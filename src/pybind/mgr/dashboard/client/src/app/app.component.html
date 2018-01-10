@@ -1,7 +1,7 @@
 <div style="display:none;"
      id="mon-conn-banner"
      class="alert alert-danger"
-     rv-hide="have_mon_connection">
+     [hidden]="have_mon_connection">
   No monitor connection from manager daemon {{mgr_id}}: data may be stale
 </div>
 
@@ -60,7 +60,7 @@
         <li>
           <a href="/health">
             <i class="fa fa-heartbeat"
-               rv-style="health_status | health_color"></i>
+             [ngStyle]="health_status | healthColor"></i>
             <span>Cluster health</span>
           </a>
         </li>
@@ -84,7 +84,7 @@
         <li>
           <a href="#">
             <i class="fa fa-hdd-o"
-               rv-style="rbd_mirroring | block_health_color"></i>
+              [ngStyle]="block_health_color(rbd_mirroring)"></i>
             <span>Block</span>
             <span class="pull-right-container">
               <i class="fa fa-angle-left pull-right"></i>
@@ -95,9 +95,9 @@
               <a href="/rbd_mirroring">
                 <i class="fa fa-exchange"></i> Mirroring
                 <span class="pull-right-container">
-                  <small rv-hide="rbd_mirroring.warnings | hide_count_box"
+                  <small [hidden]="!rbd_mirroring.warnings"
                          class="label pull-right bg-yellow">{{rbd_mirroring.warnings}}</small>
-                  <small rv-hide="rbd_mirroring.errors | hide_count_box"
+                  <small [hidden]="!rbd_mirroring.errors"
                          class="label pull-right bg-red">{{rbd_mirroring.errors}}</small>
                 </span>
               </a>
@@ -117,12 +117,12 @@
                 </span>
               </a>
               <ul class="treeview-menu">
-                <li rv-each-pool="rbd_pools">
-                  <a rv-href="pool.url">
+                <li *ngFor="let pool of rbd_pools">
+                  <a [href]="pool.url">
                     <i class="fa fa-circle-o"></i> {{pool.name}}</a>
                 </li>
                 <li class="ceph-none-found"
-                    rv-hide="rbd_pools | length">None found</li>
+                    [hidden]="rbd_pools.length === 0">None found</li>
               </ul>
             </li>
           </ul>
@@ -136,11 +136,11 @@
             </span>
           </a>
           <ul class="treeview-menu menu-open">
-            <li rv-each-filesystem="filesystems">
-              <a rv-href="filesystem.url">{{filesystem.name}}</a>
+            <li *ngFor="let filesystem of filesystems">
+              <a ng-href="lesystem.url">{{filesystem.name}}</a>
             </li>
             <li class="ceph-none-found"
-                rv-hide="filesystems | length">None found</li>
+                [hidden]="filesystems.length === 0">None found</li>
           </ul>
         </li>
 

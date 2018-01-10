@@ -2,13 +2,13 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CephRoutingModule } from './ceph-routing.module';
-import { HealthComponent } from './health/health.component';
+import { HealthModule } from './health/health.module';
 
 @NgModule({
   imports: [
     CommonModule,
-    CephRoutingModule
-  ],
-  declarations: [HealthComponent]
+    CephRoutingModule,
+    HealthModule
+  ]
 })
 export class CephModule { }

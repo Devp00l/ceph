@@ -8,10 +8,19 @@ import { Component, OnInit } from '@angular/core';
 export class HealthComponent implements OnInit {
   health: any;
   check: any;
+  pools: any;
+  df: any;
+  mon_status: any;
+  osd_map: any;
 
   constructor() {
     this.health = {};
     this.check = {};
+    this.df = {
+      stats: {
+        total_objects: 0
+      }
+    };
   }
 
   ngOnInit() {}
@@ -147,7 +156,6 @@ export class HealthComponent implements OnInit {
   //         ctx.fillStyle = "#ddd";
   //         ctx.textBaseline = "middle";
 
-
   //         var text = chart.options.center_text,
   //             textX = Math.round((width - ctx.measureText(text).width) / 2),
   //             textY = height / 2;
@@ -264,5 +272,4 @@ export class HealthComponent implements OnInit {
   //     };
   //     setTimeout(refresh, 5000);
   // });
-
 }

@@ -8,11 +8,11 @@
         </div>
         <div class="box-body">
           Overall status:
-          <span rv-style="health.status | health_color">{{health.status}}</span>
+          <span [ngStyle]="health.status | healthColor">{{health.status}}</span>
 
           <ul>
-            <li rv-each-check="health.checks">
-              <span rv-style="check.severity | health_color">{{check.type}}</span>: {{check.summary.message}}
+            <li *ngFor="let check of health.checks">
+              <span [ngStyle]="check.severity | healthColor">{{check.type}}</span>: {{check.summary.message}}
             </li>
           </ul>
         </div>
@@ -26,7 +26,8 @@
 
         <div class="info-box-content">
           <span class="info-box-text">Monitors</span>
-          <span class="info-box-number">{{mon_status }}</span> <!-- | mon_summary -->
+          <span class="info-box-number">{{ mon_status }}</span>
+          <!-- | mon_summary -->
         </div>
       </div>
       <div class="info-box">
@@ -116,18 +117,18 @@
               <th>Activity</th>
             </thead>
             <tbody>
-              <tr rv-each-pool="pools">
+              <tr *ngFor="let pool of pools">
                 <td>
                   {{pool.pool_name}}
                 </td>
-                <td rv-style="pool.pg_status | pg_status_style">
+                <td [ngStyle]="pool.pg_status | pgStatusStyle">
                   {{pool.pg_status }}
                 </td>
                 <td>
-                  {{pool.stats.bytes_used.latest  }} / {{pool.stats.max_avail.latest  }}
+                  {{pool.stats.bytes_used.latest }} / {{pool.stats.max_avail.latest }}
                 </td>
                 <td>
-                  {{pool.stats.rd_bytes.rate  }} rd, {{ pool.stats.wr_bytes.rate }} wr
+                  {{pool.stats.rd_bytes.rate }} rd, {{ pool.stats.wr_bytes.rate }} wr
                 </td>
               </tr>
             </tbody>
@@ -153,9 +154,9 @@
         <div id="clog"
              class="tab-pane fade in active">
           <span>
-            <span rv-each-line="clog">
+            <span *ngFor="let line of clog">
               {{ line.stamp }}&nbsp;{{line.priority}}&nbsp;
-              <span rv-style="line | log_color">
+              <span [ngStyle]="line | logColor">
                 {{ line.message }}
                 <br>
               </span>
@@ -165,9 +166,9 @@
         <div id="audit_log"
              class="tab-pane fade in">
           <span>
-            <span rv-each-line="audit_log">
+            <span *ngFor="let line of audit_log">
               {{ line.stamp }}&nbsp;{{line.priority}}&nbsp;
-              <span rv-style="line | log_color">
+              <span [ngStyle]="line | logColor">
                 <span style="font-weight: bold;">
                   {{ line.message }}
                 </span>
