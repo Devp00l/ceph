@@ -1,0 +1,185 @@
+<!-- Main content -->
+<section class="content">
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="box">
+        <div class="box-header">
+          Health
+        </div>
+        <div class="box-body">
+          Overall status:
+          <span rv-style="health.status | health_color">{{health.status}}</span>
+
+          <ul>
+            <li rv-each-check="health.checks">
+              <span rv-style="check.severity | health_color">{{check.type}}</span>: {{check.summary.message}}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-3">
+      <div class="info-box">
+        <span class="info-box-icon bg-grey">
+          <i class="fa fa-database"></i>
+        </span>
+
+        <div class="info-box-content">
+          <span class="info-box-text">Monitors</span>
+          <span class="info-box-number">{{mon_status }}</span> <!-- | mon_summary -->
+        </div>
+      </div>
+      <div class="info-box">
+        <span class="info-box-icon bg-grey">
+          <i class="fa fa-hdd-o"></i>
+        </span>
+
+        <div class="info-box-content">
+          <span class="info-box-text">OSDs</span>
+          <span class="info-box-number">{{osd_map}}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-3">
+      <div class="info-box">
+        <span class="info-box-icon bg-grey">
+          <i class="fa fa-folder"></i>
+        </span>
+
+        <div class="info-box-content">
+          <span class="info-box-text">Metadata servers</span>
+          <span class="info-box-number">{{fs_map}}</span>
+        </div>
+      </div>
+      <div class="info-box">
+        <span class="info-box-icon bg-grey">
+          <i class="fa fa-cog"></i>
+        </span>
+
+        <div class="info-box-content">
+          <span class="info-box-text">Manager daemons</span>
+          <span class="info-box-number">{{mgr_map}}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-sm-6">
+      <div class="box">
+        <div class="box-header">
+          Usage
+        </div>
+        <div class="box-body"
+             style="text-align:center;">
+          <table class="ceph-chartbox">
+            <tr>
+              <td>
+                <span style="font-size: 45px;">{{df.stats.total_objects}}</span>
+              </td>
+              <td>
+                <div style="height:120px; width: 120px;">
+                  <canvas id="raw_usage_chart"></canvas>
+                </div>
+              </td>
+              <td>
+                <div style="height:120px; width: 120px;">
+                  <canvas id="pool_usage_chart"></canvas>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>Objects</td>
+              <td>Raw capacity
+                <br>({{df.stats.total_used_bytes }} used)</td>
+              <td>Usage by pool</td>
+            </tr>
+          </table>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <div class="box">
+        <div class="box-header">
+          Pools
+        </div>
+        <div class="box-body">
+          <table class="table table-condensed">
+            <thead>
+              <th>Name</th>
+              <th>PG status</th>
+              <th>Usage</th>
+              <th>Activity</th>
+            </thead>
+            <tbody>
+              <tr rv-each-pool="pools">
+                <td>
+                  {{pool.pool_name}}
+                </td>
+                <td rv-style="pool.pg_status | pg_status_style">
+                  {{pool.pg_status }}
+                </td>
+                <td>
+                  {{pool.stats.bytes_used.latest  }} / {{pool.stats.max_avail.latest  }}
+                </td>
+                <td>
+                  {{pool.stats.rd_bytes.rate  }} rd, {{ pool.stats.wr_bytes.rate }} wr
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-body">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a data-toggle="tab"
+             href="#clog">Cluster log</a>
+        </li>
+        <li>
+          <a data-toggle="tab"
+             href="#audit_log">Audit log</a>
+        </li>
+      </ul>
+      <div class="tab-content ceph-log">
+        <div id="clog"
+             class="tab-pane fade in active">
+          <span>
+            <span rv-each-line="clog">
+              {{ line.stamp }}&nbsp;{{line.priority}}&nbsp;
+              <span rv-style="line | log_color">
+                {{ line.message }}
+                <br>
+              </span>
+            </span>
+          </span>
+        </div>
+        <div id="audit_log"
+             class="tab-pane fade in">
+          <span>
+            <span rv-each-line="audit_log">
+              {{ line.stamp }}&nbsp;{{line.priority}}&nbsp;
+              <span rv-style="line | log_color">
+                <span style="font-weight: bold;">
+                  {{ line.message }}
+                </span>
+                <br>
+              </span>
+            </span>
+          </span>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>

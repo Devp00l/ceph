@@ -1,0 +1,189 @@
+<div style="display:none;"
+     id="mon-conn-banner"
+     class="alert alert-danger"
+     rv-hide="have_mon_connection">
+  No monitor connection from manager daemon {{mgr_id}}: data may be stale
+</div>
+
+<div style="display:none;"
+     id="mgr-load-banner"
+     class="alert alert-warning">
+  Failed to load data from server
+  <a href="javascript:window.location.reload(true)">Reload</a>
+</div>
+
+<div class="wrapper">
+  <!-- Main Header -->
+  <header class="main-header">
+    <!-- Logo -->
+    <a href="/"
+       class="logo">
+      <span class="logo-lg">
+        <img src="/assets/Ceph_Logo_Standard_RGB_White_120411_fa.png"
+             width="123px"
+             height="34px" />
+      </span>
+      <span class="logo-mini">
+        <img src="/assets/logo-mini.png"
+             width="34px"
+             height="34px" />
+      </span>
+    </a>
+
+    <!-- Header Navbar -->
+    <nav class="navbar navbar-static-top"
+         role="navigation">
+      <!-- Sidebar toggle button-->
+      <a href="#"
+         class="sidebar-toggle"
+         data-toggle="offcanvas"
+         role="button">
+        <span class="sr-only">Toggle navigation</span>
+      </a>
+
+      <!-- Navbar Right Menu -->
+      <div class="navbar-custom-menu">
+        <ul class="nav navbar-nav">
+
+        </ul>
+      </div>
+    </nav>
+  </header>
+  <!-- Left side column. contains the logo and sidebar -->
+  <aside class="main-sidebar skin-blue">
+
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+      <!-- Sidebar Menu -->
+      <ul class="sidebar-menu">
+        <!-- Optionally, you can add icons to the links -->
+        <li>
+          <a href="/health">
+            <i class="fa fa-heartbeat"
+               rv-style="health_status | health_color"></i>
+            <span>Cluster health</span>
+          </a>
+        </li>
+        <li>
+          <a href="#">
+            <i class="fa fa-server"></i>
+            <span>Cluster</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu menu-open">
+            <li>
+              <a href="/servers">Servers</a>
+            </li>
+            <li>
+              <a href="/osd">OSDs</a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">
+            <i class="fa fa-hdd-o"
+               rv-style="rbd_mirroring | block_health_color"></i>
+            <span>Block</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu menu-open">
+            <li>
+              <a href="/rbd_mirroring">
+                <i class="fa fa-exchange"></i> Mirroring
+                <span class="pull-right-container">
+                  <small rv-hide="rbd_mirroring.warnings | hide_count_box"
+                         class="label pull-right bg-yellow">{{rbd_mirroring.warnings}}</small>
+                  <small rv-hide="rbd_mirroring.errors | hide_count_box"
+                         class="label pull-right bg-red">{{rbd_mirroring.errors}}</small>
+                </span>
+              </a>
+            </li>
+            <li>
+              <a href="/rbd_iscsi">
+                <i class="fa fa-upload"></i> iSCSI
+                <span class="pull-right-container"></span>
+              </a>
+            </li>
+            <li>
+              <a href="#">
+                <i class="fa fa-dot-circle-o"></i>
+                <span>Pools</span>
+                <span class="pull-right-container">
+                  <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              </a>
+              <ul class="treeview-menu">
+                <li rv-each-pool="rbd_pools">
+                  <a rv-href="pool.url">
+                    <i class="fa fa-circle-o"></i> {{pool.name}}</a>
+                </li>
+                <li class="ceph-none-found"
+                    rv-hide="rbd_pools | length">None found</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <a href="#">
+            <i class="fa fa-folder"></i>
+            <span>Filesystems</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu menu-open">
+            <li rv-each-filesystem="filesystems">
+              <a rv-href="filesystem.url">{{filesystem.name}}</a>
+            </li>
+            <li class="ceph-none-found"
+                rv-hide="filesystems | length">None found</li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="/rgw">
+            <i class="fa fa-cloud-download"
+               aria-hidden="true"></i>
+            <span>RGW</span>
+          </a>
+        </li>
+
+      </ul>
+      <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+  </aside>
+
+  <div id="content"
+       class="content-wrapper">
+
+    <router-outlet></router-outlet>
+
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Main Footer -->
+  <footer class="main-footer">
+    <!-- To the right -->
+    <div class="pull-right hidden-xs">
+      {{ ceph_version }}
+    </div>
+    <!-- Default to the left -->
+    <strong>Copyright &copy; 2016 by Ceph Contributors.</strong> Free software (LGPL 2.1)
+  </footer>
+
+</div>
+
+<!--
+<pre>
+{{ data }}
+</pre>
+-->
+
+<!-- Bootstrap 3.3.6 -->
+
+<!-- AdminLTE App -->
