@@ -15,7 +15,7 @@ export class AppComponent implements OnInit {
   mgr_id: any;
   health_status: any;
 
-  constructor(private http: HttpClient) {
+  constructor() {
     this.rbd_mirroring = {
       errors: 0
     };
