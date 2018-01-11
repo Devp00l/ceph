@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 
 import { CephRoutingModule } from './ceph-routing.module';
 import { HealthModule } from './health/health.module';
+import { ClusterModule } from './cluster/cluster.module';
 
 @NgModule({
   imports: [
     CommonModule,
     CephRoutingModule,
-    HealthModule
+    HealthModule,
+    ClusterModule
   ]
 })
 export class CephModule { }
