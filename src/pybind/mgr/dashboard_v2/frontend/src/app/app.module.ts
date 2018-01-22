@@ -20,6 +20,7 @@ import { CephModule } from './ceph/ceph.module';
     SharedModule,
     CephModule
   ],
+  exports: [SharedModule],
   providers: [],
   bootstrap: [AppComponent]
 })
