@@ -24,6 +24,7 @@ export class CustomOption extends ToastOptions {
     AppComponent
   ],
   imports: [
+    HttpClientModule,
     BrowserModule,
     BrowserAnimationsModule,
     ToastModule.forRoot(),

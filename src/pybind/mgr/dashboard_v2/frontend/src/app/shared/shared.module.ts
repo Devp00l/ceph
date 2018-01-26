@@ -22,7 +22,8 @@ import { HostService } from './services/host.service';
     HostService
   ],
   exports: [
-    PipesModule
+    PipesModule,
+    ComponentsModule
   ]
 })
 export class SharedModule { }
