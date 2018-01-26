@@ -33,7 +33,12 @@ import { ServicesModule } from './services/services.module';
     AuthGuardService,
     HostService,
     PoolService,
-    FormatterService
+    FormatterService,
+    HostService
+  ],
+  exports: [
+    PipesModule,
+    ComponentsModule
   ]
 })
 export class SharedModule {}

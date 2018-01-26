@@ -1,0 +1,32 @@
+<p>
+  osd-details works!
+  {{ selected| json }}
+</p>
+<div ngFor="let osd of selected">
+  <div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{osd.name}}
+    </h3>
+  </div>
+  <div class="panel-body">
+    <dl class="dl-horizontal">
+      <dt>Writes</dt>
+      <dd><cd-osd-performance-histogram [histogram]="opWLatencyInBytesHistogram"></cd-osd-performance-histogram></dd>
+      <dt>Reads</dt>
+      <dd><cd-osd-performance-histogram [histogram]="opRLatencyOutBytesHistogram"></cd-osd-performance-histogram></dd>
+    </dl>
+
+    <h2>Attributes (OSD map)</h2>
+    <dl *ngFor="let key of Object.keys(osd.attributes)" class="dl-horizontal">
+      <dt>{{key}}</dt>
+      <dd>{{osd.attributes[key]}}</dd>
+    </dl>
+
+    <h2>Metadata</h2>
+    <dl *ngFor="let key of Object.keys(osd.metadata)" class="dl-horizontal">
+      <dt>{{key}}</dt>
+      <dd>{{osd.metadata[key]}}</dd>
+    </dl>
+  </div>
+</div>
