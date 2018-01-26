@@ -1,8 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { DatatableComponent } from '@swimlane/ngx-datatable';
-import { HttpClient, HttpParams } from '@angular/common/http';
+//import { HttpClient, HttpParams } from '@angular/common/http';
 import { Input } from '@angular/core';
-import { TableData } from '../../models/table-data';
+//import { TableData } from '../../models/table-data';
 import { FilterConfig } from '../../models/filter-config';
 
 @Component({
@@ -17,26 +17,36 @@ export class TableComponent implements OnInit {
   @Input() header? = true;
 
   @Input() process?: any;
-  @Input() fetchURL?: string;
+  @Input() data?: any[];
 
   @Input() rows?: any;
   temp = [];
+  columns = [];
 
   limits = [2, 10, 25, 50, 100];
 
   filterConfig: FilterConfig;
 
-  constructor(private http: HttpClient) {}
+  //constructor(private http: HttpClient) {}
+  constructor() {}
 
   ngOnInit() {
+    this.filterConfig ={
+      page: 0,
+      entries: 10,
+      search: "",
+      sortfield: "",
+      sortorder: ""
+    };
     this.temp = [...this.rows];
 
-    if (this.fetchURL) {
-      this.fetch();
+    if (this.data) {
+      this.useData();
     }
   }
 
-  fetch() {
+  useData() {
+    /*
     // Initialize Params Object
     let params = new HttpParams();
 
@@ -51,15 +61,29 @@ export class TableComponent implements OnInit {
     );
 
     this.http
-      .get(this.fetchURL, { params: params })
+      .get(this.data, { params: params })
       .subscribe((data: TableData) => {
         if (this.process) {
-          this.rows = [...this.process(data.results)];
+          this.ows = [...this.process(data.results)];
         } else {
           this.rows = [...data.results];
         }
         this.temp = [...this.rows];
       });
+    */
+    console.log(this.data);
+    this.rows = [...this.data];
+    this.temp = [...this.rows];
+    this.columns = [
+      {prop: 'id'},
+      {name: 'name'},
+      {name: 'crush_weight'}
+    ];
+  }
+
+  toggleExpandRow(row){
+    console.log("clicked row");
+    this.table.rowDetail.toggleExpandRow(row)
   }
 
   updateFilter(event) {

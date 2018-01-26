@@ -39,10 +39,21 @@
     <!-- end pagination limit-->
   </div>
   <ngx-datatable #table
-                 class="bootstrap fullsceen"
+                 class="bootstrap oadatatable"
+                 [columns]="columns"
                  [columnMode]="'force'"
                  [rows]="rows"
                  [limit]="filterConfig.entries">
+    <!-- Row Detail Template -->
+    <ngx-datatable-row-detail [rowHeight]="100" #myDetailRow (toggle)="onDetailToggle($event)">
+      <ng-template let-row="row" let-expanded="expanded" ngx-datatable-row-detail-template>
+        <div style="padding-left:35px;">
+          <div><strong>Everything</strong></div>
+          <div>{{row | json}}</div>
+        </div>
+      </ng-template>
+    </ngx-datatable-row-detail>
     <ng-content select="table-columns"></ng-content>
+    <ngx-datatable-footer></ngx-datatable-footer>
   </ngx-datatable>
 </div>

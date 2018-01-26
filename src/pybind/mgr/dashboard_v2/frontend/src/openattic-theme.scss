@@ -483,23 +483,19 @@ ul.task-queue-pagination {
   border-top: 1px solid #d1d1d1;
 }
 
-/* Table */
-table.datatable {
+/* Table
+ * Has to be here because the table component uses ngx-datatable component in
+ * the template and styles are not inherited by nested components.
+ */
+.ngx-datatable {
   margin-bottom: 0;
   max-width: none!important
 }
-table.dataTable thead .sorting_asc,
-table.dataTable thead .sorting_desc {
+.datatable-header .sort-asc,
+.datatable-header .sort-desc {
   color: #288cea;
 }
-table.dataTable thead .sorting,
-table.dataTable thead .sorting_asc,
-table.dataTable thead .sorting_desc {
-  cursor: pointer;
-}
-table.datatable thead .sorting:after,
-table.datatable thead .sorting_asc:after,
-table.datatable thead .sorting_desc:after {
+.datatable-header-cell-label:after {
   font-family: FontAwesome;
   font-weight: 400;
   height: 9px;
@@ -509,32 +505,24 @@ table.datatable thead .sorting_desc:after {
   vertical-align: baseline;
   width: 12px;
 }
-table.datatable thead .sorting:after {
-  content: "\f0dc";
+.sortable .datatable-header-cell-label:after {
+  content: " \f0dc";
 }
-table.datatable thead .sorting_asc:after {
-  content: "\f160";
+.sort-active.sort-asc .datatable-header-cell-label:after {
+  content: " \f160";
 }
-table.datatable thead .sorting_desc:after {
-  content: "\f161";
+.sort-active.sort-desc .datatable-header-cell-label:after {
+  content: " \f161";
 }
-.table>tbody>tr>td,
-.table>tbody>tr>th,
-.table>tfoot>tr>td,
-.table>tfoot>tr>th,
-.table>thead>tr>td,
-.table>thead>tr>th {
+.datatable-header-cell,
+.datatable-body-cell {
   padding: 5px;
 }
-.table>tbody>tr>td>input,
-.table>tbody>tr>th>input,
-.table>tfoot>tr>td>input,
-.table>tfoot>tr>th>input,
-.table>thead>tr>td>input,
-.table>thead>tr>th>input {
+.datatable-header-cell-label,
+.datatable-body-cell-label {
   display: block;
 }
-.table>thead {
+.datatable-header {
   background-clip: padding-box;
   background-color: #f9f9f9;
   background-image: -webkit-linear-gradient(top,#fafafa 0,#ededed 100%);
@@ -543,63 +531,25 @@ table.datatable thead .sorting_desc:after {
   background-repeat: repeat-x;
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fffafafa', endColorstr='#ffededed', GradientType=0);
 }
-
-.table.header-text-center>thead>tr>th {
+.datatable-header-cell {
   text-align: center;
 }
-
-.table-bordered {
+.ngx-datatable {
   border: none;
   border-top: 1px solid #d1d1d1;
   border-right: 1px solid #d1d1d1;
 }
-
-.table-bordered>tbody>tr>td,
-.table-bordered>tbody>tr>th,
-.table-bordered>tfoot>tr>td,
-.table-bordered>tfoot>tr>th,
-.table-bordered>thead>tr>td,
-.table-bordered>thead>tr>th {
+.datatable-header-cell,
+.datatable-body-cell {
   border: none;
   border-left: 1px solid #d1d1d1;
   border-bottom: 1px solid #d1d1d1;
 }
-.table-striped>tbody>tr:nth-of-type(odd) {
+.datatable-row-even {
   background-color: #ffffff;
 }
-.table-striped>tbody>tr:nth-of-type(even) {
+.datatable-row-odd {
   background-color: #f6f6f6;
-}
-.table-responsive {
-  overflow-x: auto;
-  margin-bottom: 0;
-  min-height: .01%;
-}
-
-.table-no-background>thead {
-  background: none;
-}
-.table-no-background>thead>tr>th {
-  border-bottom: 1px solid #ddd;
-}
-.table-no-background>tbody>tr>td {
-  height: 50px;
-  vertical-align: middle;
-  border-top: 0px;
-  border-bottom: 1px solid #ddd;
-}
-
-.table-transparent>thead {
-  background: none;
-}
-.table-transparent>thead>tr>th {
-  border-bottom: 0px;
-}
-.table-transparent>tbody>tr>td {
-  height: 50px;
-  vertical-align: middle;
-  border-top: 0px;
-  border-bottom: 0px;
 }
 
 /* Typo */
