@@ -30,6 +30,10 @@ export class TableComponent implements OnInit, OnChanges {
   // name of the component fe 'TableDetailsComponent'
   @Input() detailsComponent?: string;
   @Input() header ?= true;
+  @Input() groupBy?: {
+    name: string,
+    prop: string
+  };
 
   // Should be the function that will update the input data
   @Output() fetchData = new EventEmitter();
@@ -49,6 +53,9 @@ export class TableComponent implements OnInit, OnChanges {
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
+    if (this.groupBy) {
+      this.columns = this.columns.filter(column => this.groupBy.prop !== column.prop);
+    }
     this.reloadData();
     if (this.detailsComponent) {
       this.selectable = 'multi';
@@ -78,6 +85,15 @@ export class TableComponent implements OnInit, OnChanges {
     if (this.selected.length > 0) {
       this.table.rowDetail.toggleExpandRow(this.selected[0]);
     }
+  }
+
+  toggleExpandGroup(group) {
+    console.log('Toggled Expand Group!', group);
+    this.table.groupHeader.toggleExpandGroup(group);
+  }
+
+  onDetailToggle(event) {
+    console.log('Detail Toggled', event);
   }
 
   updateDetailView() {

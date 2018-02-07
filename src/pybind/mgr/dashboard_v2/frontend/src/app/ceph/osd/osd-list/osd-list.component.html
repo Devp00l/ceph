@@ -1,6 +1,7 @@
 <oa-osd-details></oa-osd-details>
 <cd-table [data]="osds"
           (fetchData)="getOsdList()"
+          [groupBy]="{name: 'Hostname', prop: 'pg_count'}"
           [columns]="columns"
           [detailsComponent]="detailsComponent">
 </cd-table>

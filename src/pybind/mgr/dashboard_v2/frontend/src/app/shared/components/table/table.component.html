@@ -49,6 +49,8 @@
   </div>
   <ngx-datatable #table
                  class="bootstrap oadatatable"
+                 [groupRowsBy]="groupBy ? groupBy.prop : undefined"
+                 [groupExpansionDefault]="true"
                  [cssClasses]="paginationClasses"
                  [selectionType]="selectable"
                  [selected]="selected"
@@ -60,6 +62,23 @@
                  [limit]="limit"
                  [loadingIndicator]="true"
                  [rowHeight]="'auto'">
+
+    <!-- Group Header Template -->
+    <ngx-datatable-group-header [rowHeight]="50" #myGroupHeader (toggle)="onDetailToggle($event)">
+      <ng-template let-group="group" let-expanded="expanded" ngx-datatable-group-header-template>
+        <div style="padding-left:5px;">
+          <a
+            [class.datatable-icon-right]="!expanded"
+            [class.datatable-icon-down]="expanded"
+            title="Expand/Collapse {{groupBy.name}}"
+            (click)="toggleExpandGroup(group)">
+            <b>{{groupBy.name}}: {{group.value[0][groupBy.prop]}}</b>
+          </a>
+        </div>
+      </ng-template>
+    </ngx-datatable-group-header>
+
+
     <!-- Row Detail Template -->
     <ngx-datatable-row-detail (toggle)="updateDetailView($event)">
     </ngx-datatable-row-detail>
