@@ -18,32 +18,33 @@ export class OsdDetailsComponent implements OnInit {
   constructor(private osdService: OsdService) {}
 
   ngOnInit() {
-    _.each(this.selected, (osd)=>{});
-    this.refresh();
+    _.each(this.selected, (osd)=>{
+      this.refresh(osd);
+    });
   }
 
-  refresh() {
-    this.osdService.getDetails(this.osdId).subscribe((data: any) => {
-      this.opWLatencyInBytesHistogram = data.osd_histogram.osd.op_w_latency_in_bytes_histogram;
-      this.opRLatencyOutBytesHistogram = data.osd_histogram.osd.op_r_latency_out_bytes_histogram;
-      this.osd = data.osd;
+  refresh(osd: any) {
+    this.osdService.getDetails(osd.id).subscribe((data: any) => {
+      osd.opWLatencyInBytesHistogram = data.osd_histogram.osd.op_w_latency_in_bytes_histogram;
+      osd.opRLatencyOutBytesHistogram = data.osd_histogram.osd.op_r_latency_out_bytes_histogram;
+      osd.osd = data.osd;
       const osdMetadata = data.osd_metadata;
-      this.osdMetadataList = [];
-      this.osdList = [];
+      osd.osdMetadataList = [];
+      osd.osdList = [];
       _.each(osdMetadata, (v, k) => {
-        this.osdMetadataList.push({
+        osd.osdMetadataList.push({
           key: k,
           value: v
         });
       });
-      _.each(this.osd, (v, k) => {
-        this.osdList.push({
+      _.each(osd.osd, (v, k) => {
+        osd.osdList.push({
           key: k,
           value: v
         });
       });
       setTimeout(() => {
-        this.refresh();
+        this.refresh(osd);
       }, 3000);
     });
   }
