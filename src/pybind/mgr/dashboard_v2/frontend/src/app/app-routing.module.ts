@@ -4,9 +4,9 @@ import { RouterModule, Routes } from '@angular/router';
 import { PoolDetailComponent } from './ceph/block/pool-detail/pool-detail.component';
 import { HostsComponent } from './ceph/cluster/hosts/hosts.component';
 import { DashboardComponent } from './ceph/dashboard/dashboard/dashboard.component';
-import { OsdListComponent } from './ceph/osd/osd-list/osd-list.component';
 import { LoginComponent } from './core/auth/login/login.component';
 import { AuthGuardService } from './shared/services/auth-guard.service';
+import {OsdListComponent} from './ceph/cluster/osd/osd-list/osd-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -18,7 +18,7 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'hosts', component: HostsComponent, canActivate: [AuthGuardService] },
   { path: 'block/pool/:name', component: PoolDetailComponent, canActivate: [AuthGuardService] },
-  { path: 'osd', component: OsdListComponent }
+  { path: 'osd', component: OsdListComponent, canActivate: [AuthGuardService] }
 ];
 
 @NgModule({
