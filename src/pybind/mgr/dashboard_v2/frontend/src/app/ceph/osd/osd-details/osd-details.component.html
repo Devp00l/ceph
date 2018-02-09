@@ -1,32 +1,34 @@
-<p>
-  osd-details works!
-  {{ selected| json }}
-</p>
-<div ngFor="let osd of selected">
+<div *ngFor="let osd of selected">
   <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{ osd.name }}
+      {{ osd.hostname + "_" + osd.id }}
     </h3>
   </div>
-  <div class="panel-body">
+  <div class="panel-body" *ngIf="osd.loaded">
+    <div class="row">
+      <div class="col-md-6">
+        <h4>Writes</h4>
+        <cd-osd-performance-histogram [histogram]="osd.opWLatencyInBytesHistogram"></cd-osd-performance-histogram>
+      </div>
+      <div class="col-md-6">
+        <h4>Reads</h4>
+        <cd-osd-performance-histogram [histogram]="osd.opRLatencyOutBytesHistogram"></cd-osd-performance-histogram>
+      </div>
+    </div>
     <dl class="dl-horizontal">
-      <dt>Writes</dt>
-      <dd><cd-osd-performance-histogram [histogram]="opWLatencyInBytesHistogram"></cd-osd-performance-histogram></dd>
-      <dt>Reads</dt>
-      <dd><cd-osd-performance-histogram [histogram]="opRLatencyOutBytesHistogram"></cd-osd-performance-histogram></dd>
     </dl>
 
     <h2>Attributes (OSD map)</h2>
-    <dl *ngFor="let key of Object.keys(osd.attributes)" class="dl-horizontal">
-      <dt>{{ key }}</dt>
-      <dd>{{ osd.attributes[key] }}</dd>
-    </dl>
+    <cd-table [data]="makeData(osd.osd)"
+              (fetchData)="pass()"
+              [columns]="makeCol">
+    </cd-table>
 
     <h2>Metadata</h2>
-    <dl *ngFor="let key of Object.keys(osd.metadata)" class="dl-horizontal">
-      <dt>{{ key }}</dt>
-      <dd>{{ osd.metadata[key] }}</dd>
-    </dl>
+    <cd-table [data]="makeData(osd.osd_metadata)"
+              (fetchData)="pass()"
+              [columns]="makeCol">
+    </cd-table>
   </div>
 </div>

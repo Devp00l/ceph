@@ -20,6 +20,7 @@ export class OsdDetailsComponent implements OnInit {
   constructor(private osdService: OsdService) {}
 
   ngOnInit() {
+    console.log(this.selected);
     _.each(this.selected, (osd) => {
       this.refresh(osd);
     });
@@ -30,24 +31,28 @@ export class OsdDetailsComponent implements OnInit {
       osd.opWLatencyInBytesHistogram = data.osd_histogram.osd.op_w_latency_in_bytes_histogram;
       osd.opRLatencyOutBytesHistogram = data.osd_histogram.osd.op_r_latency_out_bytes_histogram;
       osd.osd = data.osd;
-      const osdMetadata = data.osd_metadata;
-      osd.osdMetadataList = [];
-      osd.osdList = [];
-      _.each(osdMetadata, (v, k) => {
-        osd.osdMetadataList.push({
-          key: k,
-          value: v
-        });
-      });
-      _.each(osd.osd, (v, k) => {
-        osd.osdList.push({
-          key: k,
-          value: v
-        });
-      });
+      osd.osd_metadata= data.osd_metadata;
+      osd.loaded = true;
+      /*
       setTimeout(() => {
         this.refresh(osd);
-      }, 3000);
+      }, 20000);
+      */
     });
+  }
+
+  pass () {}
+
+  makeCol = [
+    {prop: "key"},
+    {prop: "value"}
+  ];
+
+  makeData (sth) {
+    const bla = Object.keys(sth).map(k => ({
+      key: k,
+      value: sth[k]
+    }));
+    return bla;
   }
 }

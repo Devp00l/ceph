@@ -36,6 +36,9 @@ export class OsdPerformanceHistogramComponent implements OnInit, OnChanges {
   }
 
   render() {
+    if (!this.histogram) {
+      return;
+    }
     // var data = contentData.osd_histogram.osd[counter];
     // var hist_table = $(element);
     // hist_table.empty();
@@ -45,10 +48,12 @@ export class OsdPerformanceHistogramComponent implements OnInit, OnChanges {
     _.each(this.histogram.values, (row, i) => {
       _.each(row, (col, j) => {
         let val;
-        if (!this.last) {
-          val = col;
-        } else {
+        console.log(this);
+        if (this.last && this.last[i] && this.last[i][j]) {
+          console.log(this.last, i, j);
           val = col - this.last[i][j];
+        } else {
+          val = col;
         }
         sum += val;
         max = Math.max(max, val);
@@ -60,10 +65,10 @@ export class OsdPerformanceHistogramComponent implements OnInit, OnChanges {
       values[i] = new Array(row.length);
       _.each(row, (col, j) => {
         let val;
-        if (!this.last) {
-          val = col;
-        } else {
+        if (this.last && this.last[i] && this.last[i][j]) {
           val = col - this.last[i][j];
+        } else {
+          val = col;
         }
         let g;
         if (max) {
