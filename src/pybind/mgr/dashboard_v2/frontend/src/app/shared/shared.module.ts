@@ -13,19 +13,20 @@ import { PoolService } from './services/pool.service';
 import { ServicesModule } from './services/services.module';
 
 @NgModule({
+  declarations: [
+    PasswordButtonDirective
+  ],
+  exports: [
+    ComponentsModule,
+    PipesModule,
+    ServicesModule,
+    PasswordButtonDirective
+  ],
   imports: [
     CommonModule,
     PipesModule,
     ComponentsModule,
     ServicesModule
-  ],
-  exports: [
-    PipesModule,
-    ServicesModule,
-    PasswordButtonDirective
-  ],
-  declarations: [
-    PasswordButtonDirective
   ],
   providers: [
     AuthService,
@@ -36,9 +37,5 @@ import { ServicesModule } from './services/services.module';
     FormatterService,
     HostService
   ],
-  exports: [
-    PipesModule,
-    ComponentsModule
-  ]
 })
 export class SharedModule {}

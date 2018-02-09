@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { AuthGuardService } from './shared/services/auth-guard.service';
+import { PoolDetailComponent } from './ceph/block/pool-detail/pool-detail.component';
 import { HostsComponent } from './ceph/cluster/hosts/hosts.component';
 import { DashboardComponent } from './ceph/dashboard/dashboard/dashboard.component';
-import { LoginComponent } from './core/auth/login/login.component';
 import { OsdListComponent } from './ceph/osd/osd-list/osd-list.component';
-import { PoolDetailComponent } from './ceph/block/pool-detail/pool-detail.component';
+import { LoginComponent } from './core/auth/login/login.component';
+import { AuthGuardService } from './shared/services/auth-guard.service';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
-import {OsdService} from '../osd.service';
+import { OsdService } from '../osd.service';
+
+import * as _ from 'lodash';
 
 @Component({
   selector: 'cd-osd-details',
@@ -18,7 +20,7 @@ export class OsdDetailsComponent implements OnInit {
   constructor(private osdService: OsdService) {}
 
   ngOnInit() {
-    _.each(this.selected, (osd)=>{
+    _.each(this.selected, (osd) => {
       this.refresh(osd);
     });
   }
