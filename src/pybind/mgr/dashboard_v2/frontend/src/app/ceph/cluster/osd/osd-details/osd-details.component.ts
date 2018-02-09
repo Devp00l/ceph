@@ -10,12 +10,10 @@ import * as _ from 'lodash';
 })
 export class OsdDetailsComponent implements OnInit {
   @Input() selected?: any[];
-  osdId: number;
-  opWLatencyInBytesHistogram = {};
-  opRLatencyOutBytesHistogram = {};
-  osd = {};
-  osdList = [];
-  osdMetadataList = [];
+  makeCol = [
+    {prop: 'key'},
+    {prop: 'value'}
+  ];
 
   constructor(private osdService: OsdService) {}
 
@@ -31,7 +29,7 @@ export class OsdDetailsComponent implements OnInit {
       osd.opWLatencyInBytesHistogram = data.osd_histogram.osd.op_w_latency_in_bytes_histogram;
       osd.opRLatencyOutBytesHistogram = data.osd_histogram.osd.op_r_latency_out_bytes_histogram;
       osd.osd = data.osd;
-      osd.osd_metadata= data.osd_metadata;
+      osd.osd_metadata = data.osd_metadata;
       osd.loaded = true;
       /*
       setTimeout(() => {
@@ -42,11 +40,6 @@ export class OsdDetailsComponent implements OnInit {
   }
 
   pass () {}
-
-  makeCol = [
-    {prop: "key"},
-    {prop: "value"}
-  ];
 
   makeData (sth) {
     const bla = Object.keys(sth).map(k => ({

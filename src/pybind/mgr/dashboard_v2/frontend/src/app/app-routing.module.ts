@@ -3,10 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { PoolDetailComponent } from './ceph/block/pool-detail/pool-detail.component';
 import { HostsComponent } from './ceph/cluster/hosts/hosts.component';
+import { OsdListComponent } from './ceph/cluster/osd/osd-list/osd-list.component';
 import { DashboardComponent } from './ceph/dashboard/dashboard/dashboard.component';
 import { LoginComponent } from './core/auth/login/login.component';
 import { AuthGuardService } from './shared/services/auth-guard.service';
-import {OsdListComponent} from './ceph/cluster/osd/osd-list/osd-list.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },

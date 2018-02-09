@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { NgxDatatableModule } from '@swimlane/ngx-datatable';
 
-import {OsdDetailsComponent} from '../../ceph/cluster/osd/osd-details/osd-details.component';
+import { OsdDetailsComponent } from '../../ceph/cluster/osd/osd-details/osd-details.component';
 import { TableDetailsDirective } from './table/table-details.directive';
 import { TableComponent } from './table/table.component';
 
