@@ -5,7 +5,7 @@ import {
   Input,
   OnChanges,
   OnInit,
-  Output,
+  Output, TemplateRef,
   Type,
   ViewChild
 } from '@angular/core';
@@ -40,6 +40,12 @@ export class TableComponent implements OnInit, OnChanges {
   // Should be the function that will update the input data
   @Output() fetchData = new EventEmitter();
 
+  @Output() useTemplates = new EventEmitter<any>();
+  @ViewChild('bold') bold: TemplateRef<any>;
+  cellTemplates: {
+    [key: string]: TemplateRef<any>
+  } = {};
+
   selectable: String = undefined;
   search = '';
   rows = [];
@@ -55,10 +61,12 @@ export class TableComponent implements OnInit, OnChanges {
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
   ngOnInit() {
+    this.cellTemplates.bold = this.bold;
     this.reloadData();
     if (this.detailsComponent) {
       this.selectable = 'multi';
     }
+    this.useTemplates.emit(this.cellTemplates);
   }
 
   ngOnChanges(changes) {
