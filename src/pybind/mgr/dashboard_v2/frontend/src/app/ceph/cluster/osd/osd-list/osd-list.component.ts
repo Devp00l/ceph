@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild} from '@angular/core';
 import * as _ from 'lodash';
 import { OsdService } from '../osd.service';
+import {TableTemplatesService} from '../../../../shared/services/table-templates.service';
 
 @Component({
   selector: 'cd-osd-list',
@@ -13,21 +14,32 @@ export class OsdListComponent implements OnInit {
   osds = [];
   selection: any = {};
   detailsComponent = 'OsdDetailsComponent';
-  columns = [
-    {prop: 'hostname', name: 'Host'},
-    {prop: 'id', name: 'ID'},
-    {prop: 'states', name: 'Status', no_pipe: 'colored_up_in'},
-    {prop: 'stats.numpg', name: 'PGs', no_pipe: 'dimless_binary'},
-    {prop: 'usedPercent', name: 'Usage'},
-    {prop: 'stats.op_out_bytes', name: 'Read bytes', no_pipe: 'sparkline'},
-    {prop: 'stats.op_in_bytes', name: 'Writes bytes', no_pipe: 'sparkline'},
-    {prop: 'stats.op_r', name: 'Read ops', no_pipe: 'dimless'}, // per second
-    {prop: 'stats.op_w', name: 'Write ops', no_pipe: 'dimless'} // per second
-  ];
+  templateService: TableTemplatesService;
 
-  constructor(private osdService: OsdService) {}
+  constructor(private osdService: OsdService, templateService: TableTemplatesService) {
+    this.templateService = templateService;
+  }
 
   ngOnInit() {
+    this.templateService.overwriteSetColumns(() => {
+      return [
+        {prop: 'hostname', name: 'Host'},
+        {prop: 'id', name: 'ID', cellTemplate: this.templateService.cellTemplates.bold},
+        {prop: 'states', name: 'Status'},
+        //{prop: 'states', name: 'Status', pipe: 'colored_up_in'},
+        {prop: 'stats.numpg', name: 'PGs'},
+        //{prop: 'stats.numpg', name: 'PGs', pipe: 'dimless_binary'},
+        {prop: 'usedPercent', name: 'Usage'},
+        {prop: 'stats.op_out_bytes', name: 'Read bytes'},
+        //{prop: 'stats.op_out_bytes', name: 'Read bytes', no_pipe: 'sparkline'},
+        {prop: 'stats.op_in_bytes', name: 'Writes bytes'},
+        //{prop: 'stats.op_in_bytes', name: 'Writes bytes', no_pipe: 'sparkline'},
+        {prop: 'stats.op_r', name: 'Read ops'}, // per second
+        //{prop: 'stats.op_r', name: 'Read ops', no_pipe: 'dimless'}, // per second
+        {prop: 'stats.op_w', name: 'Write ops'} // per second
+        //{prop: 'stats.op_w', name: 'Write ops', no_pipe: 'dimless'} // per second
+      ];
+    }, this);
   }
 
   getOsdList() {
