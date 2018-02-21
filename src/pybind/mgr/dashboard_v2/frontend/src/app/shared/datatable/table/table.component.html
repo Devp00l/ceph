@@ -62,6 +62,7 @@
                  [footerHeight]="footer ? 'auto' : 0"
                  [limit]="limit > 0 ? limit : undefined"
                  [loadingIndicator]="loadingIndicator"
+                 [rowIdentity]="rowIdentity()"
                  [rowHeight]="'auto'">
     <!-- Row Detail Template -->
     <ngx-datatable-row-detail (toggle)="updateDetailView()">
