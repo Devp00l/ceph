@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 
 import { ChartsModule } from 'ng2-charts/ng2-charts';
-import { AlertModule } from 'ngx-bootstrap';
+import { AlertModule } from 'ngx-bootstrap/alert';
+import { ModalModule } from 'ngx-bootstrap/modal';
 
+import { ModalComponent } from './modal/modal.component';
 import { SparklineComponent } from './sparkline/sparkline.component';
 import { ViewCacheComponent } from './view-cache/view-cache.component';
 
@@ -11,16 +13,21 @@ import { ViewCacheComponent } from './view-cache/view-cache.component';
   imports: [
     CommonModule,
     AlertModule.forRoot(),
-    ChartsModule
+    ChartsModule,
+    ModalModule.forRoot()
   ],
   declarations: [
     ViewCacheComponent,
-    SparklineComponent
+    SparklineComponent,
+    ModalComponent,
+    SubmitButtonComponent
   ],
   providers: [],
   exports: [
     ViewCacheComponent,
-    SparklineComponent
+    SparklineComponent,
+    ModalComponent,
+    SubmitButtonComponent
   ]
 })
 export class ComponentsModule { }
