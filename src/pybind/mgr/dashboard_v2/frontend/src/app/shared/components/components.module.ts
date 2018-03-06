@@ -7,6 +7,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 
 import { ModalComponent } from './modal/modal.component';
 import { SparklineComponent } from './sparkline/sparkline.component';
+import { SubmitButtonComponent } from './submit-button/submit-button.component';
 import { ViewCacheComponent } from './view-cache/view-cache.component';
 
 @NgModule({
