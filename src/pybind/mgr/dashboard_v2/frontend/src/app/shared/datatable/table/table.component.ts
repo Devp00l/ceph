@@ -20,6 +20,7 @@ import 'rxjs/add/observable/timer';
 import { Observable } from 'rxjs/Observable';
 
 import { CdTableColumn } from '../../models/cd-table-column';
+import { CdUserConfig } from '../../models/cd-user-config';
 import { TableDetailsDirective } from '../table-details.directive';
 
 @Component({
@@ -68,6 +69,8 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   // Which row property is unique for a row
   @Input() identifier = 'id';
 
+  @Input() autoSave = true;
+
   /**
    * Should be a function to update the input data if undefined nothing will be triggered
    *
@@ -94,8 +97,12 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     pagerPrevious: 'i fa fa-angle-left',
     pagerNext: 'i fa fa-angle-right'
   };
-  private subscriber;
+  userConfig: CdUserConfig = {};
+  tableName: string;
+  private saveSubscriber;
+  private reloadSubscriber;
   private updating = false;
+  private localStorage = window.localStorage;
 
   // Internal variable to check if it is necessary to recalculate the
   // table columns after the browser window has been resized.
@@ -103,13 +110,58 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
+  calculateUniqueTableName (columns) {
+    const stringToNumber = (s) => {
+      if (!_.isString(s)) {
+        return 0;
+      }
+      let result = 0;
+      for (let i = 0; i < s.length; i++) {
+        result += s.charCodeAt(i) * i;
+      }
+      return result;
+    };
+    return columns.reduce((result, value, index) =>
+       ((stringToNumber(value.prop) + stringToNumber(value.name)) * (index + 1)) + result,
+     0).toString();
+  }
+
+  initUserConfig () {
+    const loaded = this.localStorage.getItem(this.tableName);
+    if (loaded) {
+      this.userConfig = JSON.parse(loaded);
+    }
+    const source = Observable.create((obj) => {
+      this.userConfig = new Proxy(this.userConfig, {
+        set(config, prop, value) {
+          config[prop] = value;
+          obj.next(config);
+          return true;
+        }
+      });
+    });
+    this.saveSubscriber = source.subscribe(config => {
+      this.localStorage[this.tableName] = JSON.stringify(config);
+    });
+  }
+
   ngOnInit() {
     this._addTemplates();
-    if (!this.sorts) {
-      this.identifier = this.columns.some((c) => c.prop === this.identifier) ?
-        this.identifier :
-        this.columns[0].prop + '';
-      this.sorts = this.createSortingDefinition(this.identifier);
+    if (this.autoSave) {
+      this.tableName = this.calculateUniqueTableName(this.columns);
+      this.initUserConfig();
+    }
+    if (!this.userConfig.limit) {
+      this.userConfig.limit = this.limit;
+    }
+    if (!this.userConfig.sorts) {
+      if (!this.sorts) {
+        this.identifier = this.columns.some((c) => c.prop === this.identifier) ?
+          this.identifier :
+          this.columns[0].prop + '';
+        this.sorts = this.createSortingDefinition(this.identifier);
+      }
+      this.userConfig.sorts = this.sorts;
     }
     this.columns.map((column) => {
       if (column.cellTransformation) {
@@ -126,17 +178,35 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     if (this.detailsComponent) {
       this.selectionType = 'multi';
     }
+    if (!this.userConfig.columns) {
+      this.updateUserColumns();
+    } else {
+      this.columns.forEach((c, i) => {
+        c.isHidden = this.userConfig.columns[i].isHidden;
+      });
+    }
     this.tableColumns = this.columns.filter(c => !c.isHidden);
     if (this.autoReload) { // Also if nothing is bound to fetchData nothing will be triggered
-      this.subscriber = Observable.timer(0, this.autoReload).subscribe(x => {
+      this.reloadSubscriber = Observable.timer(0, this.autoReload).subscribe(x => {
         return this.reloadData();
       });
     }
   }
 
+  updateUserColumns () {
+    this.userConfig.columns = this.columns.map(c => ({
+      prop: c.prop,
+      name: c.name,
+      isHidden: !!c.isHidden
+    }));
+  }
+
   ngOnDestroy() {
-    if (this.subscriber) {
-      this.subscriber.unsubscribe();
+    if (this.reloadSubscriber) {
+      this.reloadSubscriber.unsubscribe();
+    }
+    if (this.saveSubscriber) {
+      this.saveSubscriber.unsubscribe();
     }
   }
 
@@ -166,7 +236,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   setLimit(e) {
     const value = parseInt(e.target.value, 10);
     if (value > 0) {
-      this.limit = value;
+      this.userConfig.limit = value;
     }
   }
 
@@ -224,12 +294,18 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   }
 
   updateColumns () {
+    this.updateUserColumns();
     this.tableColumns = this.columns.filter(c => !c.isHidden);
-    const sortProp = this.table.sorts[0].prop;
+    const sortProp = this.userConfig.sorts[0].prop;
     if (!_.find(this.tableColumns, c => c.prop === sortProp)) {
-      this.table.onColumnSort({sorts: this.createSortingDefinition(this.tableColumns[0].prop)});
+      this.userConfig.sorts = this.createSortingDefinition(this.tableColumns[0].prop);
+      this.table.onColumnSort({sorts: this.userConfig.sorts});
     }
     this.table.recalculate();
+  }
+
+  changeSort ({sorts}) {
+    this.userConfig.sorts = sorts;
   }
 
   createSortingDefinition (prop) {
