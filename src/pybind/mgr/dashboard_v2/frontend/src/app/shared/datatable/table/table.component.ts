@@ -110,41 +110,6 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
 
   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
 
-  calculateUniqueTableName (columns) {
-    const stringToNumber = (s) => {
-      if (!_.isString(s)) {
-        return 0;
-      }
-      let result = 0;
-      for (let i = 0; i < s.length; i++) {
-        result += s.charCodeAt(i) * i;
-      }
-      return result;
-    };
-    return columns.reduce((result, value, index) =>
-       ((stringToNumber(value.prop) + stringToNumber(value.name)) * (index + 1)) + result,
-     0).toString();
-  }
-
-  initUserConfig () {
-    const loaded = this.localStorage.getItem(this.tableName);
-    if (loaded) {
-      this.userConfig = JSON.parse(loaded);
-    }
-    const source = Observable.create((obj) => {
-      this.userConfig = new Proxy(this.userConfig, {
-        set(config, prop, value) {
-          config[prop] = value;
-          obj.next(config);
-          return true;
-        }
-      });
-    });
-    this.saveSubscriber = source.subscribe(config => {
-      this.localStorage[this.tableName] = JSON.stringify(config);
-    });
-  }
-
   ngOnInit() {
     this._addTemplates();
     if (this.autoSave) {
@@ -191,6 +156,41 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
         return this.reloadData();
       });
     }
+  }
+
+  calculateUniqueTableName (columns) {
+    const stringToNumber = (s) => {
+      if (!_.isString(s)) {
+        return 0;
+      }
+      let result = 0;
+      for (let i = 0; i < s.length; i++) {
+        result += s.charCodeAt(i) * i;
+      }
+      return result;
+    };
+    return columns.reduce((result, value, index) =>
+      ((stringToNumber(value.prop) + stringToNumber(value.name)) * (index + 1)) + result,
+      0).toString();
+  }
+
+  initUserConfig () {
+    const loaded = this.localStorage.getItem(this.tableName);
+    if (loaded) {
+      this.userConfig = JSON.parse(loaded);
+    }
+    const source = Observable.create((obj) => {
+      this.userConfig = new Proxy(this.userConfig, {
+        set(config, prop, value) {
+          config[prop] = value;
+          obj.next(config);
+          return true;
+        }
+      });
+    });
+    this.saveSubscriber = source.subscribe(config => {
+      this.localStorage[this.tableName] = JSON.stringify(config);
+    });
   }
 
   updateUserColumns () {
@@ -304,7 +304,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     this.table.recalculate();
   }
 
-  changeSort ({sorts}) {
+  changeSorting ({sorts}) {
     this.userConfig.sorts = sorts;
   }
 

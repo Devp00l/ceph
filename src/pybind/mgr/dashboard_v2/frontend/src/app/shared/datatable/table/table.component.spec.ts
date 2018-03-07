@@ -62,11 +62,11 @@ describe('TableComponent', () => {
 
     const e = {target: {value: '1'}};
     component.setLimit(e);
-    expect(component.limit).toBe(1);
-    expect(component.limit).toEqual(jasmine.any(Number));
+    expect(component.userConfig.limit).toBe(1);
+    expect(component.userConfig.limit).toEqual(jasmine.any(Number));
     e.target.value = '-20';
     component.setLimit(e);
-    expect(component.limit).toBe(1);
+    expect(component.userConfig.limit).toBe(1);
   });
 
   it('should search for 13', () => {
@@ -100,7 +100,6 @@ describe('TableComponent', () => {
 
     beforeEach(() => {
       component.ngOnInit();
-      component.table.sorts = component.sorts;
     });
 
     it('should have updated the column definitions', () => {
