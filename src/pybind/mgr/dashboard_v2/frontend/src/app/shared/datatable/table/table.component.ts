@@ -289,7 +289,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
       $event.target.checked = true;
       return;
     }
-    _.find(this.columns, c => c.prop === prop).isHidden = hide;
+    _.find(this.columns, (c: SortPropDir) => c.prop === prop).isHidden = hide;
     this.updateColumns();
   }
 
