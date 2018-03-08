@@ -39,7 +39,6 @@ describe('TableComponent', () => {
 
   beforeEach(() => {
     component.data = createFakeData(100);
-    component.useData();
     component.columns = [
       {prop: 'a'},
       {prop: 'b'},
@@ -51,41 +50,48 @@ describe('TableComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should have rows', () => {
-    expect(component.data.length).toBe(100);
-    expect(component.rows.length).toBe(component.data.length);
-  });
+  describe('after useData', () => {
 
-  it('should have an int in setLimit parsing a string', () => {
-    expect(component.limit).toBe(10);
-    expect(component.limit).toEqual(jasmine.any(Number));
+    beforeEach(() => {
+      component.useData();
+    });
 
-    const e = {target: {value: '1'}};
-    component.setLimit(e);
-    expect(component.limit).toBe(1);
-    expect(component.limit).toEqual(jasmine.any(Number));
-    e.target.value = '-20';
-    component.setLimit(e);
-    expect(component.limit).toBe(1);
-  });
+    it('should have rows', () => {
+      expect(component.data.length).toBe(100);
+      expect(component.rows.length).toBe(component.data.length);
+    });
 
-  it('should search for 13', () => {
-    component.search = '13';
-    expect(component.rows.length).toBe(100);
-    component.updateFilter(true);
-    expect(component.rows[0].a).toBe(13);
-    expect(component.rows[1].b).toBe(1369);
-    expect(component.rows[2].b).toBe(3136);
-    expect(component.rows.length).toBe(3);
-  });
+    it('should have an int in setLimit parsing a string', () => {
+      expect(component.limit).toBe(10);
+      expect(component.limit).toEqual(jasmine.any(Number));
 
-  it('should restore full table after search', () => {
-    component.search = '13';
-    expect(component.rows.length).toBe(100);
-    component.updateFilter(true);
-    expect(component.rows.length).toBe(3);
-    component.updateFilter();
-    expect(component.rows.length).toBe(100);
+      const e = {target: {value: '1'}};
+      component.setLimit(e);
+      expect(component.userConfig.limit).toBe(1);
+      expect(component.userConfig.limit).toEqual(jasmine.any(Number));
+      e.target.value = '-20';
+      component.setLimit(e);
+      expect(component.userConfig.limit).toBe(1);
+    });
+
+    it('should search for 13', () => {
+      component.search = '13';
+      expect(component.rows.length).toBe(100);
+      component.updateFilter(true);
+      expect(component.rows[0].a).toBe(13);
+      expect(component.rows[1].b).toBe(1369);
+      expect(component.rows[2].b).toBe(3136);
+      expect(component.rows.length).toBe(3);
+    });
+
+    it('should restore full table after search', () => {
+      component.search = '13';
+      expect(component.rows.length).toBe(100);
+      component.updateFilter(true);
+      expect(component.rows.length).toBe(3);
+      component.updateFilter();
+      expect(component.rows.length).toBe(100);
+    });
   });
 
   describe('after ngInit', () => {
@@ -98,9 +104,18 @@ describe('TableComponent', () => {
       });
     };
 
+    const clearLocalStorage = () => {
+      component.localStorage.clear();
+    };
+
+    const equalStorageConfig = () => {
+      expect(JSON.stringify(component.userConfig)).toBe(
+        component.localStorage.getItem(component.tableName)
+      );
+    };
+
     beforeEach(() => {
       component.ngOnInit();
-      component.table.sorts = component.sorts;
     });
 
     it('should have updated the column definitions', () => {
@@ -115,31 +130,42 @@ describe('TableComponent', () => {
       expect(component.tableColumns).toEqual(component.columns);
     });
 
-    it('should have a unique identifier which is search for', () => {
+    it('should have a unique identifier which it searches for', () => {
       expect(component.identifier).toBe('a');
-      expect(component.sorts[0].prop).toBe('a');
-      expect(component.sorts).toEqual(component.createSortingDefinition('a'));
+      expect(component.userConfig.sorts[0].prop).toBe('a');
+      expect(component.userConfig.sorts).toEqual(component.createSortingDefinition('a'));
+      equalStorageConfig();
     });
 
     it('should remove column "a"', () => {
+      expect(component.userConfig.sorts[0].prop).toBe('a');
       toggleColumn('a', false);
-      expect(component.table.sorts[0].prop).toBe('b');
+      expect(component.userConfig.sorts[0].prop).toBe('b');
       expect(component.tableColumns.length).toBe(2);
+      equalStorageConfig();
     });
 
     it('should not be able to remove all columns', () => {
+      expect(component.userConfig.sorts[0].prop).toBe('a');
       toggleColumn('a', false);
       toggleColumn('b', false);
       toggleColumn('c', false);
-      expect(component.table.sorts[0].prop).toBe('c');
+      expect(component.userConfig.sorts[0].prop).toBe('c');
       expect(component.tableColumns.length).toBe(1);
+      equalStorageConfig();
     });
 
     it('should enable column "a" again', () => {
+      expect(component.userConfig.sorts[0].prop).toBe('a');
       toggleColumn('a', false);
       toggleColumn('a', true);
-      expect(component.table.sorts[0].prop).toBe('b');
+      expect(component.userConfig.sorts[0].prop).toBe('b');
       expect(component.tableColumns.length).toBe(3);
+      equalStorageConfig();
+    });
+
+    afterEach(() => {
+      clearLocalStorage();
     });
   });
 });
