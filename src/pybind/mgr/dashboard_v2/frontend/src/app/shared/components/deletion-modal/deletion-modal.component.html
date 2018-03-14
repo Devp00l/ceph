@@ -1,0 +1,83 @@
+<button type="button"
+        [class]="btnClasses"
+        (click)="openModal(deletionModal)">
+  <ng-container *ngTemplateOutlet="deletionButtonLabel"></ng-container>
+</button>
+
+<ng-template #deletionModal>
+  <cd-modal [modalRef]="bsModalRef" #modal>
+    <ng-container class="modal-title">
+      <ng-container *ngTemplateOutlet="deletionHeading"></ng-container>
+    </ng-container>
+
+    <ng-container class="modal-body">
+      <ng-template *ngTemplateOutlet="deletionDescription"></ng-template>
+      <p>
+        <ng-container i18n>
+          To confirm the deletion, enter
+        </ng-container>
+        <kbd>{{ pattern }}</kbd>
+        <ng-container i18n>
+          and click on
+        </ng-container>
+        <kbd>
+          <ng-container *ngTemplateOutlet="deletionButtonLabel"></ng-container>
+        </kbd>.
+      </p>
+      <form name="deletionForm"
+            #formDir="ngForm"
+            [formGroup]="deletionForm">
+        <div class="form-group"
+             [ngClass]="{'has-error': invalidControl(confirmation)}">
+          <input type="text"
+                 class="form-control"
+                 [placeholder]="pattern"
+                 autocomplete="off"
+                 formControlName="confirmation"
+                 autofocus>
+          <span class="help-block"
+                *ngIf="invalidControl(confirmation, 'required')"
+                i18n>
+            This field is required
+          </span>
+          <span class="help-block"
+                *ngIf="invalidControl(confirmation, 'pattern')">
+            '{{ confirmation.value }}'
+            <span i18n>doesn't match</span>
+            '{{ pattern }}'
+          </span>
+        </div>
+      </form>
+    </ng-container>
+
+    <ng-container class="modal-footer">
+      <button type="button"
+              (click)="delete()"
+              [class]="btnClasses">
+        <ng-container *ngTemplateOutlet="deletionButtonLabel"></ng-container>
+      </button>
+      <button class="btn btn-link btn-sm"
+              (click)="bsModalRef.hide()"
+              i18n>
+        Cancel
+      </button>
+    </ng-container>
+  </cd-modal>
+</ng-template>
+
+<ng-template #deletionButtonLabel>
+  <i class="fa fa-fw fa-trash-o"></i>
+  <ng-container *ngTemplateOutlet="deletionHeading"></ng-container>
+</ng-template>
+
+<ng-template #deletionHeading>
+  <ng-container i18n>
+    Delete
+  </ng-container>
+  {{ metaType }}
+</ng-template>
+
+<ng-template #deletionDescription>
+  <ng-content></ng-content>
+</ng-template>
+
