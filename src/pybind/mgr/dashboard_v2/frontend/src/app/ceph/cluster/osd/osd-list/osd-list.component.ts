@@ -15,6 +15,7 @@ import { OsdService } from '../osd.service';
 export class OsdListComponent implements OnInit {
   @ViewChild('statusColor') statusColor: TemplateRef<any>;
 
+  times = 0;
   osds = [];
   columns: CdTableColumn[];
   selection = new CdTableSelection();
@@ -71,5 +72,10 @@ export class OsdListComponent implements OnInit {
 
   beforeShowDetails(selection: CdTableSelection) {
     return selection.hasSingleSelection;
+  }
+
+  deleteAnything () {
+    console.log('bammm deleted');
+    this.times++;
   }
 }
