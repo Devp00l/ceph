@@ -9,6 +9,30 @@
           [columns]="columns"
           selectionType="single"
           (updateSelection)="updateSelection($event)">
+  <div class="table-actions">
+    <div class="btn-group">
+      <button type="button"
+              class="btn btn-sm btn-primary">
+        <i class="fa fa-fw fa-plus"></i>Create OSD
+      </button>
+    </div>
+    <div class="btn-group">
+      <cd-deletion-button #deleteButton
+                          metaType="OSD ctl"
+                          pattern="ctrl-test"
+                          (toggleDeletion)="fakeDeleteController()">
+        The spinner is handled by your controller if you have use the modal as ViewChild in order to use it's functions
+        to stop the spinner or close the dialog.
+      </cd-deletion-button>
+    </div>
+    <div class="btn-group">
+      <cd-deletion-button metaType="OSD"
+                          [deletionObserver]="fakeDelete()"
+                          pattern="modal-test">
+        The spinner is handled by the modal if your given deletion function returns a Observable.
+      </cd-deletion-button>
+    </div>
+  </div>
   <cd-osd-details cdTableDetail
                   [selection]="selection">
   </cd-osd-details>

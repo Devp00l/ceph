@@ -1,6 +1,14 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
+import { timeout } from 'q';
+import 'rxjs/add/observable/zip';
+import { Observable } from 'rxjs/Observable';
+import { Observer } from 'rxjs/Observer';
+
 import { OsdService } from '../../../../shared/api/osd.service';
+import {
+  DeletionButtonComponent
+} from '../../../../shared/components/deletion-button/deletion-button.component';
 import { CellTemplate } from '../../../../shared/enum/cell-template.enum';
 import { CdTableColumn } from '../../../../shared/models/cd-table-column';
 import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
@@ -13,6 +21,7 @@ import { DimlessBinaryPipe } from '../../../../shared/pipes/dimless-binary.pipe'
 })
 
 export class OsdListComponent implements OnInit {
+  @ViewChild(DeletionButtonComponent) deleteButton: DeletionButtonComponent;
   @ViewChild('statusColor') statusColor: TemplateRef<any>;
   @ViewChild('osdUsageTpl') osdUsageTpl: TemplateRef<any>;
 
@@ -67,6 +76,27 @@ export class OsdListComponent implements OnInit {
   collectStates(osd) {
     const select = (onState, offState) => osd[onState] ? onState : offState;
     return [select('up', 'down'), select('in', 'out')];
+  }
+
+  fakeDelete() {
+    return (): Observable => {
+      const first = Observable.timer(1000);
+      const second = Observable.create((observer: Observer) => {
+        const x = () => console.log('fake modal delete', this.osds);
+        observer.next(x());
+        observer.complete();
+      });
+      const fin = Observable.zip(first, second);
+      console.log(fin);
+      return fin;
+    };
+  }
+
+  fakeDeleteController() {
+    Observable.timer(1000).subscribe(() => {
+      console.log('fake controller delete', this.osds);
+      this.deleteButton.stopLoadingSpinner();
+    });
   }
 
   beforeShowDetails(selection: CdTableSelection) {
