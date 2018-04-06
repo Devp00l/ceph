@@ -10,6 +10,34 @@
           selectionType="single"
           (updateSelection)="updateSelection($event)"
           [updateSelectionOnRefresh]="false">
+  <div class="table-actions">
+    <div class="btn-group">
+      <button type="button"
+              class="btn btn-sm btn-primary">
+        <i class="fa fa-fw fa-plus"></i>Create OSD
+      </button>
+    </div>
+    <div class="btn-group">
+      <button type="button"
+              class="btn btn-sm btn-primary"
+              (click)="openCtrlDriven()">
+        <i class="fa fa-fw fa-trash"></i>Deletion Ctrl-Test
+      </button>
+      <ng-template #ctrlDescription>
+        The spinner is handled by the controller if you have use the modal as ViewChild in order to
+        use it's functions to stop the spinner or close the dialog.
+      </ng-template>
+
+      <button type="button"
+              class="btn btn-sm btn-primary"
+              (click)="openModalDriven()">
+        <i class="fa fa-fw fa-trash"></i>Deletion Modal-Test
+      </button>
+      <ng-template #modalDescription>
+        The spinner is handled by the modal if your given deletion function returns a Observable.
+      </ng-template>
+    </div>
+  </div>
   <cd-osd-details cdTableDetail
                   [selection]="selection">
   </cd-osd-details>
