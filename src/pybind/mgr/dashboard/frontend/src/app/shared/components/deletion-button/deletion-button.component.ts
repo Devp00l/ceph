@@ -1,5 +1,10 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output, TemplateRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  TemplateRef,
   ViewChild
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
@@ -14,7 +19,6 @@ import { SubmitButtonComponent } from '../submit-button/submit-button.component'
   styleUrls: ['./deletion-button.component.scss']
 })
 export class DeletionButtonComponent implements OnInit {
-  @ViewChild(SubmitButtonComponent) submitButton: SubmitButtonComponent;
   @Input() metaType: string;
   @Input() pattern: string;
   @Input() btnClasses = 'btn btn-sm btn-primary';
@@ -29,10 +33,7 @@ export class DeletionButtonComponent implements OnInit {
 
   ngOnInit() {
     this.confirmation = new FormControl('', {
-      validators: [
-        Validators.required,
-        Validators.pattern(this.pattern)
-      ],
+      validators: [Validators.required, Validators.pattern(this.pattern)],
       updateOn: 'blur'
     });
     this.deletionForm = new FormGroup({
@@ -43,13 +44,14 @@ export class DeletionButtonComponent implements OnInit {
   showModal(template: TemplateRef<any>) {
     this.deletionForm.reset();
     this.bsModalRef = this.modalService.show(template);
-    this.delete = () => {
-      this.submitButton.submit();
-    };
   }
 
-  invalidControl (control: FormControl, error?: string) {
-    return control.dirty && control.invalid && (error ? control.errors[error] : true);
+  invalidControl(control: FormControl, error?: string) {
+    return (
+      (this.deletionForm.sub || control.dirty) &&
+      control.invalid &&
+      (error ? control.errors[error] : true)
+    );
   }
 
   updateConfirmation($e) {
@@ -63,11 +65,15 @@ export class DeletionButtonComponent implements OnInit {
 
   deletionCall() {
     if (this.deletionObserver) {
-      this.deletionObserver().subscribe(undefined, () => {
-        this.stopLoadingSpinner();
-      }, () => {
-        this.hideModal();
-      });
+      this.deletionObserver().subscribe(
+        undefined,
+        () => {
+          this.stopLoadingSpinner();
+        },
+        () => {
+          this.hideModal();
+        }
+      );
     } else {
       this.toggleDeletion.emit();
     }
@@ -78,7 +84,7 @@ export class DeletionButtonComponent implements OnInit {
     this.bsModalRef.hide();
   }
 
-  stopLoadingSpinner () {
+  stopLoadingSpinner() {
     this.submitButton.loading = false;
   }
 }

@@ -7,11 +7,40 @@
         aria-current="page">Hosts</li>
   </ol>
 </nav>
+
+<h1>Use age of modal deletion component</h1>
+<p></p>
+<cd-deletion-button pattern="delete-this"
+                   metaType="NoDescription"
+                   (toggleDeletion)="deleteAnything()">
+</cd-deletion-button>
+<p></p>
+<cd-deletion-button pattern="charlie"
+                   metaType="Unicorn"
+                   (toggleDeletion)="deleteAnything()">
+  <p>BLUE UNICORN</p>
+  <dl>
+    <dd>Hey, Charlie. Hey Charlie, wake up!</dd>
+  </dl>
+  <p>PINK UNICORN</p>
+  <dl>
+    <dd>Yeah Charlie. You silly sleepy-head, wake up.</dd>
+  </dl>
+  <p>(Charlie wakes up and looks at the two)</p>
+  <p>CHARLIE THE UNICORN - Groans</p>
+  <dl>
+    <dd>Oh God, you guys. This'd better be pretty freaking important. Is the meadow on fire?</dd>
+  </dl>
+</cd-deletion-button>
+<p></p>
+<h3>Called deletion method {{ times }}</h3>
+
 <cd-table [data]="hosts"
           [columns]="columns"
           columnMode="flex"
           (fetchData)="getHosts()">
-  <ng-template #servicesTpl let-value="value">
+  <ng-template #servicesTpl
+               let-value="value">
     <span *ngFor="let service of value; last as isLast">
       <a [routerLink]="[service.cdLink]">{{ service.type }}.{{ service.id }}</a>{{ !isLast ? ", " : "" }}
     </span>

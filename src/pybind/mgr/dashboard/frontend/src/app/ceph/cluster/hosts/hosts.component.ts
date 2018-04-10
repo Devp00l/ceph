@@ -10,15 +10,18 @@ import { CephShortVersionPipe } from '../../../shared/pipes/ceph-short-version.p
   styleUrls: ['./hosts.component.scss']
 })
 export class HostsComponent implements OnInit {
-
   columns: Array<CdTableColumn> = [];
   hosts: Array<object> = [];
   isLoadingHosts = false;
 
+  times = 0;
+
   @ViewChild('servicesTpl') public servicesTpl: TemplateRef<any>;
 
-  constructor(private hostService: HostService,
-              private cephShortVersionPipe: CephShortVersionPipe) { }
+  constructor(
+    private hostService: HostService,
+    private cephShortVersionPipe: CephShortVersionPipe
+  ) {}
 
   ngOnInit() {
     this.columns = [
@@ -42,23 +45,31 @@ export class HostsComponent implements OnInit {
     ];
   }
 
+  deleteAnything() {
+    console.log('bammm deleted');
+    this.times++;
+  }
+
   getHosts() {
     if (this.isLoadingHosts) {
       return;
     }
     this.isLoadingHosts = true;
-    this.hostService.list().then((resp) => {
-      resp.map((host) => {
-        host.services.map((service) => {
-          service.cdLink = `/perf_counters/${service.type}/${service.id}`;
-          return service;
+    this.hostService
+      .list()
+      .then(resp => {
+        resp.map(host => {
+          host.services.map(service => {
+            service.cdLink = `/perf_counters/${service.type}/${service.id}`;
+            return service;
+          });
+          return host;
         });
-        return host;
+        this.hosts = resp;
+        this.isLoadingHosts = false;
+      })
+      .catch(() => {
+        this.isLoadingHosts = false;
       });
-      this.hosts = resp;
-      this.isLoadingHosts = false;
-    }).catch(() => {
-      this.isLoadingHosts = false;
-    });
   }
 }
