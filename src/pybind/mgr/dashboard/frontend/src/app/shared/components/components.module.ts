@@ -6,7 +6,7 @@ import { ChartsModule } from 'ng2-charts/ng2-charts';
 import { AlertModule, ModalModule, PopoverModule, TooltipModule } from 'ngx-bootstrap';
 
 import { PipesModule } from '../pipes/pipes.module';
-import { DeletionLinkComponent } from './deletion-link/deletion-link.component';
+import { DeletionModalComponent } from './deletion-modal/deletion-modal.component';
 import { HelperComponent } from './helper/helper.component';
 import { ModalComponent } from './modal/modal.component';
 import { SparklineComponent } from './sparkline/sparkline.component';
@@ -33,7 +33,10 @@ import { ViewCacheComponent } from './view-cache/view-cache.component';
     SubmitButtonComponent,
     UsageBarComponent,
     ModalComponent,
-    DeletionLinkComponent
+    DeletionModalComponent
+  ],
+  entryComponents: [
+    DeletionModalComponent
   ],
   providers: [],
   exports: [
@@ -43,7 +46,7 @@ import { ViewCacheComponent } from './view-cache/view-cache.component';
     SubmitButtonComponent,
     UsageBarComponent,
     ModalComponent,
-    DeletionLinkComponent
+    DeletionModalComponent
   ]
 })
 export class ComponentsModule { }

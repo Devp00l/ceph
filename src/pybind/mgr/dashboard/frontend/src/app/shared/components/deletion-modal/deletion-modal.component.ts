@@ -1,7 +1,7 @@
 import {
-  Component, EventEmitter, Input, OnInit, Output, TemplateRef, ViewChild
+  Component, OnInit, TemplateRef, ViewChild
 } from '@angular/core';
-import { FormControl, FormGroup, FormGroupDirective, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { Observable } from 'rxjs/Observable';
@@ -9,42 +9,32 @@ import { Observable } from 'rxjs/Observable';
 import { SubmitButtonComponent } from '../submit-button/submit-button.component';
 
 @Component({
-  selector: 'cd-deletion-link',
-  templateUrl: './deletion-link.component.html',
-  styleUrls: ['./deletion-link.component.scss']
+  selector: 'cd-deletion-modal',
+  templateUrl: './deletion-modal.component.html',
+  styleUrls: ['./deletion-modal.component.scss']
 })
-export class DeletionLinkComponent implements OnInit {
+export class DeletionModalComponent implements OnInit {
   @ViewChild(SubmitButtonComponent) submitButton: SubmitButtonComponent;
-  @Input() metaType: string;
-  @Input() pattern = 'yes';
-  @Input() deletionObserver: () => Observable<any>;
-  @Output() toggleDeletion = new EventEmitter();
-  bsModalRef: BsModalRef;
+  description: TemplateRef<any>;
+  metaType: string;
+  pattern: 'yes';
+  deletionObserver: () => Observable<any>;
+  deletionMethod: Function;
+  modalRef: BsModalRef;
+
   deletionForm: FormGroup;
   confirmation: FormControl;
-  delete: Function;
-
-  constructor(public modalService: BsModalService) {}
 
   ngOnInit() {
     this.confirmation = new FormControl('', {
       validators: [
-        Validators.required,
-        Validators.pattern(this.pattern)
+        Validators.required
       ],
       updateOn: 'blur'
     });
     this.deletionForm = new FormGroup({
       confirmation: this.confirmation
     });
-  }
-
-  showModal(template: TemplateRef<any>) {
-    this.deletionForm.reset();
-    this.bsModalRef = this.modalService.show(template);
-    this.delete = () => {
-      this.submitButton.submit();
-    };
   }
 
   invalidControl(submitted: boolean, error?: string): boolean {
@@ -65,20 +55,26 @@ export class DeletionLinkComponent implements OnInit {
     this.confirmation.updateValueAndValidity();
   }
 
+  delete () {
+    this.submitButton.submit();
+  }
+
   deletionCall() {
     if (this.deletionObserver) {
       this.deletionObserver().subscribe(
         undefined,
-        () => this.stopLoadingSpinner(),
-        () => this.hideModal()
+        this.stopLoadingSpinner.bind(this),
+        this.hideModal.bind(this)
       );
     } else {
-      this.toggleDeletion.emit();
+      this.deletionMethod();
     }
   }
 
   hideModal() {
-    this.bsModalRef.hide();
+    if (this.modalRef) {
+      this.modalRef.hide();
+    }
   }
 
   stopLoadingSpinner() {
