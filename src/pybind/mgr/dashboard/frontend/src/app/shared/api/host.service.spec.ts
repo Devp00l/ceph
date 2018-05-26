@@ -1,24 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
-
-import { Observable } from 'rxjs';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 
 import { ApiUnitTest } from '../tests/util';
-import { RbdMirroringService } from './rbd-mirroring.service';
+import { HostService } from './host.service';
 
-describe('RbdMirroringService', () => {
-  let service: RbdMirroringService;
+describe('HostService', () => {
+  let service: HostService;
   let httpClient: HttpClient;
   let aut: ApiUnitTest;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RbdMirroringService],
+      providers: [HostService],
       imports: [HttpClientTestingModule]
     });
 
-    service = TestBed.get(RbdMirroringService);
+    service = TestBed.get(HostService);
     httpClient = TestBed.get(HttpClient);
     aut = new ApiUnitTest(httpClient);
   });
@@ -27,8 +25,12 @@ describe('RbdMirroringService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should call get', () => {
-    expect(service.get()).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/rbdmirror');
-  });
+  it(
+    'should call list',
+    fakeAsync(() => {
+      expect(service.list()).toEqual(jasmine.any(Promise));
+      tick();
+      expect(aut.path).toBe('api/host');
+    })
+  );
 });

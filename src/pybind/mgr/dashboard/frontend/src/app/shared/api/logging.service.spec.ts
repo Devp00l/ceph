@@ -5,20 +5,20 @@ import { TestBed } from '@angular/core/testing';
 import { Observable } from 'rxjs';
 
 import { ApiUnitTest } from '../tests/util';
-import { RbdMirroringService } from './rbd-mirroring.service';
+import { LoggingService } from './logging.service';
 
-describe('RbdMirroringService', () => {
-  let service: RbdMirroringService;
+describe('LoggingService', () => {
+  let service: LoggingService;
   let httpClient: HttpClient;
   let aut: ApiUnitTest;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [RbdMirroringService],
+      providers: [LoggingService],
       imports: [HttpClientTestingModule]
     });
 
-    service = TestBed.get(RbdMirroringService);
+    service = TestBed.get(LoggingService);
     httpClient = TestBed.get(HttpClient);
     aut = new ApiUnitTest(httpClient);
   });
@@ -27,8 +27,13 @@ describe('RbdMirroringService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should call get', () => {
-    expect(service.get()).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/rbdmirror');
+  it('should call jsError', () => {
+    expect(service.jsError('foo', 'bar', 'baz')).toEqual(jasmine.any(Observable));
+    expect(aut.path).toBe('ui-api/logging/js-error');
+    expect(aut.body).toEqual({
+      url: 'foo',
+      message: 'bar',
+      stack: 'baz'
+    });
   });
 });
