@@ -1,16 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { Observable } from 'rxjs';
-
-import { ApiUnitTest } from '../tests/util';
 import { LoggingService } from './logging.service';
 
 describe('LoggingService', () => {
   let service: LoggingService;
   let httpClient: HttpClient;
-  let aut: ApiUnitTest;
+  let httpTesting: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,17 +17,22 @@ describe('LoggingService', () => {
 
     service = TestBed.get(LoggingService);
     httpClient = TestBed.get(HttpClient);
-    aut = new ApiUnitTest(httpClient);
+    httpTesting = TestBed.get(HttpTestingController);
   });
+
+  afterEach(() => {
+    httpTesting.verify();
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
   it('should call jsError', () => {
-    expect(service.jsError('foo', 'bar', 'baz')).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('ui-api/logging/js-error');
-    expect(aut.body).toEqual({
+    service.jsError('foo', 'bar', 'baz').subscribe();
+    const req = httpTesting.expectOne('ui-api/logging/js-error');
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
       url: 'foo',
       message: 'bar',
       stack: 'baz'

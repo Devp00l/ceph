@@ -1,16 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { Observable } from 'rxjs';
-
-import { ApiUnitTest } from '../tests/util';
 import { CephfsService } from './cephfs.service';
 
 describe('CephfsService', () => {
   let service: CephfsService;
   let httpClient: HttpClient;
-  let aut: ApiUnitTest;
+  let httpTesting: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -20,30 +17,38 @@ describe('CephfsService', () => {
 
     service = TestBed.get(CephfsService);
     httpClient = TestBed.get(HttpClient);
-    aut = new ApiUnitTest(httpClient);
+    httpTesting = TestBed.get(HttpTestingController);
   });
+
+  afterEach(() => {
+    httpTesting.verify();
+  })
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
   it('should call list', () => {
-    expect(service.list()).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/cephfs');
+    service.list().subscribe()
+    const req = httpTesting.expectOne('api/cephfs');
+    expect(req.request.method).toBe('GET');
   });
 
   it('should call getCephfs', () => {
-    expect(service.getCephfs(1)).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/cephfs/1');
+    service.getCephfs(1).subscribe()
+    const req = httpTesting.expectOne('api/cephfs/1');
+    expect(req.request.method).toBe('GET');
   });
 
   it('should call getClients', () => {
-    expect(service.getClients(1)).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/cephfs/1/clients');
+    service.getClients(1).subscribe()
+    const req = httpTesting.expectOne('api/cephfs/1/clients');
+    expect(req.request.method).toBe('GET');
   });
 
   it('should call getMdsCounters', () => {
-    expect(service.getMdsCounters(1)).toEqual(jasmine.any(Observable));
-    expect(aut.path).toBe('api/cephfs/1/mds_counters');
+    service.getMdsCounters(1).subscribe()
+    const req = httpTesting.expectOne('api/cephfs/1/mds_counters');
+    expect(req.request.method).toBe('GET');
   });
 });
