@@ -39,3 +39,11 @@ class ClusterConfiguration(RESTController):
                 return self._append_config_option_values([option])[0]
 
         raise cherrypy.HTTPError(404)
+
+    def create(self, name, value):
+        for entry in value:
+            if entry['value'] is None or entry['value'] is False or entry['value'] == '':
+                CephService.send_command('mon', 'config rm', who=entry['section'], name=name)
+            else:
+                CephService.send_command('mon', 'config set', who=entry['section'], name=name,
+                                         value=str(entry['value']))
