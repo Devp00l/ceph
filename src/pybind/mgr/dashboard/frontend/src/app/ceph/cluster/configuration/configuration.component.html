@@ -3,7 +3,17 @@
           [columns]="columns"
           selectionType="single"
           (updateSelection)="updateSelection($event)">
-  <div class="table-actions form-inline">
+  <div class="table-actions">
+    <div class="btn-group" dropdown>
+      <button type="button"
+              class="btn btn-sm btn-primary"
+              [ngClass]="{'disabled': !selection.hasSingleSelection}"
+              routerLink="/configuration/edit/{{ selection.first()?.name }}">
+        <i class="fa fa-fw fa-pencil"></i><span i18n>Edit</span>
+      </button>
+    </div>
+  </div>
+  <div class="table-filters">
     <div class="form-group filter"
          *ngFor="let filter of filters">
       <label>{{ filter.label }}: </label>

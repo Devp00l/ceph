@@ -1,0 +1,105 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+
+import { configureTestBed } from '../../../../../testing/unit-test-helper';
+import { SharedModule } from '../../../../shared/shared.module';
+import { ConfigurationFormComponent } from './configuration-form.component';
+import { ConfigFormModel } from './configuration-form.model';
+
+describe('ConfigurationFormComponent', () => {
+  let component: ConfigurationFormComponent;
+  let fixture: ComponentFixture<ConfigurationFormComponent>;
+  let activatedRoute: ActivatedRoute;
+
+  configureTestBed({
+    imports: [HttpClientTestingModule, ReactiveFormsModule, RouterTestingModule, SharedModule],
+    declarations: [ConfigurationFormComponent],
+    providers: [
+      {
+        provide: ActivatedRoute
+      }
+    ]
+  });
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(ConfigurationFormComponent);
+    component = fixture.componentInstance;
+    activatedRoute = TestBed.get(ActivatedRoute);
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  describe('getValidators', () => {
+    it('should return a validator for types double, entity_addr_t and uuid_d', () => {
+      const types = ['double', 'entity_addr_t', 'uuid_d'];
+
+      types.forEach((valType) => {
+        const configOption = new ConfigFormModel();
+        configOption.type = valType;
+
+        const ret = component.getValidators(configOption);
+        expect(ret).toBeTruthy();
+        expect(ret.length).toBe(1);
+      });
+    });
+
+    it(
+      'should not return a validator for types std::string, bool, uint64_t, int64_t, size_t ' +
+        'and secs',
+      () => {
+        const types = ['std::string', 'bool', 'uint64_t', 'int64_t', 'size_t', 'secs'];
+
+        types.forEach((valType) => {
+          const configOption = new ConfigFormModel();
+          configOption.type = valType;
+
+          const ret = component.getValidators(configOption);
+          expect(ret).toBeTruthy();
+          expect(ret.length).toBe(0);
+        });
+      }
+    );
+
+    it('should return a min validator', () => {
+      const configOption = new ConfigFormModel();
+      configOption.type = 'int64_t';
+      configOption.min = 2;
+
+      const ret = component.getValidators(configOption);
+      expect(ret).toBeTruthy();
+      expect(ret.length).toBe(1);
+      expect(component.minValue).toBe(2);
+      expect(component.maxValue).toBeUndefined();
+    });
+
+    it('should return a max validator', () => {
+      const configOption = new ConfigFormModel();
+      configOption.type = 'int64_t';
+      configOption.max = 5;
+
+      const ret = component.getValidators(configOption);
+      expect(ret).toBeTruthy();
+      expect(ret.length).toBe(1);
+      expect(component.minValue).toBeUndefined();
+      expect(component.maxValue).toBe(5);
+    });
+
+    it('should return multiple validators', () => {
+      const configOption = new ConfigFormModel();
+      configOption.type = 'double';
+      configOption.max = 5.2;
+      configOption.min = 1.5;
+
+      const ret = component.getValidators(configOption);
+      expect(ret).toBeTruthy();
+      expect(ret.length).toBe(3);
+      expect(component.minValue).toBe(1.5);
+      expect(component.maxValue).toBe(5.2);
+    });
+  });
+});
