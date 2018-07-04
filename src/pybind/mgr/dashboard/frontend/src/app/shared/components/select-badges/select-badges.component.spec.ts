@@ -54,5 +54,4 @@ describe('SelectBadgesComponent', () => {
     component.removeItem('option1');
     expect(component.data).toEqual(['option2']);
   });
-
 });

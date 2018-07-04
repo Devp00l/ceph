@@ -14,7 +14,7 @@ export class SelectBadgesComponent implements OnChanges {
   constructor() {}
 
   ngOnChanges() {
-    if (this.options) {
+    if (this.data.length > 0) {
       this.options.forEach((option) => {
         if (this.data.indexOf(option.name) !== -1) {
           option.selected = true;
@@ -24,12 +24,7 @@ export class SelectBadgesComponent implements OnChanges {
   }
 
   private updateOptions() {
-    this.data.splice(0, this.data.length);
-    this.options.forEach((option: SelectBadgesOption) => {
-      if (option.selected) {
-        this.data.push(option.name);
-      }
-    });
+    this.data = this.options.filter(option => option.selected).map(option => option.name);
   }
 
   selectOption(option: SelectBadgesOption) {
