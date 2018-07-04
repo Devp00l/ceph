@@ -7,10 +7,8 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { ToastModule } from 'ng2-toastr';
 import { of } from 'rxjs';
 
-import { RoleService } from '../../../shared/api/role.service';
 import { UserService } from '../../../shared/api/user.service';
 import { ComponentsModule } from '../../../shared/components/components.module';
-import { AuthStorageService } from '../../../shared/services/auth-storage.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { configureTestBed } from '../../../shared/unit-test-helper';
 import { UserFormComponent } from './user-form.component';
@@ -21,18 +19,6 @@ describe('UserFormComponent', () => {
   let form: FormGroup;
   let fixture: ComponentFixture<UserFormComponent>;
   let userService: UserService;
-
-  const fakeRoles = [
-    {
-      name: 'administrator',
-      description: 'Administrator',
-      scopes_permissions: {
-        user: ['create', 'delete', 'read', 'update'],
-        osd: ['create', 'delete', 'read', 'update']
-      }
-    }
-  ];
-  const fakeUsername = 'user1';
 
   configureTestBed({
     imports: [
@@ -51,10 +37,6 @@ describe('UserFormComponent', () => {
     component = fixture.componentInstance;
     form = component.userForm;
     userService = TestBed.get(UserService);
-    spyOn(userService, 'create').and.callThrough();
-    spyOn(userService, 'update').and.callThrough();
-    spyOn(TestBed.get(RoleService), 'list').and.callFake(() => of(fakeRoles));
-    spyOn(TestBed.get(AuthStorageService), 'getUsername').and.callFake(() => of(fakeUsername));
     fixture.detectChanges();
   });
 
@@ -66,6 +48,7 @@ describe('UserFormComponent', () => {
   describe('create mode', () => {
     let router: Router;
     const setUrl = (url) => Object.defineProperty(router, 'url', { value: url });
+
     beforeEach(() => {
       router = TestBed.get(Router);
       setUrl('/users/add');
@@ -98,7 +81,7 @@ describe('UserFormComponent', () => {
       form.get('confirmpassword').setValue('bbb');
       expect(form.get('confirmpassword').hasError('match')).toBeTruthy();
       form.get('confirmpassword').setValue('aaa');
-      expect(form.get('confirmpassword').hasError('match')).toBeFalsy();
+      expect(form.get('confirmpassword').valid).toBeTruthy();
     });
 
     it('should validate email', () => {
@@ -111,20 +94,18 @@ describe('UserFormComponent', () => {
     });
 
     it('should submit', () => {
-      form.get('username').setValue('user0');
-      form.get('name').setValue('User 0');
-      form.get('password').setValue('pass0');
-      form.get('confirmpassword').setValue('pass0');
-      form.get('email').setValue('user0@email.com');
-      form.get('roles').setValue(['administrator']);
-      component.submit();
-      expect(userService.create).toHaveBeenCalledWith({
+      spyOn(userService, 'create').and.callThrough();
+      const user: UserFormModel = {
         username: 'user0',
         password: 'pass0',
         name: 'User 0',
         email: 'user0@email.com',
         roles: ['administrator']
-      });
+      };
+      Object.keys(user).forEach((k) => form.get(k).setValue(user[k]));
+      form.get('confirmpassword').setValue(user.password);
+      component.submit();
+      expect(userService.create).toHaveBeenCalledWith(user);
     });
   });
 
@@ -146,14 +127,13 @@ describe('UserFormComponent', () => {
 
     it('should disable fields if editing', () => {
       expect(form.get('username').disabled).toBeTruthy();
-      expect(form.get('name').disabled).toBeFalsy();
-      expect(form.get('password').disabled).toBeFalsy();
-      expect(form.get('confirmpassword').disabled).toBeFalsy();
-      expect(form.get('email').disabled).toBeFalsy();
-      expect(form.get('roles').disabled).toBeFalsy();
+      ['name', 'password', 'confirmpassword', 'email', 'roles'].forEach((controlName) =>
+        expect(form.get(controlName).disabled).toBeFalsy()
+      );
     });
 
     it('should set control values', () => {
+      // Change to getValue through usage of CdFormGroup
       expect(form.get('username').value).toBe(user.username);
       expect(form.get('name').value).toBe(user.name);
       expect(form.get('password').value).toBe('');
@@ -167,13 +147,14 @@ describe('UserFormComponent', () => {
     });
 
     it('should validate password not required', () => {
-      form.get('password').setValue('');
-      form.get('confirmpassword').setValue('');
-      expect(form.get('password').hasError('required')).toBeFalsy();
-      expect(form.get('confirmpassword').hasError('required')).toBeFalsy();
+      ['password', 'confirmpassword'].forEach((controlName) => {
+        form.get(controlName).setValue('');
+        expect(form.get(controlName).hasError('required')).toBeFalsy();
+      });
     });
 
     it('should submit', () => {
+      spyOn(userService, 'update').and.callThrough();
       component.submit();
       expect(userService.update).toHaveBeenCalledWith({
         username: 'user1',
