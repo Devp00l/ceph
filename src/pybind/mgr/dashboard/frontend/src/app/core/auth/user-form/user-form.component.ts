@@ -45,7 +45,7 @@ export class UserFormComponent implements OnInit {
   }
 
   createForm() {
-    this.userForm = new FormGroup(
+    this.userForm = new FormGroup( // Use CdFormGroup here
       {
         username: new FormControl('', {
           validators: [Validators.required]
@@ -84,13 +84,15 @@ export class UserFormComponent implements OnInit {
   }
 
   initAdd() {
-    this.userForm.get('password').setValidators([Validators.required]);
-    this.userForm.get('confirmpassword').setValidators([Validators.required]);
+    ['password', 'confirmpassword'].forEach((controlName) =>
+      this.userForm.get(controlName).setValidators([Validators.required])
+    );
   }
 
   initEdit() {
-    this.userForm.get('password').setValidators([]);
-    this.userForm.get('confirmpassword').setValidators([]);
+    ['password', 'confirmpassword'].forEach((controlName) =>
+      this.userForm.get(controlName).setValidators([])
+    );
     this.disableForEdit();
     this.route.params.subscribe((params: { username: string }) => {
       const username = params.username;
@@ -105,16 +107,15 @@ export class UserFormComponent implements OnInit {
   }
 
   setResponse(response: UserFormModel) {
-    this.userForm.get('username').setValue(response.username);
-    this.userForm.get('name').setValue(response.name);
-    this.userForm.get('email').setValue(response.email);
-    this.userForm.get('roles').setValue(response.roles);
+    ['name', 'username', 'email', 'roles'].forEach((key) =>
+      this.userForm.get(key).setValue(response[key])
+    );
   }
 
   getRequest(): UserFormModel {
     const userFormModel = new UserFormModel();
     ['username', 'password', 'name', 'email', 'roles'].forEach(
-      (key) => (userFormModel[key] = this.userForm.get(key).value)
+      (key) => (userFormModel[key] = this.userForm.get(key).value) //getValue
     );
     return userFormModel;
   }
@@ -137,7 +138,7 @@ export class UserFormComponent implements OnInit {
   }
 
   editAction() {
-    if (this.isRemoveSelfUserReadUpdatePermission()) {
+    if (this.isUserRemovingNeededRolePermissions()) {
       const initialState = {
         titleText: 'Update user',
         buttonText: 'Continue',
@@ -153,31 +154,25 @@ export class UserFormComponent implements OnInit {
       };
       this.modalRef = this.modalService.show(ConfirmationModalComponent, { initialState });
     } else {
+      // only this path is tested
       this.doEditAction();
     }
   }
 
-  private isRemoveSelfUserReadUpdatePermission(): boolean {
+  // This should be tested a test
+  private isUserRemovingNeededRolePermissions(): boolean {
     const isCurrentUser =
       this.authStorageService.getUsername() === this.userForm.get('username').value;
     return isCurrentUser && !this.hasUserReadUpdatePermissions(this.userForm.get('roles').value);
   }
 
   private hasUserReadUpdatePermissions(roles) {
-    let hasReadPermission = false;
-    let hasUpdatePermission = false;
     for (const role of this.allRoles) {
       if (roles.indexOf(role.name) !== -1 && role.scopes_permissions['user']) {
         const userPermissions = role.scopes_permissions['user'];
-        if (userPermissions.indexOf('read') !== -1) {
-          hasReadPermission = true;
-        }
-        if (userPermissions.indexOf('update') !== -1) {
-          hasUpdatePermission = true;
-        }
+        return ['read', 'update'].every((permission) => userPermissions[permission])
       }
     }
-    return hasReadPermission && hasUpdatePermission;
   }
 
   private doEditAction() {
