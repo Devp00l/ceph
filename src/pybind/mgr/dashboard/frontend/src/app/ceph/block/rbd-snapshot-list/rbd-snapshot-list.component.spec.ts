@@ -93,4 +93,25 @@ describe('RbdSnapshotListComponent', () => {
       expect(called).toBe(true);
     }));
   });
+
+  describe('snapshot modal dialog', () => {
+    beforeAll(() => {
+      component.poolName = "pool01";
+      component.rbdName = "image01";
+    });
+
+    it('should display old snapshot name', () => {
+      component.openSnapshotModal('rbd/snap/edit', 'oldname');
+      const formCtrl = component.modalRef.snapshotForm.get('snapshotName');
+      expect(formCtrl.value).toBe('oldname');
+      component.modalRef.hide();
+    });
+
+    it('should display suggested snapshot name', () => {
+      component.openSnapshotModal('rbd/snap/create');
+      const formCtrl = component.modalRef.snapshotForm.get('snapshotName');
+      expect(formCtrl.value).toMatch(RegExp(`^${component.rbdName}-\\d+T\\d+Z)\\$`));
+      component.modalRef.hide();
+    });
+  });
 });
