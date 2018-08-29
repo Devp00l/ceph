@@ -28,13 +28,11 @@ describe('RbdListComponent', () => {
   let summaryService: SummaryService;
   let rbdService: RbdService;
 
-  let data: any;
-
   const raiseError = () => {
     summaryService['summaryDataSource'].error(undefined);
   };
 
-  const refresh = () => {
+  const refresh = (data?) => {
     summaryService['summaryDataSource'].next(data);
   };
 
@@ -54,8 +52,7 @@ describe('RbdListComponent', () => {
       ],
       declarations: [RbdListComponent, RbdDetailsComponent, RbdSnapshotListComponent],
       providers: [SummaryService, TaskListService, RbdService]
-    },
-    true
+    }
   );
 
   beforeEach(() => {
@@ -72,14 +69,12 @@ describe('RbdListComponent', () => {
       summaryService = TestBed.get(SummaryService);
       rbdService = TestBed.get(RbdService);
 
-      data = undefined;
       fixture.detectChanges();
       spyOn(rbdService, 'list').and.callThrough();
     });
 
     it('should load images on init', () => {
-      data = {};
-      refresh();
+      refresh({});
       expect(rbdService.list).toHaveBeenCalled();
     });
 
