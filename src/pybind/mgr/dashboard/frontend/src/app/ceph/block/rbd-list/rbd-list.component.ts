@@ -49,28 +49,21 @@ export class RbdListComponent implements OnInit {
   modalRef: BsModalRef;
 
   builders = {
-    'rbd/create': (metadata) => {
-      const model = new RbdModel();
-      model.id = '-1';
-      model.name = metadata['image_name'];
-      model.pool_name = metadata['pool_name'];
-      return model;
-    },
-    'rbd/clone': (metadata) => {
-      const model = new RbdModel();
-      model.id = '-1';
-      model.name = metadata['child_image_name'];
-      model.pool_name = metadata['child_pool_name'];
-      return model;
-    },
-    'rbd/copy': (metadata) => {
-      const model = new RbdModel();
-      model.id = '-1';
-      model.name = metadata['dest_image_name'];
-      model.pool_name = metadata['dest_pool_name'];
-      return model;
-    }
+    'rbd/create': (metadata) =>
+      this.createRbdFromTask(metadata['pool_name'], metadata['image_name']),
+    'rbd/clone': (metadata) =>
+      this.createRbdFromTask(metadata['child_pool_name'], metadata['child_image_name']),
+    'rbd/copy': (metadata) =>
+      this.createRbdFromTask(metadata['dest_pool_name'], metadata['dest_image_name'])
   };
+
+  private createRbdFromTask(pool: string, name: string): RbdModel {
+    const model = new RbdModel();
+    model.id = '-1';
+    model.name = name;
+    model.pool_name = pool;
+    return model;
+  }
 
   constructor(
     private authStorageService: AuthStorageService,
