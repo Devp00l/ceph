@@ -3,8 +3,8 @@ import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testin
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { ToastModule } from 'ng2-toastr';
-import { BsModalRef, ModalModule } from 'ngx-bootstrap';
-import { throwError as observableThrowError } from 'rxjs';
+import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap';
+import { throwError as observableThrowError, of } from 'rxjs';
 
 import { configureTestBed } from '../../../../testing/unit-test-helper';
 import { ApiModule } from '../../../shared/api/api.module';
@@ -95,23 +95,32 @@ describe('RbdSnapshotListComponent', () => {
   });
 
   describe('snapshot modal dialog', () => {
-    beforeAll(() => {
-      component.poolName = "pool01";
-      component.rbdName = "image01";
+    let modalRef;
+    let newName:string;
+    beforeEach(() => {
+      component.poolName = 'pool01';
+      component.rbdName = 'image01';
+      newName = '';
+      modalRef = {
+        content: {
+          onSubmit: of([]),
+          setSnapName: (name) => newName=name
+        }
+      };
+      spyOn(TestBed.get(BsModalService), 'show').and.callFake(() => modalRef);
+      spyOn(component as any, 'openSnapshotModal').and.callThrough();
     });
 
     it('should display old snapshot name', () => {
-      component.openSnapshotModal('rbd/snap/edit', 'oldname');
-      const formCtrl = component.modalRef.snapshotForm.get('snapshotName');
-      expect(formCtrl.value).toBe('oldname');
-      component.modalRef.hide();
+      // set the selection first
+      // component.openCreateSnapshotModal();
+      // sth
     });
 
     it('should display suggested snapshot name', () => {
-      component.openSnapshotModal('rbd/snap/create');
-      const formCtrl = component.modalRef.snapshotForm.get('snapshotName');
-      expect(formCtrl.value).toMatch(RegExp(`^${component.rbdName}-\\d+T\\d+Z)\\$`));
-      component.modalRef.hide();
+      component.openCreateSnapshotModal();
+      expect(component['openSnapshotModal']).toHaveBeenCalledWith('rbd/snap/create');
+      expect(newName.match(/image01-20[0-9]{6}T[0-9]{6}Z$/)).toBeTruthy();
     });
   });
 });
