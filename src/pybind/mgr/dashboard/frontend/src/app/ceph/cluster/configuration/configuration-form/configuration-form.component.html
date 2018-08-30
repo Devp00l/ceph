@@ -7,7 +7,7 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">
-          <span i18n>Edit configuration option</span>
+          <span><span i18n>Edit</span> {{ configForm.getValue('name') }}</span>
         </h3>
       </div>
       <div class="panel-body">
@@ -18,62 +18,62 @@
                  class="control-label col-sm-3">Name
           </label>
           <div class="col-sm-9">
-            <p class="form-control-static">{{ configForm.controls.name.value }}</p>
+            <p class="form-control-static">{{ configForm.getValue('name') }}</p>
           </div>
         </div>
 
         <!-- Description -->
         <div class="form-group"
-             *ngIf="configForm.controls.desc.value">
+             *ngIf="configForm.getValue('desc')">
           <label i18n
                  class="control-label col-sm-3">Description
           </label>
           <div class="col-sm-9">
-            <p class="form-control-static">{{ configForm.controls.desc.value }}</p>
+            <p class="form-control-static">{{ configForm.getValue('desc') }}</p>
           </div>
         </div>
 
         <!-- Long description -->
         <div class="form-group"
-             *ngIf="configForm.controls.long_desc.value">
+             *ngIf="configForm.getValue('long_desc')">
           <label i18n
                  class="control-label col-sm-3">Long description
           </label>
           <div class="col-sm-9">
-            <p class="form-control-static">{{ configForm.controls.long_desc.value }}</p>
+            <p class="form-control-static">{{ configForm.getValue('long_desc') }}</p>
           </div>
         </div>
 
         <!-- Default -->
         <div class="form-group"
-             *ngIf="configForm.controls.default.value !== ''">
+             *ngIf="configForm.getValue('default') !== ''">
           <label i18n
                  class="control-label col-sm-3">Default
           </label>
           <div class="col-sm-9">
-            <p class="form-control-static">{{ configForm.controls.default.value }}</p>
+            <p class="form-control-static">{{ configForm.getValue('default') }}</p>
           </div>
         </div>
 
         <!-- Daemon default -->
         <div class="form-group"
-             *ngIf="configForm.controls.daemon_default.value !== ''">
+             *ngIf="configForm.getValue('daemon_default') !== ''">
           <label i18n
                  class="control-label col-sm-3">Daemon default
           </label>
           <div class="col-sm-9">
-            <p class="form-control-static">{{ configForm.controls.daemon_default.value }}</p>
+            <p class="form-control-static">{{ configForm.getValue('daemon_default') }}</p>
           </div>
         </div>
 
         <!-- Services -->
         <div class="form-group"
-             *ngIf="configForm.controls.services.value.length > 0">
+             *ngIf="configForm.getValue('services').length > 0">
           <label i18n
                  class="control-label col-sm-3">Services
           </label>
           <div class="col-sm-9">
-            <span *ngFor="let service of configForm.controls.services.value">
+            <span *ngFor="let service of configForm.getValue('services')">
               <span class="badge badge-pill badge-primary">{{ service }}</span>
             </span>
           </div>
@@ -85,143 +85,43 @@
               class="page-header">Values</h2>
           <div class="row" *ngFor="let section of availSections">
 
-             <!-- unit64_t, int64_t, size_t, secs -->
-            <div *ngIf="type == 'uint64_t' || type == 'int64_t' || type == 'size_t' ||
-                  type == 'secs'">
-              <div class="form-group"
-                   [ngClass]="{'has-error': configForm.showError(section, formDir)}">
-                <label class="control-label col-sm-3"
-                       for="{{ section }}"
-                       i18n>{{ section }}
-                </label>
-                <div class="col-sm-9">
-                  <input class="form-control"
-                           type="number"
-                           id="{{ section }}"
-                           formControlName="{{ section }}">
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'max')"
-                        i18n>
-                    The entered value is too high! It must not be greater than {{ maxValue }}.
-                  </span>
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'min')"
-                        i18n>
-                    The entered value is too low! It must not be lower than {{ minValue }}.
-                  </span>
-                </div>
+            <div class="form-group"
+                 [ngClass]="{'has-error': configForm.showError(section, formDir)}">
+              <label class="control-label col-sm-3"
+                     [for]="section"
+                     i18n>{{ section }}
+              </label>
+              <div class="col-sm-9">
+                <!-- bool can't be used as dynamically with value validation -->
+                <input *ngIf="type === 'bool'"
+                       id="{{ section }}"
+                       type="checkbox"
+                       formControlName="{{ section }}">
+                <input *ngIf="type !== 'bool'"
+                       class="form-control"
+                         [ngClass]="{'form-control': type !== 'bool',
+                                     'checkbox checkbox-primary': type === 'bool'}"
+                         [type]="getInputType(type)"
+                         [id]="section"
+                         [placeholder]="makeTypeHumanReadable(type)"
+                         [formControlName]="section">
+                <span class="help-block"
+                      *ngIf="configForm.showError(section, formDir, 'pattern')"
+                      i18n>
+                  {{getPatternHelpText(type)}}
+                </span>
+                <span class="help-block"
+                      *ngIf="configForm.showError(section, formDir, 'max')"
+                      i18n>
+                  This has to be lower or equal {{ maxValue }}.
+                </span>
+                <span class="help-block"
+                      *ngIf="configForm.showError(section, formDir, 'min')"
+                      i18n>
+                  This has to be greater or equal {{ minValue }}.
+                </span>
               </div>
             </div>
-
-            <!-- std::string -->
-            <div *ngIf="type == 'std::string'">
-              <div class="form-group">
-                <label class="control-label col-sm-3"
-                       for="{{ section }}"
-                       i18n>{{ section }}
-                </label>
-                <div class="col-sm-9">
-                  <input class="form-control"
-                         type="text"
-                         id="{{ section }}"
-                         formControlName="{{ section }}">
-                </div>
-              </div>
-            </div>
-
-            <!-- bool -->
-            <div *ngIf="type == 'bool'">
-              <div class="form-group">
-                <div class="col-sm-offset-3 col-sm-9">
-                  <div class="checkbox checkbox-primary">
-                    <input id="{{ section }}"
-                           type="checkbox"
-                           formControlName="{{ section }}">
-                    <label for="{{ section }}"
-                           i18n>{{ section }}
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- double -->
-            <div *ngIf="type == 'double'">
-              <div class="form-group"
-                   [ngClass]="{'has-error': configForm.showError(section, formDir)}">
-                <label class="control-label col-sm-3"
-                       for="{{ section }}"
-                       i18n>{{ section }}
-                </label>
-                <div class="col-sm-9">
-                  <input class="form-control"
-                         type="text"
-                         id="{{ section }}"
-                         formControlName="{{ section }}">
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'pattern')"
-                        i18n>
-                    The entered value needs to be a number or decimal.
-                  </span>
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'max')"
-                        i18n>
-                    The entered value is too high! It must not be greater than {{ maxValue }}.
-                  </span>
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'min')"
-                        i18n>
-                    The entered value is too low! It must not be lower than {{ minValue }}.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-             <!-- entity_addr_t -->
-            <div *ngIf="type == 'entity_addr_t'">
-              <div class="form-group"
-                   [ngClass]="{'has-error': configForm.showError(section, formDir)}">
-                <label class="control-label col-sm-3"
-                       for="{{ section }}"
-                       i18n>{{ section }}
-                </label>
-                <div class="col-sm-9">
-                  <input class="form-control"
-                           type="text"
-                           id="{{ section }}"
-                           formControlName="{{ section }}">
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'pattern')"
-                        i18n>
-                    The entered value needs to be a valid IP address.
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- uuid_d -->
-            <div *ngIf="type == 'uuid_d'">
-              <div class="form-group"
-                   [ngClass]="{'has-error': configForm.showError(section, formDir)}">
-                <label class="control-label col-sm-3"
-                       for="{{ section }}"
-                       i18n>{{ section }}
-                </label>
-                <div class="col-sm-9">
-                  <input class="form-control"
-                           type="text"
-                           id="{{ section }}"
-                           formControlName="{{ section }}">
-                  <span class="help-block"
-                        *ngIf="configForm.showError(section, formDir, 'pattern')"
-                        i18n>
-                    The entered value doesn't match the valid pattern
-                    ([a-z0-9]{{ '{' }}8{{ '}' }}-[a-z0-9]{{ '{' }}4{{ '}' }}-[a-z0-9]{{ '{' }}4{{ '}' }}-[a-z0-9]{{ '{' }}4{{ '}' }}-[a-z0-9]{{ '{' }}12{{ '}' }}).
-                  </span>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ import { ConfigFormModel } from './configuration-form.model';
 })
 export class ConfigurationFormComponent implements OnInit {
   configForm: CdFormGroup;
-  response: ConfigFormModel;
+  response: ConfigFormModel; //rename to option??
   type: string;
   minValue: number;
   maxValue: number;
@@ -61,57 +61,94 @@ export class ConfigurationFormComponent implements OnInit {
     });
   }
 
-  getValidators(configOption: any) {
+  isNumber(type: string): boolean {
+    return ['uint64_t', 'int64_t', 'size_t', 'double', 'secs'].includes(type);
+  }
+
+  getInputType(type: string): string {
+    const numbers = ['uint64_t', 'int64_t', 'size_t', 'secs'];
+    const texts = ['double', 'std::string', 'entity_addr_t', 'uuid_d'];
+    const checkboxes = ['bool'];
+    if (numbers.includes(type)) {
+      return 'number';
+    } else if (texts.includes(type)) {
+      return 'text';
+    } else {
+      return 'checkbox';
+    }
+  }
+
+  getPatternHelpText(type: string): string {
+    if (type === 'double') {
+      return 'The entered value needs to be a number or decimal.';
+    } else if (type === 'entity_addr_t') {
+      return 'The entered value needs to be a valid IP address.';
+    } else if (type === 'uuid_d') {
+      // not accurate in current version because of line breaks
+      return `The entered value doesn't match the valid pattern
+      ([a-z0-9]{{ '{' }}8{{ '}' }}-[a-z0-9]{{ '{' }}4{{ '}' }}-
+      [a-z0-9]{{ '{' }}4{{ '}' }}-[a-z0-9]{{ '{' }}4{{ '}' }}-[a-z0-9]{{ '{' }}12{{ '}' }}).`;
+    }
+  }
+
+  makeTypeHumanReadable(type: string): string {
+    return type; // make type human understandable
+  }
+
+  getValidators(configOption: any): Validators[] {
     const validators = [];
-    const numberTypes = ['uint64_t', 'int64_t', 'size_t', 'double', 'secs'];
 
-    if (numberTypes.includes(configOption.type)) {
-      if (configOption.max && configOption.max !== '') {
-        this.maxValue = configOption.max;
-        validators.push(Validators.max(configOption.max));
-      }
-
-      if (configOption.min && configOption.min !== '') {
-        this.minValue = configOption.min;
-        validators.push(Validators.min(configOption.min));
-      }
-    }
-
-    if (configOption.type === 'double') {
-      validators.push(Validators.pattern('-?[0-9]+(.[0-9]+)?'));
-    }
-
-    if (configOption.type === 'entity_addr_t') {
-      const ipv4Ipv6Rgx =
-        '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|' +
-        '2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z]|[A-Za-z]' +
-        '[A-Za-z0-9-]*[A-Za-z0-9])$|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|((' +
-        '[0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d' +
-        '|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|' +
-        '2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}' +
-        '(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)' +
-        '(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4})' +
-        '{1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|' +
-        '1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|' +
-        '((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d))' +
-        '{3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:' +
-        '((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:' +
-        '[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)' +
-        '(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*';
-      validators.push(Validators.pattern(ipv4Ipv6Rgx));
-    }
-
-    if (configOption.type === 'uuid_d') {
+    if (this.isNumber(configOption.type)) {
+      return this.numberValidator(configOption);
+    } else if (configOption.type === 'entity_addr_t') {
+      validators.push(this.addressValidator(configOption));
+    } else if (configOption.type === 'uuid_d') {
       validators.push(
         Validators.pattern('[a-z0-9]{8}\\-[a-z0-9]{4}\\-[a-z0-9]{4}\\-[a-z0-9]{4}\\-[a-z0-9]{12}')
       );
     }
-
     return validators;
+  }
+
+  private numberValidator(configOption): Validators[] {
+    const validators = [];
+    if (configOption.max && configOption.max !== '') {
+      this.maxValue = configOption.max;
+      validators.push(Validators.max(configOption.max));
+    }
+    if (configOption.min && configOption.min !== '') {
+      this.minValue = configOption.min;
+      validators.push(Validators.min(configOption.min));
+    }
+    if (configOption.type === 'double') {
+      validators.push(Validators.pattern('-?[0-9]+(.[0-9]+)?')); // why not treat it as number?
+    }
+    return validators;
+  }
+
+  private addressValidator(configOption): Validators {
+    const ipv4Ipv6Rgx =
+      '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5]).){3}([0-9]|[1-9][0-9]|1[0-9]{2}|' +
+      '2[0-4][0-9]|25[0-5])$|^(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]).)*([A-Za-z]|[A-Za-z]' +
+      '[A-Za-z0-9-]*[A-Za-z0-9])$|^s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|((' +
+      '[0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d' +
+      '|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|' +
+      '2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}' +
+      '(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]d|1dd|[1-9]?d)' +
+      '(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4})' +
+      '{1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|' +
+      '1dd|[1-9]?d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|' +
+      '((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d))' +
+      '{3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:' +
+      '((25[0-5]|2[0-4]d|1dd|[1-9]?d)(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:))|(:(((:' +
+      '[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]d|1dd|[1-9]?d)' +
+      '(.(25[0-5]|2[0-4]d|1dd|[1-9]?d)){3}))|:)))(%.+)?s*';
+    return Validators.pattern(ipv4Ipv6Rgx);
   }
 
   setResponse(response: ConfigFormModel) {
     this.response = response;
+    console.log(response);
     const validators = this.getValidators(response);
 
     this.configForm.get('name').setValue(response.name);
@@ -183,7 +220,7 @@ export class ConfigurationFormComponent implements OnInit {
 
   submit() {
     if (this.configForm.pristine) {
-      this.router.navigate(['/configuration']);
+      this.router.navigate(['/configuration']); // in nothing is changed you can click save?
     }
 
     this.createAction();
