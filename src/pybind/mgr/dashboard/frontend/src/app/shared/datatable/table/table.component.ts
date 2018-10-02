@@ -475,7 +475,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     const columnsClone = [...columns];
     const dataClone = [...data];
     const filterColumns = (columnName: string) =>
-      columnsClone.filter((c) => c.name.toLowerCase().indexOf(columnName) !== -1);
+      columnsClone.filter((c) => c.name && c.name.toLowerCase().includes(columnName));
     if (searchTerms.length === 2) {
       columns = filterColumns(searchTerms[0]);
     }
@@ -494,7 +494,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     }
     return data.filter((d) => {
       return (
-        columns.filter((c) => {
+        columns.filter((c) => c.name).filter((c) => {
           let cellValue: any = _.get(d, c.prop);
           if (!_.isUndefined(c.pipe)) {
             cellValue = c.pipe.transform(cellValue);
