@@ -16,6 +16,7 @@ describe('CrushmapComponent', () => {
   let component: CrushmapComponent;
   let fixture: ComponentFixture<CrushmapComponent>;
   let debugElement: DebugElement;
+
   configureTestBed({
     imports: [HttpClientTestingModule, TreeModule, TabsModule.forRoot(), SharedModule],
     declarations: [CrushmapComponent],
@@ -38,33 +39,52 @@ describe('CrushmapComponent', () => {
     expect(span.textContent).toContain(component.panelTitle);
   });
 
-  it('should display "No nodes!" if ceph tree nodes is empty array', () => {
-    const dashboardService = debugElement.injector.get(DashboardService);
-    const osd_map = { tree: {} };
-    const data = { osd_map };
-    const getHealthSpy = spyOn(dashboardService, 'getHealth');
-    getHealthSpy.and.returnValue(of(data));
-    fixture.detectChanges();
+  describe('tests tree', () => {
+    let dashboardService: DashboardService;
 
-    expect(getHealthSpy).toHaveBeenCalled();
-    expect(component.tree.value).toEqual('No nodes!');
-  });
-
-  it('should has correct tree data structure after transform the metadata', () => {
-    const dashboardService = debugElement.injector.get(DashboardService);
-    const osd_map = {
-      tree: {
-        nodes: [
-          { children: [-1], type: 'root', name: 'Root', id: 1 },
-          { children: [-2], type: 'host', name: 'Host', id: -1 },
-          { status: 'up', type: 'osd', name: 'Osd', id: -2 }
-        ]
-      }
+    const prepareGetHealth = (nodes: object[]) => {
+      spyOn(dashboardService, 'getHealth').and.returnValue(
+        of({ osd_map: { tree: { nodes: nodes } } })
+      );
+      fixture.detectChanges();
     };
-    const data = { osd_map };
-    spyOn(dashboardService, 'getHealth').and.returnValue(of(data));
-    fixture.detectChanges();
 
-    expect(component.tree.children[0].children[0].value).toBe('Osd (osd)--up');
+    beforeEach(() => {
+      dashboardService = debugElement.injector.get(DashboardService);
+    });
+
+    it('should display "No nodes!" if ceph tree nodes is empty array', () => {
+      prepareGetHealth([]);
+      expect(dashboardService.getHealth).toHaveBeenCalled();
+      expect(component.tree.value).toEqual('No nodes!');
+    });
+
+    describe('with data', () => {
+      beforeEach(() => {
+        prepareGetHealth([
+          { children: [-2], type: 'root', name: 'default', id: -1 },
+          { children: [1, 0, 2], type: 'host', name: 'my-host', id: -2 },
+          { status: 'up', type: 'osd', name: 'osd.0', id: 0 },
+          { status: 'down', type: 'osd', name: 'osd.1', id: 1 },
+          { status: 'up', type: 'osd', name: 'osd.2', id: 2 }
+        ]);
+      });
+
+      it('has a tree structure deriving from root', () => {
+        expect(component.tree.value).toBe('default (root)');
+      });
+
+      it('has a tree structure with one host child with 3 children', () => {
+        expect(component.tree.children.length).toBe(1);
+        expect(component.tree.children[0].value).toBe('my-host (host)');
+        expect(component.tree.children[0].children.length).toBe(3);
+      });
+
+      it('has sorted all host children by id', () => {
+        expect(component.tree.children[0].children[0].value).toBe('osd.0 (osd)--up');
+        expect(component.tree.children[0].children[1].value).toBe('osd.1 (osd)--down');
+        expect(component.tree.children[0].children[2].value).toBe('osd.2 (osd)--up');
+      });
+    });
   });
 });
