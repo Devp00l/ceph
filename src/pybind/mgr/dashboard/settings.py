@@ -40,6 +40,10 @@ class Options(object):
     GRAFANA_API_USERNAME = ('admin', str)
     GRAFANA_API_PASSWORD = ('admin', str)
 
+    # Prometheus settings
+    PROMETHEUS_API_HOST = ('', str)  # Not in use ATM
+    ALERTMANAGER_API_HOST = ('', str)
+
     @staticmethod
     def has_default_value(name):
         return getattr(Settings, name, None) is None or \
