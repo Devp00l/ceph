@@ -19,7 +19,9 @@ import { MgrModuleFormComponent } from './ceph/cluster/mgr-modules/mgr-module-fo
 import { MgrModuleListComponent } from './ceph/cluster/mgr-modules/mgr-module-list/mgr-module-list.component';
 import { MonitorComponent } from './ceph/cluster/monitor/monitor.component';
 import { OsdListComponent } from './ceph/cluster/osd/osd-list/osd-list.component';
+import { PrometheusFormComponent } from './ceph/cluster/prometheus/prometheus-form/prometheus-form.component';
 import { PrometheusListComponent } from './ceph/cluster/prometheus/prometheus-list/prometheus-list.component';
+import { SilencesListComponent } from './ceph/cluster/prometheus/silences-list/silences-list.component';
 import { DashboardComponent } from './ceph/dashboard/dashboard/dashboard.component';
 import { Nfs501Component } from './ceph/nfs/nfs-501/nfs-501.component';
 import { NfsFormComponent } from './ceph/nfs/nfs-form/nfs-form.component';
@@ -134,6 +136,21 @@ const routes: Routes = [
     component: PrometheusListComponent,
     canActivate: [AuthGuardService],
     data: { breadcrumbs: 'Cluster/Alerts' }
+  },
+  {
+    path: 'silence',
+    canActivate: [AuthGuardService],
+    data: { breadcrumbs: 'Cluster/Silences' },
+    children: [
+      { path: '', component: SilencesListComponent },
+      { path: 'add', component: PrometheusFormComponent, data: { breadcrumbs: 'Add' } },
+      { path: 'edit/:id', component: PrometheusFormComponent, data: { breadcrumbs: 'Edit' } },
+      {
+        path: 'recreate/:id',
+        component: PrometheusFormComponent,
+        data: { breadcrumbs: 'Recreate' }
+      }
+    ]
   },
   {
     path: 'perf_counters/:type/:id',

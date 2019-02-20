@@ -7,10 +7,16 @@ import locale_id from '@angular/common/locales/id';
 import locale_pt_PT from '@angular/common/locales/pt-PT';
 import locale_zh_Hans from '@angular/common/locales/zh-Hans';
 import { LOCALE_ID, TRANSLATIONS, TRANSLATIONS_FORMAT } from '@angular/core';
+import { defineLocale, deLocale, ptBrLocale } from 'ngx-bootstrap/chronos';
 
 declare const require;
 
 export class LocaleHelper {
+  constructor() {
+    defineLocale('de', deLocale);
+    defineLocale('pt', ptBrLocale);
+  }
+
   static getBrowserLang(): string {
     const lang = navigator.language;
 
