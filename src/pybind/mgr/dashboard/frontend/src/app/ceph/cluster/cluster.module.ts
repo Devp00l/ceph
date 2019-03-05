@@ -35,6 +35,7 @@ import { AlertListComponent } from './prometheus/alert-list/alert-list.component
 import { PrometheusTabsComponent } from './prometheus/prometheus-tabs/prometheus-tabs.component';
 import { SilenceMatcherModalComponent } from './prometheus/silence-matcher-modal/silence-matcher-modal.component';
 import { SilencesListComponent } from './prometheus/silences-list/silences-list.component';
+import {TypeaheadModule} from "ngx-bootstrap";
 
 @NgModule({
   entryComponents: [
@@ -60,6 +61,7 @@ import { SilencesListComponent } from './prometheus/silences-list/silences-list.
     TooltipModule.forRoot(),
     TreeModule,
     MgrModulesModule,
+    TypeaheadModule.forRoot(),
     TimepickerModule.forRoot(),
     BsDatepickerModule.forRoot()
   ],

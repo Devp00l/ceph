@@ -58,8 +58,8 @@ describe('PrometheusFormComponent', () => {
     );
     spyOn(prometheusService, 'getRules').and.callFake(() =>
       of(
-        prometheus.createRule('alert0', 'someSeverity', [null]),
-        prometheus.createRule('alert1', 'someOtherSeverity', [])
+        [prometheus.createRule('alert0', 'someSeverity', [null]),
+        prometheus.createRule('alert1', 'someOtherSeverity', [])]
       )
     );
     spyOn(global, 'Date').and.callFake((sth) => (sth ? new originalDate(sth) : beginningDate));

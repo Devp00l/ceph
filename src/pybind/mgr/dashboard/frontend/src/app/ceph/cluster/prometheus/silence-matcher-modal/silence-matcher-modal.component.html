@@ -30,7 +30,7 @@
                 id="name"
                 formControlName="name"
                 name="name">
-          <option ngValue=""
+          <option [ngValue]="null"
                   i18n>-- Select an attribute to match against --</option>
           <option *ngFor="let attribute of nameAttributes"
                   [value]="attribute">
@@ -55,6 +55,7 @@
         <input id="value"
                class="form-control"
                type="text"
+               [typeahead]="possibleValues"
                formControlName="value">
         <span *ngIf="form.showError('value', formDir, 'required')"
               class="help-block"

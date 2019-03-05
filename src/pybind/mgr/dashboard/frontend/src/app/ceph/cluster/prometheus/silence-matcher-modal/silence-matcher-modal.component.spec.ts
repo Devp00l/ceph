@@ -7,7 +7,8 @@ import {
   configureTestBed,
   FixtureHelper,
   FormHelper,
-  i18nProviders
+  i18nProviders,
+  PrometheusHelper
 } from '../../../../../testing/unit-test-helper';
 import { SharedModule } from '../../../../shared/shared.module';
 import { ClusterModule } from '../../cluster.module';
@@ -18,6 +19,7 @@ describe('SilenceMatcherModalComponent', () => {
   let fixture: ComponentFixture<SilenceMatcherModalComponent>;
   let formH: FormHelper;
   let fixtureH: FixtureHelper;
+  let prometheus: PrometheusHelper;
 
   configureTestBed({
     imports: [HttpClientTestingModule, SharedModule, ClusterModule],
@@ -29,6 +31,15 @@ describe('SilenceMatcherModalComponent', () => {
     fixtureH = new FixtureHelper(fixture);
     component = fixture.componentInstance;
     formH = new FormHelper(component.form);
+
+    prometheus = new PrometheusHelper();
+    const alert = prometheus.createAlert('alert0');
+    component.alerts = [alert];
+    component.rules = [
+      prometheus.createRule('alert0', 'someSeverity', [alert]),
+      prometheus.createRule('alert1', 'someOtherSeverity', [])
+    ];
+
     fixture.detectChanges();
   });
 
@@ -41,15 +52,36 @@ describe('SilenceMatcherModalComponent', () => {
     formH.expectValidChange('name', 'CPU 50% above usual load');
   });
 
-  it('should contain a alert name list based on rules from prometheus', () => {});
+  it('should autocomplete or show a list based on the set name', () => {
+    formH.setValue('name', component.nameAttributes[0]);
+    expect(component.possibleValues).toEqual(['alert0', 'alert1']);
+    formH.setValue('name', component.nameAttributes[1]);
+    expect(component.possibleValues).toEqual(['someInstance']);
+    formH.setValue('name', component.nameAttributes[2]);
+    expect(component.possibleValues).toEqual(['someJob']);
+    formH.setValue('name', component.nameAttributes[3]);
+    expect(component.possibleValues).toEqual(['someSeverity', 'someOtherSeverity']);
+  });
 
-  it('should contain a alert severity list based on rules from prometheus', () => {});
+  it('shows how many rules and alerts would be affected', () => {
+    formH.setValue('name', component.nameAttributes[0]);
+    formH.setValue('value', 'alert0');
+    // expect something
+  });
 
-  it('matches value with name against alert list', () => {});
+  it('should value field should only be enabled if name was set', () => {
+    const value = component.form.get('value');
+    expect(value.disabled).toBeTruthy()
+    formH.setValue('name', component.nameAttributes[0]);
+    expect(value.enabled).toBeTruthy()
+    formH.setValue('name', null);
+    expect(value.disabled).toBeTruthy()
+  });
 
   it('should have a value field', () => {
+    formH.setValue('name', component.nameAttributes[0]);
     formH.expectError('value', 'required');
-    formH.expectValidChange('value', 'avg(cpu_load[5m]) > avg(cpu_load[1d]) * 1.5');
+    formH.expectValidChange('value', 'alert0');
   });
 
   describe('verifying', () => {

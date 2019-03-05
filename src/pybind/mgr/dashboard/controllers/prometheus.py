@@ -42,7 +42,8 @@ class PrometheusRESTController(RESTController):
                                      component='prometheus')
         content = json.loads(response.content)
         if content['status'] == 'success':
-            return content['data']
+            data = content['data']
+            return data
         raise DashboardException(content, http_status_code=400, component='prometheus')
 
 
@@ -53,7 +54,12 @@ class Prometheus(PrometheusRESTController):
 
     @RESTController.Collection(method='GET')
     def rules(self, **params):
-        return self.prometheus_proxy('GET', '/rules', params)
+        data = self.prometheus_proxy('GET', '/rules', params)
+        configs = data['groups']
+        rules = []
+        for config in configs:
+            rules += config['rules']
+        return rules
 
     @RESTController.Collection(method='GET')
     def query(self, **params):
