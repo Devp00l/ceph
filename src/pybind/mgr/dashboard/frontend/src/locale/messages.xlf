@@ -288,6 +288,18 @@
           <context context-type="sourcefile">app/shared/components/refresh-selector/refresh-selector.component.html</context>
           <context context-type="linenumber">5</context>
         </context-group>
+      </trans-unit><trans-unit id="454ee9cb60b00446a8fb147fd2cc5eb836320586" datatype="html">
+        <source>The entered value is too high! It must not be greater than <x id="INTERPOLATION" equiv-text="{{ option.maxValue }}"/>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/shared/components/config-option/config-option.component.html</context>
+          <context context-type="linenumber">50</context>
+        </context-group>
+      </trans-unit><trans-unit id="7fc8a22825131e028336f60ef909ccbd96059703" datatype="html">
+        <source>The entered value is too low! It must not be lower than <x id="INTERPOLATION" equiv-text="{{ option.minValue }}"/>.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">app/shared/components/config-option/config-option.component.html</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
       </trans-unit><trans-unit id="012741ee52b3c050e4a977c37cc2334f7974f141" datatype="html">
         <source>Failed to load data.</source>
         <context-group purpose="location">
