@@ -7,7 +7,7 @@ import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
 import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
 import { PrometheusSilenceMatcher } from '../../../../shared/models/prometheus-silence';
 import { AlertmanagerAlert, PrometheusRule } from '../../../../shared/models/prometheus-alerts';
-import * as _ from "lodash";
+import * as _ from 'lodash';
 
 @Component({
   selector: 'cd-silence-matcher-modal',
@@ -30,17 +30,17 @@ export class SilenceMatcherModalComponent {
 
   possibleValues: string[] = []; // Autocomplete possible values to match a rule
 
-  constructor(
-    private formBuilder: CdFormBuilder,
-    public bsModalRef: BsModalRef
-  ) {
+  matchedRules = 0; // Will be set during value change
+  matchedAlerts = 0; // Will be set during value change
+
+  constructor(private formBuilder: CdFormBuilder, public bsModalRef: BsModalRef) {
     this.createForm();
   }
 
   createForm() {
     this.form = this.formBuilder.group({
       name: [null, [Validators.required]],
-      value: [{value: null, disabled: true}, [Validators.required]],
+      value: [{ value: null, disabled: true }, [Validators.required]],
       isRegex: new FormControl(false)
     });
     this.form.get('name').valueChanges.subscribe((name) => {
@@ -48,20 +48,43 @@ export class SilenceMatcherModalComponent {
         this.form.get('value').disable();
         return;
       }
-      this.setPossibleValues(name);
+      this.setPossibleValues();
       this.form.get('value').enable();
+    });
+    this.form.get('value').valueChanges.subscribe((name) => {
+      this.matches();
     });
   }
 
-  setPossibleValues(name) {
+  matches() {
+    if (this.form.getValue('isRegex')) {
+      return;
+    }
+    const value = this.form.getValue('value');
+    const attributePath = this.getAttributePath();
+
+    const rules = this.rules.filter((r) => _.get(r, attributePath) === value).filter((x) => x);
+    this.matchedRules = rules.length;
+
+    let activeAlerts = 0;
+    rules.forEach((r) => (activeAlerts += r.alerts.length));
+    this.matchedAlerts = activeAlerts;
+  }
+
+  setPossibleValues() {
+    this.possibleValues = _.sortedUniq(
+      this.rules.map((r) => _.get(r, this.getAttributePath())).filter((x) => x)
+    );
+  }
+
+  getAttributePath() {
     const getValues = {
       alertname: 'name',
       instance: 'alerts.0.labels.instance',
       job: 'alerts.0.labels.job',
       severity: 'labels.severity'
-    }
-    const attributePath = getValues[name]
-    this.possibleValues = this.rules.map((r)=> _.get(r, attributePath)).filter(x => x)
+    };
+    return getValues[this.form.getValue('name')];
   }
 
   preFillControls(matcher: PrometheusSilenceMatcher) {

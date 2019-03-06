@@ -37,7 +37,7 @@ describe('SilenceMatcherModalComponent', () => {
     component.alerts = [alert];
     component.rules = [
       prometheus.createRule('alert0', 'someSeverity', [alert]),
-      prometheus.createRule('alert1', 'someOtherSeverity', [])
+      prometheus.createRule('alert1', 'someSeverity', [])
     ];
 
     fixture.detectChanges();
@@ -60,22 +60,42 @@ describe('SilenceMatcherModalComponent', () => {
     formH.setValue('name', component.nameAttributes[2]);
     expect(component.possibleValues).toEqual(['someJob']);
     formH.setValue('name', component.nameAttributes[3]);
-    expect(component.possibleValues).toEqual(['someSeverity', 'someOtherSeverity']);
+    expect(component.possibleValues).toEqual(['someSeverity']);
   });
 
-  it('shows how many rules and alerts would be affected', () => {
-    formH.setValue('name', component.nameAttributes[0]);
-    formH.setValue('value', 'alert0');
-    // expect something
+  describe('test rule matching', () => {
+    const expectMatch = (name, value, rules, alerts) => {
+      formH.setValue('name', name);
+      formH.setValue('value', value);
+      expect(component.matchedRules).toBe(rules);
+      expect(component.matchedAlerts).toBe(alerts);
+    };
+
+    it('should match no rule and no alert', () => {
+      expectMatch('alertname', 'alert', 0, 0);
+    });
+
+    it('should match a rule and an alert', () => {
+      expectMatch('alertname', 'alert0', 1, 1);
+    });
+
+    it('should match multiple rules and an alert', () => {
+      expectMatch('severity', 'someSeverity', 2, 1);
+    });
+
+    it('should match nothing if regex is on', () => {
+      formH.setValue('isRegex', true);
+      expectMatch('severity', 'someSeverity', 0, 0);
+    });
   });
 
   it('should value field should only be enabled if name was set', () => {
     const value = component.form.get('value');
-    expect(value.disabled).toBeTruthy()
+    expect(value.disabled).toBeTruthy();
     formH.setValue('name', component.nameAttributes[0]);
-    expect(value.enabled).toBeTruthy()
+    expect(value.enabled).toBeTruthy();
     formH.setValue('name', null);
-    expect(value.disabled).toBeTruthy()
+    expect(value.disabled).toBeTruthy();
   });
 
   it('should have a value field', () => {
