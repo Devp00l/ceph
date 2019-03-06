@@ -8,6 +8,7 @@ import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
 import { PrometheusSilenceMatcher } from '../../../../shared/models/prometheus-silence';
 import { AlertmanagerAlert, PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 import * as _ from 'lodash';
+import { I18n } from '@ngx-translate/i18n-polyfill';
 
 @Component({
   selector: 'cd-silence-matcher-modal',
@@ -25,15 +26,20 @@ export class SilenceMatcherModalComponent {
   nameAttributes = ['alertname', 'instance', 'job', 'severity'];
   form: CdFormGroup;
 
-  alerts: AlertmanagerAlert[]; // Will be set by silence form
   rules: PrometheusRule[]; // Will be set by silence form
 
   possibleValues: string[] = []; // Autocomplete possible values to match a rule
 
   matchedRules = 0; // Will be set during value change
   matchedAlerts = 0; // Will be set during value change
+  matchesText = ''; // Will be set during value change
+  matchesTextClass = ''; // Will be set during value change
 
-  constructor(private formBuilder: CdFormBuilder, public bsModalRef: BsModalRef) {
+  constructor(
+    private i18n: I18n,
+    private formBuilder: CdFormBuilder,
+    public bsModalRef: BsModalRef
+  ) {
     this.createForm();
   }
 
@@ -51,24 +57,44 @@ export class SilenceMatcherModalComponent {
       this.setPossibleValues();
       this.form.get('value').enable();
     });
-    this.form.get('value').valueChanges.subscribe((name) => {
-      this.matches();
+    this.form.get('value').valueChanges.subscribe((value) => {
+      this.matches(value);
     });
   }
 
-  matches() {
+  matches(value: string) {
     if (this.form.getValue('isRegex')) {
       return;
     }
-    const value = this.form.getValue('value');
     const attributePath = this.getAttributePath();
-
     const rules = this.rules.filter((r) => _.get(r, attributePath) === value).filter((x) => x);
-    this.matchedRules = rules.length;
 
     let activeAlerts = 0;
     rules.forEach((r) => (activeAlerts += r.alerts.length));
-    this.matchedAlerts = activeAlerts;
+
+    this.updateMatchState(rules.length, activeAlerts);
+  }
+
+  private updateMatchState(rules, alerts) {
+    this.matchedRules = rules;
+    this.matchedAlerts = alerts;
+    this.matchesTextClass = alerts ? 'has-success' : 'has-warning';
+    this.matchesText = this.getMatchText(rules, alerts);
+  }
+
+  private getMatchText(rules, alerts) {
+    const msg = {
+      noRule: this.i18n('Your matcher seems to match no currently defined rule or active alert.'),
+      noAlerts: this.i18n('no active alerts'),
+      alert: this.i18n('1 active alert'),
+      alerts: this.i18n('{{n}} active alerts', { n: alerts }),
+      rule: this.i18n('Matches 1 rule'),
+      rules: this.i18n('Matches {{n}} rules', { n: rules })
+    };
+    return rules ? (this.i18n('{{rules}} with {{alerts}}.', {
+      rules: rules > 1 ? msg.rules : msg.rule,
+      alerts: alerts ? (alerts > 1 ? msg.alerts : msg.alert) : msg.noAlerts
+    })) : msg.noRule;
   }
 
   setPossibleValues() {

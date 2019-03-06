@@ -33,10 +33,8 @@ describe('SilenceMatcherModalComponent', () => {
     formH = new FormHelper(component.form);
 
     prometheus = new PrometheusHelper();
-    const alert = prometheus.createAlert('alert0');
-    component.alerts = [alert];
     component.rules = [
-      prometheus.createRule('alert0', 'someSeverity', [alert]),
+      prometheus.createRule('alert0', 'someSeverity', [prometheus.createAlert('alert0')]),
       prometheus.createRule('alert1', 'someSeverity', [])
     ];
 
@@ -49,7 +47,7 @@ describe('SilenceMatcherModalComponent', () => {
 
   it('should have a name field', () => {
     formH.expectError('name', 'required');
-    formH.expectValidChange('name', 'CPU 50% above usual load');
+    formH.expectValidChange('name', 'alertname');
   });
 
   it('should autocomplete or show a list based on the set name', () => {
@@ -64,28 +62,49 @@ describe('SilenceMatcherModalComponent', () => {
   });
 
   describe('test rule matching', () => {
-    const expectMatch = (name, value, rules, alerts) => {
+    const expectMatch = (name, value, helpText, successClass: boolean) => {
       formH.setValue('name', name);
       formH.setValue('value', value);
-      expect(component.matchedRules).toBe(rules);
-      expect(component.matchedAlerts).toBe(alerts);
+      const helpBlock = fixtureH.getElementByCss('.match-state');
+      expect(helpBlock.nativeElement.textContent).toContain(helpText);
+      expect(helpBlock.properties['className']).toContain(
+        successClass ? 'has-success' : 'has-warning'
+      );
     };
 
     it('should match no rule and no alert', () => {
-      expectMatch('alertname', 'alert', 0, 0);
+      expectMatch(
+        'alertname',
+        'alert',
+        'Your matcher seems to match no currently defined rule or active alert.',
+        false
+      );
+    });
+
+    it('should match a rule with no alert', () => {
+      expectMatch('alertname', 'alert1', 'Matches 1 rule with no active alerts.', false);
     });
 
     it('should match a rule and an alert', () => {
-      expectMatch('alertname', 'alert0', 1, 1);
+      expectMatch('alertname', 'alert0', 'Matches 1 rule with 1 active alert.', true);
     });
 
     it('should match multiple rules and an alert', () => {
-      expectMatch('severity', 'someSeverity', 2, 1);
+      expectMatch('severity', 'someSeverity', 'Matches 2 rules with 1 active alert.', true);
     });
 
-    it('should match nothing if regex is on', () => {
+    it('should match multiple rules and multiple alerts', () => {
+      component.rules[1].alerts.push(null);
+      expectMatch('severity', 'someSeverity', 'Matches 2 rules with 2 active alerts.', true);
+    });
+
+    it('should not show match-state if regex is checked', () => {
+      fixtureH.expectElementVisible('.match-state', false);
+      formH.setValue('name', 'severity');
+      formH.setValue('value', 'someSeverity');
+      fixtureH.expectElementVisible('.match-state', true);
       formH.setValue('isRegex', true);
-      expectMatch('severity', 'someSeverity', 0, 0);
+      fixtureH.expectElementVisible('.match-state', false);
     });
   });
 
