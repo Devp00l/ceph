@@ -355,9 +355,9 @@ describe('PrometheusFormComponent', () => {
       expect(form.errors).toEqual(null);
     });
 
-    it('should show which alerts and rules will be affected with one matcher', () => {})
+    it('should show how many alerts and rules will be affected with one matcher', () => {})
 
-    it('should show which alerts and rules will be affected with multiple matchers', () => {})
+    it('should show how many alerts and rules will be affected with multiple matchers', () => {})
   });
 
   describe('submit tests', () => {
