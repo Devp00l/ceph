@@ -122,11 +122,4 @@ describe('SilenceMatcherModalComponent', () => {
     formH.expectError('value', 'required');
     formH.expectValidChange('value', 'alert0');
   });
-
-  describe('verifying', () => {
-    it('should that the matcher combination matches something', () => {});
-    it('should warn if it only matches something that is not active', () => {});
-    it('should warn if it only matches active and non active alerts', () => {});
-    it('should show matched alerts', () => {});
-  });
 });
