@@ -14,7 +14,10 @@ import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
 import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
 import { CdValidators } from '../../../../shared/forms/cd-validators';
 import { Permission } from '../../../../shared/models/permissions';
-import { PrometheusSilenceMatcher } from '../../../../shared/models/prometheus-silence';
+import {
+  PrometheusSilenceMatcher,
+  PrometheusSilenceMatcherMatch
+} from '../../../../shared/models/prometheus-silence';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
 import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
@@ -51,6 +54,8 @@ export class SilenceFormComponent implements OnInit {
       attribute: 'isRegex'
     }
   ];
+
+  matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during matcher change
 
   rules: PrometheusRule[];
 

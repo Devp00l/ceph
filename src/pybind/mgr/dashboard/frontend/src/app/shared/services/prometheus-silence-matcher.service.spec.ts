@@ -69,8 +69,7 @@ describe('PrometheusSilenceMatcherService', () => {
     });
 
     it('should match multiple rules and multiple alerts', () => {
-      rules[1].alerts.push(null);
-      expectSingleMatch('severity', 'someSeverity', 'Matches 2 rules with 2 active alerts.', true);
+      expectSingleMatch('job', 'someJob', 'Matches 2 rules with 2 active alerts.', true);
     });
 
     it('should return any match if regex is checked', () => {

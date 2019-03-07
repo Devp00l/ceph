@@ -60,9 +60,9 @@
         <span *ngIf="form.showError('value', formDir, 'required')"
               class="help-block"
               i18n>This field is required!</span>
-        <span *ngIf="form.getValue('value') && !form.getValue('isRegex')"
-              class="help-block match-state {{matchesTextClass}}">
-          {{matchesText}}
+        <span *ngIf="form.getValue('value') && !form.getValue('isRegex') && matcherMatch"
+              class="help-block match-state {{matcherMatch.cssClass}}">
+          {{matcherMatch.status}}
         </span>
       </div>
     </div>

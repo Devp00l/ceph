@@ -5,7 +5,10 @@ import { BsModalRef } from 'ngx-bootstrap/modal';
 
 import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
 import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
-import { PrometheusSilenceMatcher } from '../../../../shared/models/prometheus-silence';
+import {
+  PrometheusSilenceMatcher,
+  PrometheusSilenceMatcherMatch
+} from '../../../../shared/models/prometheus-silence';
 import { AlertmanagerAlert, PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 import * as _ from 'lodash';
 import { I18n } from '@ngx-translate/i18n-polyfill';
@@ -31,8 +34,7 @@ export class SilenceMatcherModalComponent {
 
   possibleValues: string[] = []; // Autocomplete possible values to match a rule
 
-  matchesText = ''; // Will be set during value change
-  matchesTextClass = ''; // Will be set during value change
+  matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during value change
 
   constructor(
     private i18n: I18n,
@@ -60,7 +62,7 @@ export class SilenceMatcherModalComponent {
     this.form.get('value').valueChanges.subscribe((value) => {
       const values = this.form.value;
       values.value = value;
-      this.updateMatchState(values);
+      this.matcherMatch = this.silenceMatcher.singleMatch(values, this.rules);
     });
   }
 
@@ -68,14 +70,6 @@ export class SilenceMatcherModalComponent {
     this.possibleValues = _.sortedUniq(
       this.rules.map((r) => _.get(r, this.silenceMatcher.getAttributePath(name))).filter((x) => x)
     );
-  }
-
-  private updateMatchState(values: PrometheusSilenceMatcher) {
-    const match = this.silenceMatcher.singleMatch(values, this.rules);
-    if (match) {
-      this.matchesTextClass = match.cssClass;
-      this.matchesText = match.status;
-    }
   }
 
   preFillControls(matcher: PrometheusSilenceMatcher) {

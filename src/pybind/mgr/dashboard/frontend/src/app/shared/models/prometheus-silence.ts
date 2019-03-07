@@ -4,6 +4,11 @@ export class PrometheusSilenceMatcher {
   isRegex: boolean;
 }
 
+export class PrometheusSilenceMatcherMatch {
+  status: string;
+  cssClass: string;
+}
+
 export class PrometheusSilence {
   id: string;
   matchers: PrometheusSilenceMatcher[];

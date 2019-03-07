@@ -4,7 +4,10 @@ import * as _ from 'lodash';
 
 import { ServicesModule } from './services.module';
 import { I18n } from '@ngx-translate/i18n-polyfill';
-import { PrometheusSilenceMatcher } from '../models/prometheus-silence';
+import {
+  PrometheusSilenceMatcher,
+  PrometheusSilenceMatcherMatch
+} from '../models/prometheus-silence';
 import { PrometheusRule } from '../models/prometheus-alerts';
 
 @Injectable({
@@ -23,11 +26,14 @@ export class PrometheusSilenceMatcherService {
   singleMatch(
     matcher: PrometheusSilenceMatcher,
     rules: PrometheusRule[]
-  ): { status: string; cssClass: string } {
+  ): PrometheusSilenceMatcherMatch {
     return this.multiMatch([matcher], rules);
   }
 
-  multiMatch(matchers: PrometheusSilenceMatcher[], rules: PrometheusRule[]) {
+  multiMatch(
+    matchers: PrometheusSilenceMatcher[],
+    rules: PrometheusRule[]
+  ): PrometheusSilenceMatcherMatch {
     if (matchers.some((matcher) => matcher.isRegex)) {
       return;
     }
@@ -45,7 +51,7 @@ export class PrometheusSilenceMatcherService {
     return rules.filter((r) => _.get(r, attributePath) === matcher.value);
   }
 
-  private describeMatch(rules: PrometheusRule[]) {
+  private describeMatch(rules: PrometheusRule[]): PrometheusSilenceMatcherMatch {
     let alerts = 0;
     rules.forEach((r) => (alerts += r.alerts.length));
     return {
