@@ -362,7 +362,7 @@ describe('PrometheusFormComponent', () => {
 
   describe('submit tests', () => {
     beforeEach(() => {
-      spyOn(prometheusService, 'setSilence');
+      spyOn(prometheusService, 'setSilence').and.callFake(() => of());
     });
 
     it('should create a json on submit', () => {
@@ -399,7 +399,7 @@ describe('PrometheusFormComponent', () => {
         formH.setValue(attr, silence[attr]);
       });
       silence.matchers.forEach((matcher) => component.setMatcher(matcher));
-      fixtureH.clickElement('#submit');
+      component.submit();
       expect(form.valid).toBeTruthy();
       expect(prometheusService.setSilence).toHaveBeenCalledWith(silence);
     });

@@ -17,7 +17,7 @@ import { Permission } from '../../../../shared/models/permissions';
 import { PrometheusSilenceMatcher } from '../../../../shared/models/prometheus-silence';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
-import { AlertmanagerAlert, PrometheusRule } from '../../../../shared/models/prometheus-alerts';
+import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 
 @Component({
   selector: 'cd-prometheus-form',
@@ -52,7 +52,6 @@ export class SilenceFormComponent implements OnInit {
     }
   ];
 
-  alerts: AlertmanagerAlert[];
   rules: PrometheusRule[];
 
   constructor(
@@ -89,7 +88,6 @@ export class SilenceFormComponent implements OnInit {
     this.prometheusService.ifPrometheusConfigured(() =>
       this.prometheusService.getRules().subscribe((rules) => (this.rules = rules))
     );
-    this.prometheusService.getAlerts().subscribe((alerts) => (this.alerts = alerts));
   }
 
   private createForm() {
@@ -193,7 +191,6 @@ export class SilenceFormComponent implements OnInit {
   showMatcherModal(index?: number) {
     const modalRef = this.bsModalService.show(SilenceMatcherModalComponent);
     const modal = modalRef.content as SilenceMatcherModalComponent;
-    modal.alerts = this.alerts;
     modal.rules = this.rules;
     if (_.isNumber(index)) {
       modal.preFillControls(this.matchers[index]);
@@ -216,8 +213,11 @@ export class SilenceFormComponent implements OnInit {
 
   submit() {
     const payload = this.form.value;
+    delete payload.duration;
+    payload.startsAt = payload.startsAt.toISOString();
+    payload.endsAt = payload.endsAt.toISOString();
     payload.matchers = this.matchers;
-    console.log('hi');
+
     this.prometheusService.setSilence(payload).subscribe(
       () => this.router.navigate(['/silence']),
       (resp) => {

@@ -63,8 +63,11 @@ describe('SilenceMatcherModalComponent', () => {
 
   describe('test rule matching', () => {
     const expectMatch = (name, value, helpText, successClass: boolean) => {
-      formH.setValue('name', name);
-      formH.setValue('value', value);
+      component.preFillControls({
+        name: name,
+        value: value,
+        isRegex: false
+      })
       const helpBlock = fixtureH.getElementByCss('.match-state');
       expect(helpBlock.nativeElement.textContent).toContain(helpText);
       expect(helpBlock.properties['className']).toContain(
@@ -122,4 +125,28 @@ describe('SilenceMatcherModalComponent', () => {
     formH.expectError('value', 'required');
     formH.expectValidChange('value', 'alert0');
   });
+
+  it('should test preFillControls', () => {
+    const controlValues = {
+      name: 'alertname',
+      value: 'alert0',
+      isRegex: false
+    };
+    component.preFillControls(controlValues);
+    expect(component.form.value).toEqual(controlValues)
+  });
+
+  it('should test submit', (done) => {
+    const controlValues = {
+      name: 'alertname',
+      value: 'alert0',
+      isRegex: false
+    };
+    component.preFillControls(controlValues);
+    component.submitAction.subscribe((resp) => {
+      expect(resp).toEqual(controlValues)
+      done();
+    })
+    component.onSubmit();
+  })
 });

@@ -58,11 +58,27 @@ export class SilenceMatcherModalComponent {
       this.form.get('value').enable();
     });
     this.form.get('value').valueChanges.subscribe((value) => {
-      this.matches(value);
+      this.determineMatch(value);
     });
   }
 
-  matches(value: string) {
+  private setPossibleValues() {
+    this.possibleValues = _.sortedUniq(
+      this.rules.map((r) => _.get(r, this.getAttributePath())).filter((x) => x)
+    );
+  }
+
+  private getAttributePath() {
+    const getValues = {
+      alertname: 'name',
+      instance: 'alerts.0.labels.instance',
+      job: 'alerts.0.labels.job',
+      severity: 'labels.severity'
+    };
+    return getValues[this.form.getValue('name')];
+  }
+
+  private determineMatch(value: string) {
     if (this.form.getValue('isRegex')) {
       return;
     }
@@ -95,22 +111,6 @@ export class SilenceMatcherModalComponent {
       rules: rules > 1 ? msg.rules : msg.rule,
       alerts: alerts ? (alerts > 1 ? msg.alerts : msg.alert) : msg.noAlerts
     })) : msg.noRule;
-  }
-
-  setPossibleValues() {
-    this.possibleValues = _.sortedUniq(
-      this.rules.map((r) => _.get(r, this.getAttributePath())).filter((x) => x)
-    );
-  }
-
-  getAttributePath() {
-    const getValues = {
-      alertname: 'name',
-      instance: 'alerts.0.labels.instance',
-      job: 'alerts.0.labels.job',
-      severity: 'labels.severity'
-    };
-    return getValues[this.form.getValue('name')];
   }
 
   preFillControls(matcher: PrometheusSilenceMatcher) {
