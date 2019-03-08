@@ -8,16 +8,8 @@ import { I18n } from '@ngx-translate/i18n-polyfill';
   styleUrls: ['./back-button.component.scss']
 })
 export class BackButtonComponent {
-  @Input() customBack: Function;
-  @Input() customName: string;
+  @Input() back: Function = this.location.back;
+  @Input() name: string = this.i18n('Back');
 
   constructor(private location: Location, private i18n: I18n) {}
-
-  name() {
-    return this.customName || this.i18n('Back');
-  }
-
-  back() {
-    this.customBack ? this.customBack() : this.location.back();
-  }
 }
