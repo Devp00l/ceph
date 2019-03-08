@@ -12,13 +12,13 @@ export class SettingsService {
 
   private settings: { [url: string]: string } = {};
 
-  ifSettingConfigured(url: string, fn: (value?: string) => void): void {
+  ifSettingConfigured(url: string, fn: (value?: string) => void, elseFn?: () => void): void {
     const setting = this.settings[url];
     if (setting === undefined) {
       this.http.get(url).subscribe(
         (data: any) => {
           this.settings[url] = this.getSettingsValue(data);
-          this.ifSettingConfigured(url, fn);
+          this.ifSettingConfigured(url, fn, elseFn);
         },
         (resp) => {
           this.settings[url] = '';
@@ -26,6 +26,10 @@ export class SettingsService {
       );
     } else if (setting !== '') {
       fn(setting);
+    } else {
+      if (elseFn) {
+        elseFn();
+      }
     }
   }
 

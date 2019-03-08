@@ -69,6 +69,8 @@ describe('SettingsService', () => {
       service.ifSettingConfigured(url, (setValue) => {
         expect(setValue).toBe(value);
         increment++;
+      }, () => {
+        increment--;
       });
     };
 
@@ -78,7 +80,7 @@ describe('SettingsService', () => {
       expect(req.request.method).toBe('GET');
       req.flush(value);
       tick();
-      expect(increment).toBe(isSet !== '' ? 1 : 0);
+      expect(increment).toBe(isSet !== '' ? 1 : -1);
       expect(service['settings'][url]).toBe(isSet);
     };
 
