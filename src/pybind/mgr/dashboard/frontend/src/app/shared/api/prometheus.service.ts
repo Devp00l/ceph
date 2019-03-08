@@ -20,16 +20,16 @@ export class PrometheusService {
 
   constructor(private http: HttpClient, private settingsService: SettingsService) {}
 
-  ifAlertmanagerConfigured(fn): void {
-    this.settingsService.ifSettingConfigured(this.settingsKey.alertmanager, fn);
+  ifAlertmanagerConfigured(fn, elseFn?): void {
+    this.settingsService.ifSettingConfigured(this.settingsKey.alertmanager, fn, elseFn);
   }
 
   disableAlertmanagerConfig(): void {
     this.settingsService.disableSetting(this.settingsKey.alertmanager);
   }
 
-  ifPrometheusConfigured(fn): void {
-    this.settingsService.ifSettingConfigured(this.settingsKey.prometheus, fn);
+  ifPrometheusConfigured(fn, elseFn?): void {
+    this.settingsService.ifSettingConfigured(this.settingsKey.prometheus, fn, elseFn);
   }
 
   disablePrometheusConfig(): void {
