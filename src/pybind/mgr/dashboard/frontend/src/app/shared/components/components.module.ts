@@ -11,6 +11,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 
 import { DirectivesModule } from '../directives/directives.module';
 import { PipesModule } from '../pipes/pipes.module';
+import { BackButtonComponent } from './back-button/back-button.component';
 import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 import { CriticalConfirmationModalComponent } from './critical-confirmation-modal/critical-confirmation-modal.component';
 import { ErrorPanelComponent } from './error-panel/error-panel.component';
@@ -59,7 +60,8 @@ import { WarningPanelComponent } from './warning-panel/warning-panel.component';
     WarningPanelComponent,
     LanguageSelectorComponent,
     GrafanaComponent,
-    SelectComponent
+    SelectComponent,
+    BackButtonComponent
   ],
   providers: [],
   exports: [
@@ -68,6 +70,7 @@ import { WarningPanelComponent } from './warning-panel/warning-panel.component';
     HelperComponent,
     SelectBadgesComponent,
     SubmitButtonComponent,
+    BackButtonComponent,
     ErrorPanelComponent,
     LoadingPanelComponent,
     InfoPanelComponent,
