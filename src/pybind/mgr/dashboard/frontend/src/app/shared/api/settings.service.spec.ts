@@ -66,12 +66,16 @@ describe('SettingsService', () => {
     let increment: number;
 
     const testConfig = (url, value) => {
-      service.ifSettingConfigured(url, (setValue) => {
-        expect(setValue).toBe(value);
-        increment++;
-      }, () => {
-        increment--;
-      });
+      service.ifSettingConfigured(
+        url,
+        (setValue) => {
+          expect(setValue).toBe(value);
+          increment++;
+        },
+        () => {
+          increment--;
+        }
+      );
     };
 
     const expectSettingsApiCall = (url: string, value: object, isSet: string) => {
