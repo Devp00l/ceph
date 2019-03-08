@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 
 import * as _ from 'lodash';
 
-import { ServicesModule } from './services.module';
 import { I18n } from '@ngx-translate/i18n-polyfill';
+import { PrometheusRule } from '../models/prometheus-alerts';
 import {
   PrometheusSilenceMatcher,
   PrometheusSilenceMatcherMatch
 } from '../models/prometheus-silence';
-import { PrometheusRule } from '../models/prometheus-alerts';
+import { ServicesModule } from './services.module';
 
 @Injectable({
   providedIn: ServicesModule

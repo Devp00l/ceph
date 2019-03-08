@@ -1,17 +1,16 @@
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 
+import * as _ from 'lodash';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
 import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
 import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
+import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 import {
   PrometheusSilenceMatcher,
   PrometheusSilenceMatcherMatch
 } from '../../../../shared/models/prometheus-silence';
-import { AlertmanagerAlert, PrometheusRule } from '../../../../shared/models/prometheus-alerts';
-import * as _ from 'lodash';
-import { I18n } from '@ngx-translate/i18n-polyfill';
 import { PrometheusSilenceMatcherService } from '../../../../shared/services/prometheus-silence-matcher.service';
 
 @Component({
@@ -37,7 +36,6 @@ export class SilenceMatcherModalComponent {
   matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during value change
 
   constructor(
-    private i18n: I18n,
     private formBuilder: CdFormBuilder,
     private silenceMatcher: PrometheusSilenceMatcherService,
     public bsModalRef: BsModalRef

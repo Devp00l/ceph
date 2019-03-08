@@ -14,14 +14,14 @@ import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
 import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
 import { CdValidators } from '../../../../shared/forms/cd-validators';
 import { Permission } from '../../../../shared/models/permissions';
+import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 import {
   PrometheusSilenceMatcher,
   PrometheusSilenceMatcherMatch
 } from '../../../../shared/models/prometheus-silence';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
+import { PrometheusSilenceMatcherService } from '../../../../shared/services/prometheus-silence-matcher.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
-import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
-import {PrometheusSilenceMatcherService} from "../../../../shared/services/prometheus-silence-matcher.service";
 
 @Component({
   selector: 'cd-prometheus-form',
@@ -92,9 +92,8 @@ export class SilenceFormComponent implements OnInit {
   }
 
   private getData() {
-    this.form.silentSet('', '')
-    this.prometheusService.ifPrometheusConfigured(() =>
-      this.prometheusService.getRules().subscribe((rules) => (this.rules = rules)),
+    this.prometheusService.ifPrometheusConfigured(
+      () => this.prometheusService.getRules().subscribe((rules) => (this.rules = rules)),
       () => {
         this.rules = [];
         // throw toasty to inform user how to add prometheus host
@@ -218,7 +217,7 @@ export class SilenceFormComponent implements OnInit {
     } else {
       this.matchers.push(matcher);
     }
-    this.matcherMatch = this.silenceMatcher.multiMatch(this.matchers, this.rules)
+    this.matcherMatch = this.silenceMatcher.multiMatch(this.matchers, this.rules);
     this.form.markAsDirty();
     this.form.updateValueAndValidity();
   }
@@ -230,11 +229,9 @@ export class SilenceFormComponent implements OnInit {
     payload.endsAt = payload.endsAt.toISOString();
     payload.matchers = this.matchers;
 
-    this.prometheusService.setSilence(payload).subscribe(
-      () => {
-        this.router.navigate(['/silence']);
-        // throw success toasty
-      }
-    );
+    this.prometheusService.setSilence(payload).subscribe(() => {
+      this.router.navigate(['/silence']);
+      // throw success toasty
+    });
   }
 }

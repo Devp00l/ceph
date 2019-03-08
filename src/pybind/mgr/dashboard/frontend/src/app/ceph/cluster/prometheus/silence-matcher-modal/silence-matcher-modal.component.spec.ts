@@ -67,7 +67,7 @@ describe('SilenceMatcherModalComponent', () => {
         name: name,
         value: value,
         isRegex: false
-      })
+      });
       const helpBlock = fixtureH.getElementByCss('#match-state');
       expect(helpBlock.nativeElement.textContent).toContain(helpText);
       expect(helpBlock.properties['className']).toContain(
@@ -133,7 +133,7 @@ describe('SilenceMatcherModalComponent', () => {
       isRegex: false
     };
     component.preFillControls(controlValues);
-    expect(component.form.value).toEqual(controlValues)
+    expect(component.form.value).toEqual(controlValues);
   });
 
   it('should test submit', (done) => {
@@ -144,9 +144,9 @@ describe('SilenceMatcherModalComponent', () => {
     };
     component.preFillControls(controlValues);
     component.submitAction.subscribe((resp) => {
-      expect(resp).toEqual(controlValues)
+      expect(resp).toEqual(controlValues);
       done();
-    })
+    });
     component.onSubmit();
-  })
+  });
 });

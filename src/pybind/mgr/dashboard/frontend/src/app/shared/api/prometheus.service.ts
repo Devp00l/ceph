@@ -3,7 +3,11 @@ import { Injectable } from '@angular/core';
 
 import { Observable } from 'rxjs';
 
-import {AlertmanagerAlert, AlertmanagerNotification, PrometheusRule} from '../models/prometheus-alerts';
+import {
+  AlertmanagerAlert,
+  AlertmanagerNotification,
+  PrometheusRule
+} from '../models/prometheus-alerts';
 import { PrometheusSilence } from '../models/prometheus-silence';
 import { ApiModule } from './api.module';
 import { SettingsService } from './settings.service';

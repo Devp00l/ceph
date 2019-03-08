@@ -5,9 +5,9 @@ import {
   i18nProviders,
   PrometheusHelper
 } from '../../../testing/unit-test-helper';
+import { PrometheusRule } from '../models/prometheus-alerts';
 import { SharedModule } from '../shared.module';
 import { PrometheusSilenceMatcherService } from './prometheus-silence-matcher.service';
-import { PrometheusRule } from '../models/prometheus-alerts';
 
 describe('PrometheusSilenceMatcherService', () => {
   let service: PrometheusSilenceMatcherService;

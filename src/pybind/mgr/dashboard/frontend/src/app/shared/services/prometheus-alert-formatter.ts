@@ -6,8 +6,8 @@ import { NotificationType } from '../enum/notification-type.enum';
 import { CdNotificationConfig } from '../models/cd-notification';
 import {
   AlertmanagerAlert,
-  PrometheusCustomAlert,
-  AlertmanagerNotificationAlert
+  AlertmanagerNotificationAlert,
+  PrometheusCustomAlert
 } from '../models/prometheus-alerts';
 import { NotificationService } from './notification.service';
 import { ServicesModule } from './services.module';

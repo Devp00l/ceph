@@ -11,6 +11,7 @@ import { ModalModule } from 'ngx-bootstrap/modal';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { TimepickerModule } from 'ngx-bootstrap/timepicker';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 
 import { SharedModule } from '../../shared/shared.module';
 import { PerformanceCounterModule } from '../performance-counter/performance-counter.module';
@@ -30,12 +31,11 @@ import { OsdPerformanceHistogramComponent } from './osd/osd-performance-histogra
 import { OsdRecvSpeedModalComponent } from './osd/osd-recv-speed-modal/osd-recv-speed-modal.component';
 import { OsdReweightModalComponent } from './osd/osd-reweight-modal/osd-reweight-modal.component';
 import { OsdScrubModalComponent } from './osd/osd-scrub-modal/osd-scrub-modal.component';
-import { SilenceFormComponent } from './prometheus/silence-form/silence-form.component';
 import { AlertListComponent } from './prometheus/alert-list/alert-list.component';
 import { PrometheusTabsComponent } from './prometheus/prometheus-tabs/prometheus-tabs.component';
+import { SilenceFormComponent } from './prometheus/silence-form/silence-form.component';
 import { SilenceMatcherModalComponent } from './prometheus/silence-matcher-modal/silence-matcher-modal.component';
 import { SilencesListComponent } from './prometheus/silences-list/silences-list.component';
-import {TypeaheadModule} from "ngx-bootstrap";
 
 @NgModule({
   entryComponents: [

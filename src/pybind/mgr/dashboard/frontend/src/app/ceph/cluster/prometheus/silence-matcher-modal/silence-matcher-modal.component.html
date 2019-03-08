@@ -55,7 +55,6 @@
         <input id="value"
                class="form-control"
                type="text"
-               autocomplete='no-browers'
                [typeahead]="possibleValues"
                formControlName="value">
         <span *ngIf="form.showError('value', formDir, 'required')"

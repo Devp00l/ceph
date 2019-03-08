@@ -186,9 +186,11 @@
                 <ng-container i18n>Add matcher</ng-container>
               </button>
             </span>
-            <span *ngIf="matchers.length > 0 && matcherMatch"
-                  id="match-state"
-                  class="help-block {{matcherMatch.cssClass}}">
+          </div>
+          <div *ngIf="matchers.length && matcherMatch"
+               class="col-sm-offset-3 col-sm-9 {{matcherMatch.cssClass}}"
+               id="match-state">
+            <span class="help-block {{matcherMatch.cssClass}}">
               {{matcherMatch.status}}
             </span>
           </div>
@@ -203,11 +205,7 @@
                             type="button">
             <span i18n>{edit, select, 1 {Edit} other {Create}} silence</span>
           </cd-submit-button>
-          <button class="btn btn-sm btn-default"
-                  i18n
-                  routerLink="/pool"
-                  type="button">Back
-          </button>
+          <cd-back-button></cd-back-button>
         </div>
       </div>
     </div>

@@ -4,7 +4,10 @@ import { By } from '@angular/platform-browser';
 import { Router, Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import * as _ from 'lodash';
 import { BsDatepickerDirective, BsDatepickerModule } from 'ngx-bootstrap/datepicker';
+import { BsModalService } from 'ngx-bootstrap/modal';
+import { of } from 'rxjs';
 
 import {
   configureTestBed,
@@ -21,10 +24,6 @@ import { AuthStorageService } from '../../../../shared/services/auth-storage.ser
 import { SharedModule } from '../../../../shared/shared.module';
 import { ClusterModule } from '../../cluster.module';
 import { SilenceFormComponent } from './silence-form.component';
-import { of } from 'rxjs';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap';
-import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
-import * as _ from 'lodash';
 
 describe('PrometheusFormComponent', () => {
   let component: SilenceFormComponent;
