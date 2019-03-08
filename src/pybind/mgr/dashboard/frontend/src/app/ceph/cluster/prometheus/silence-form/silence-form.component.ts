@@ -21,6 +21,7 @@ import {
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
 import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
+import {PrometheusSilenceMatcherService} from "../../../../shared/services/prometheus-silence-matcher.service";
 
 @Component({
   selector: 'cd-prometheus-form',
@@ -57,13 +58,14 @@ export class SilenceFormComponent implements OnInit {
 
   matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during matcher change
 
-  rules: PrometheusRule[];
+  rules: PrometheusRule[] = []; // Predefined if prometheus is not defined
 
   constructor(
     private prometheusService: PrometheusService,
     private formBuilder: CdFormBuilder,
     private authStorageService: AuthStorageService,
     private localeService: BsLocaleService,
+    private silenceMatcher: PrometheusSilenceMatcherService,
     private bsModalService: BsModalService,
     private router: Router
   ) {
@@ -90,8 +92,13 @@ export class SilenceFormComponent implements OnInit {
   }
 
   private getData() {
+    this.form.silentSet('', '')
     this.prometheusService.ifPrometheusConfigured(() =>
-      this.prometheusService.getRules().subscribe((rules) => (this.rules = rules))
+      this.prometheusService.getRules().subscribe((rules) => (this.rules = rules)),
+      () => {
+        this.rules = [];
+        // throw toasty to inform user how to add prometheus host
+      }
     );
   }
 
@@ -211,7 +218,7 @@ export class SilenceFormComponent implements OnInit {
     } else {
       this.matchers.push(matcher);
     }
-    // Mark the form as dirty to be able to submit it.
+    this.matcherMatch = this.silenceMatcher.multiMatch(this.matchers, this.rules)
     this.form.markAsDirty();
     this.form.updateValueAndValidity();
   }
@@ -224,9 +231,9 @@ export class SilenceFormComponent implements OnInit {
     payload.matchers = this.matchers;
 
     this.prometheusService.setSilence(payload).subscribe(
-      () => this.router.navigate(['/silence']),
-      (resp) => {
-        resp['application'] = 'Prometheus';
+      () => {
+        this.router.navigate(['/silence']);
+        // throw success toasty
       }
     );
   }

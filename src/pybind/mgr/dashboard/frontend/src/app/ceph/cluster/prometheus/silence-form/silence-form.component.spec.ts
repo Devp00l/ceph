@@ -22,6 +22,9 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { ClusterModule } from '../../cluster.module';
 import { SilenceFormComponent } from './silence-form.component';
 import { of } from 'rxjs';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap';
+import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
+import * as _ from 'lodash';
 
 describe('PrometheusFormComponent', () => {
   let component: SilenceFormComponent;
@@ -56,11 +59,13 @@ describe('PrometheusFormComponent', () => {
     spyOn(prometheusService, 'getAlerts').and.callFake(() =>
       of([prometheus.createAlert('alert0')])
     );
+    spyOn(prometheusService, 'ifPrometheusConfigured').and.callFake((fn) => fn());
     spyOn(prometheusService, 'getRules').and.callFake(() =>
-      of(
-        [prometheus.createRule('alert0', 'someSeverity', [null]),
-        prometheus.createRule('alert1', 'someOtherSeverity', [])]
-      )
+      of([
+        prometheus.createRule('alert0', 'someSeverity', [prometheus.createAlert('alert0')]),
+        prometheus.createRule('alert1', 'someSeverity', []),
+        prometheus.createRule('alert2', 'someOtherSeverity', [prometheus.createAlert('alert2')])
+      ])
     );
     spyOn(global, 'Date').and.callFake((sth) => (sth ? new originalDate(sth) : beginningDate));
     router = TestBed.get(Router);
@@ -74,6 +79,7 @@ describe('PrometheusFormComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(_.isArray(component.rules)).toBeTruthy();
   });
 
   describe('redirect not allowed users', () => {
@@ -280,14 +286,15 @@ describe('PrometheusFormComponent', () => {
           'matcher-value-0',
           'matcher-isRegex-0',
           'matcher-edit-0',
-          'matcher-delete-0'
+          'matcher-delete-0',
+          'match-state'
         ],
         false
       );
     });
 
     it('should show added matcher', () => {
-      addMatcher('some name', 'some value', true);
+      addMatcher('job', 'someJob', true);
       fixtureH.expectIdElementsVisible(
         [
           'matcher-name-0',
@@ -298,11 +305,12 @@ describe('PrometheusFormComponent', () => {
         ],
         true
       );
+      fixtureH.expectElementVisible('#match-state', false);
     });
 
     it('should show multiple matchers', () => {
-      addMatcher('some name', 'some value', true);
-      addMatcher('some other name', 'some other value', false);
+      addMatcher('severity', 'someSeverity', false);
+      addMatcher('alertname', 'alert0', false);
       fixtureH.expectIdElementsVisible(
         [
           'matcher-name-0',
@@ -314,24 +322,45 @@ describe('PrometheusFormComponent', () => {
           'matcher-value-1',
           'matcher-isRegex-1',
           'matcher-edit-1',
-          'matcher-delete-1'
+          'matcher-delete-1',
+          'match-state'
         ],
         true
       );
+      const helpBlock = fixtureH.getElementByCss('#match-state');
+      expect(helpBlock.nativeElement.textContent).toContain('Matches 1 rule with 1 active alert.');
+      expect(helpBlock.properties['className']).toContain('has-success');
     });
 
     it('should show the right matcher values', () => {
-      addMatcher('some name', 'some value', true);
-      addMatcher('some other name', 'some other value', false);
+      addMatcher('alertname', 'alert.*', true);
+      addMatcher('job', 'someJob', false);
       fixture.detectChanges();
-      fixtureH.expectFormFieldToBe('#matcher-name-0', 'some name');
-      fixtureH.expectFormFieldToBe('#matcher-value-0', 'some value');
+      fixtureH.expectFormFieldToBe('#matcher-name-0', 'alertname');
+      fixtureH.expectFormFieldToBe('#matcher-value-0', 'alert.*');
       fixtureH.expectFormFieldToBe('#matcher-isRegex-0', 'true');
       fixtureH.expectFormFieldToBe('#matcher-isRegex-1', 'false');
     });
 
     it('should be able to edit a matcher', () => {
-      addMatcher('some name', 'some value', true);
+      addMatcher('alertname', 'alert.*', true);
+
+      const modalService = TestBed.get(BsModalService);
+      spyOn(modalService, 'show').and.callFake(() => {
+        return {
+          content: {
+            preFillControls: (matcher) => {
+              expect(matcher).toBe(component.matchers[0]);
+            },
+            submitAction: of({ name: 'alertname', value: 'alert0', isRegex: false })
+          }
+        };
+      });
+      fixtureH.clickElement('#matcher-edit-0');
+
+      fixtureH.expectFormFieldToBe('#matcher-name-0', 'alertname');
+      fixtureH.expectFormFieldToBe('#matcher-value-0', 'alert0');
+      fixtureH.expectFormFieldToBe('#matcher-isRegex-0', 'false');
     });
 
     it('should be able to remove a matcher', () => {
@@ -355,9 +384,9 @@ describe('PrometheusFormComponent', () => {
       expect(form.errors).toEqual(null);
     });
 
-    it('should show how many alerts and rules will be affected with one matcher', () => {})
+    it('should show how many alerts and rules will be affected with one matcher', () => {});
 
-    it('should show how many alerts and rules will be affected with multiple matchers', () => {})
+    it('should show how many alerts and rules will be affected with multiple matchers', () => {});
   });
 
   describe('submit tests', () => {

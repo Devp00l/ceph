@@ -55,13 +55,17 @@
         <input id="value"
                class="form-control"
                type="text"
+               autocomplete='no-browers'
                [typeahead]="possibleValues"
                formControlName="value">
         <span *ngIf="form.showError('value', formDir, 'required')"
               class="help-block"
               i18n>This field is required!</span>
-        <span *ngIf="form.getValue('value') && !form.getValue('isRegex') && matcherMatch"
-              class="help-block match-state {{matcherMatch.cssClass}}">
+      </div>
+      <div *ngIf="form.getValue('value') && !form.getValue('isRegex') && matcherMatch"
+           class="col-sm-offset-3 col-sm-9 {{matcherMatch.cssClass}}"
+           id="match-state">
+        <span class="help-block {{matcherMatch.cssClass}}">
           {{matcherMatch.status}}
         </span>
       </div>

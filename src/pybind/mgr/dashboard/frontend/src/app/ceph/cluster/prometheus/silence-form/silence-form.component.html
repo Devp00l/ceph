@@ -186,9 +186,9 @@
                 <ng-container i18n>Add matcher</ng-container>
               </button>
             </span>
-
             <span *ngIf="matchers.length > 0 && matcherMatch"
-                  class="help-block match-state {{matcherMatch.cssClass}}">
+                  id="match-state"
+                  class="help-block {{matcherMatch.cssClass}}">
               {{matcherMatch.status}}
             </span>
           </div>

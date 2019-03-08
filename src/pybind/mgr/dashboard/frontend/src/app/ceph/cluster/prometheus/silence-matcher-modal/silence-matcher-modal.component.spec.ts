@@ -68,7 +68,7 @@ describe('SilenceMatcherModalComponent', () => {
         value: value,
         isRegex: false
       })
-      const helpBlock = fixtureH.getElementByCss('.match-state');
+      const helpBlock = fixtureH.getElementByCss('#match-state');
       expect(helpBlock.nativeElement.textContent).toContain(helpText);
       expect(helpBlock.properties['className']).toContain(
         successClass ? 'has-success' : 'has-warning'
@@ -102,12 +102,12 @@ describe('SilenceMatcherModalComponent', () => {
     });
 
     it('should not show match-state if regex is checked', () => {
-      fixtureH.expectElementVisible('.match-state', false);
+      fixtureH.expectElementVisible('#match-state', false);
       formH.setValue('name', 'severity');
       formH.setValue('value', 'someSeverity');
-      fixtureH.expectElementVisible('.match-state', true);
+      fixtureH.expectElementVisible('#match-state', true);
       formH.setValue('isRegex', true);
-      fixtureH.expectElementVisible('.match-state', false);
+      fixtureH.expectElementVisible('#match-state', false);
     });
   });
 
