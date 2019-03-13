@@ -43,6 +43,36 @@ class ClusterConfigurationTest(DashboardTestCase):
         if orig_value:
             self._ceph_cmd(['config', 'set', 'mon', config_name, orig_value[0]['value']])
 
+    def test_filter_config_options(self):
+        config_names = ['osd_scrub_during_recovery', 'osd_scrub_begin_hour', 'osd_scrub_end_hour']
+        data = self._get('/api/cluster_conf/filter?names={}'.format(','.join(config_names)))
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 3)
+        for conf in data:
+            self._validate_single(conf)
+            self.assertIn(conf['name'], config_names)
+
+    def test_filter_config_options_empty_names(self):
+        self._get('/api/cluster_conf/filter?names=')
+        self.assertStatus(404)
+        self.assertEqual(self._resp.json()['detail'], 'Config options `` not found')
+
+    def test_filter_config_options_unknown_name(self):
+        self._get('/api/cluster_conf/filter?names=abc')
+        self.assertStatus(404)
+        self.assertEqual(self._resp.json()['detail'], 'Config options `abc` not found')
+
+    def test_filter_config_options_contains_unknown_name(self):
+        config_names = ['osd_scrub_during_recovery', 'osd_scrub_begin_hour', 'abc']
+        data = self._get('/api/cluster_conf/filter?names={}'.format(','.join(config_names)))
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 2)
+        for conf in data:
+            self._validate_single(conf)
+            self.assertIn(conf['name'], config_names)
+
     def test_create(self):
         config_name = 'debug_ms'
         orig_value = self._get_config_by_name(config_name)
