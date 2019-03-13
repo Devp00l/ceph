@@ -18,6 +18,10 @@ export class ConfigurationService {
     return this.http.get(`api/cluster_conf/${configOption}`);
   }
 
+  filter(configOptionNames: Array<string>) {
+    return this.http.get(`api/cluster_conf/filter?names=${configOptionNames.join(',')}`);
+  }
+
   create(configOption: ConfigFormCreateRequestModel) {
     return this.http.post('api/cluster_conf/', configOption);
   }
