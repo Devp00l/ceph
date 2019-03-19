@@ -219,6 +219,21 @@ export class FixtureHelper {
 }
 
 export class PrometheusHelper {
+  createSilence(id) {
+    return {
+      id: id,
+      createdBy: `Creator of ${id}`,
+      comment: `A comment for ${id}`,
+      startsAt: new Date('2022-02-22T22:22:00').toISOString(),
+      endsAt: new Date('2022-02-23T22:22:00').toISOString(),
+      matchers: [{
+        name: 'job',
+        value: 'someJob',
+        isRegex: true
+      }]
+    }
+  }
+
   createRule(name, severity, alerts: any[]): PrometheusRule {
     return {
       name: name,

@@ -34,6 +34,7 @@ export class SilenceMatcherModalComponent {
   possibleValues: string[] = []; // Autocomplete possible values to match a rule
 
   matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during value change
+  editMode = false;
 
   constructor(
     private formBuilder: CdFormBuilder,

@@ -2,7 +2,6 @@
   <div class="input-group">
     <ng-container *ngFor="let config of matcherConfig">
       <span class="input-group-addon"
-            i18n-tooltip
             [tooltip]=config.tooltip>
         <i class="icon-prepend fa fa-{{config.icon}}"></i>
       </span>
@@ -56,7 +55,10 @@
     <div class="panel panel-default">
       <div class="panel-heading">
         <h3 class="panel-title">
-          <span i18n>{edit, select, 1 {Edit} other {Create}} silence</span>
+          {{mode}}
+          <cd-helper *ngIf="edit" i18n>
+            Editing a silence will expire the old silence and recreate it as a new silence
+          </cd-helper>
         </h3>
       </div>
 
@@ -107,6 +109,9 @@
           <label class="control-label col-sm-3"
                  for="starts-at">
             <ng-container i18n>Start time</ng-container>
+            <cd-helper i18n>
+              If the start time lies in the past the creation time will be used
+            </cd-helper>
             <span class="required"></span>
           </label>
           <div class="col-sm-9">
@@ -203,7 +208,7 @@
                             [form]="formDir"
                             id="submit"
                             type="button">
-            <span i18n>{edit, select, 1 {Edit} other {Create}} silence</span>
+            {{mode}}
           </cd-submit-button>
           <cd-back-button></cd-back-button>
         </div>

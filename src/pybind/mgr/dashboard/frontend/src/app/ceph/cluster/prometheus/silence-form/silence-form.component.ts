@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import * as _ from 'lodash';
 import { defineLocale } from 'ngx-bootstrap/chronos';
@@ -16,12 +16,14 @@ import { CdValidators } from '../../../../shared/forms/cd-validators';
 import { Permission } from '../../../../shared/models/permissions';
 import { PrometheusRule } from '../../../../shared/models/prometheus-alerts';
 import {
+  PrometheusSilence,
   PrometheusSilenceMatcher,
   PrometheusSilenceMatcherMatch
 } from '../../../../shared/models/prometheus-silence';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { PrometheusSilenceMatcherService } from '../../../../shared/services/prometheus-silence-matcher.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
+import { I18n } from '@ngx-translate/i18n-polyfill';
 
 @Component({
   selector: 'cd-prometheus-form',
@@ -31,8 +33,12 @@ import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-m
 export class SilenceFormComponent implements OnInit {
   permission: Permission;
   form: CdFormGroup;
+
   edit = false;
+  id: string; // Only set during edit
+
   recreate = false;
+  mode: string; // String representation of the current mode
   matchers: PrometheusSilenceMatcher[] = [];
   // Date formatting rules can be found here: https://momentjs.com/docs/#/displaying/format/
   // The problem with localised dates is that manual edits often end up as invalid date
@@ -40,17 +46,17 @@ export class SilenceFormComponent implements OnInit {
   bsConfig = { dateInputFormat: 'YYYY-MM-DDT HH:mm' };
   matcherConfig = [
     {
-      tooltip: 'Matcher name',
+      tooltip: this.i18n('Attribute name'),
       icon: 'paragraph',
       attribute: 'name'
     },
     {
-      tooltip: 'Prometheus expression',
+      tooltip: this.i18n('Value'),
       icon: 'terminal',
       attribute: 'value'
     },
     {
-      tooltip: 'Regular expression',
+      tooltip: this.i18n('Regular expression'),
       icon: 'magic',
       attribute: 'isRegex'
     }
@@ -58,7 +64,7 @@ export class SilenceFormComponent implements OnInit {
 
   matcherMatch: PrometheusSilenceMatcherMatch = undefined; // Will be set during matcher change
 
-  rules: PrometheusRule[] = []; // Predefined if prometheus is not defined
+  rules: PrometheusRule[]; // Predefined if prometheus is not defined
 
   constructor(
     private prometheusService: PrometheusService,
@@ -67,7 +73,9 @@ export class SilenceFormComponent implements OnInit {
     private localeService: BsLocaleService,
     private silenceMatcher: PrometheusSilenceMatcherService,
     private bsModalService: BsModalService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute,
+    private i18n: I18n
   ) {
     this.chooseMode();
     this.authenticate();
@@ -79,6 +87,35 @@ export class SilenceFormComponent implements OnInit {
   chooseMode() {
     this.edit = this.router.url.startsWith('/silence/edit');
     this.recreate = this.router.url.startsWith('/silence/recreate');
+    if (this.edit) {
+      this.mode = this.i18n('Edit silence');
+    } else if (this.recreate) {
+      this.mode = this.i18n('Recreate silence');
+    } else {
+      this.mode = this.i18n('Create silence');
+    }
+    if (this.edit || this.recreate) {
+      this.route.params.subscribe((params: { id: string }) => {
+        if (params.id) {
+          if (this.edit) {
+            this.id = params.id;
+          }
+          this.prometheusService.getSilences(params).subscribe((silences) => {
+            this.fillForm(silences[0]);
+          });
+        }
+      });
+    }
+  }
+
+  fillForm(silence: PrometheusSilence) {
+    if (this.edit) {
+      ['startsAt', 'endsAt'].forEach((attr) => this.form.silentSet(attr, new Date(silence[attr])));
+      this.changeDuration();
+    }
+    ['createdBy', 'comment'].forEach((attr) => this.form.silentSet(attr, silence[attr]));
+    this.matchers = silence.matchers;
+    this.validateMatchers();
   }
 
   authenticate() {
@@ -204,6 +241,7 @@ export class SilenceFormComponent implements OnInit {
     const modal = modalRef.content as SilenceMatcherModalComponent;
     modal.rules = this.rules;
     if (_.isNumber(index)) {
+      modal.editMode = true;
       modal.preFillControls(this.matchers[index]);
     }
     modalRef.content.submitAction.subscribe((matcher: PrometheusSilenceMatcher) => {
@@ -217,6 +255,14 @@ export class SilenceFormComponent implements OnInit {
     } else {
       this.matchers.push(matcher);
     }
+    this.validateMatchers();
+  }
+
+  private validateMatchers() {
+    if (!this.rules) {
+      window.setTimeout(() => this.validateMatchers(), 100);
+      return;
+    }
     this.matcherMatch = this.silenceMatcher.multiMatch(this.matchers, this.rules);
     this.form.markAsDirty();
     this.form.updateValueAndValidity();
@@ -228,6 +274,9 @@ export class SilenceFormComponent implements OnInit {
     payload.startsAt = payload.startsAt.toISOString();
     payload.endsAt = payload.endsAt.toISOString();
     payload.matchers = this.matchers;
+    if (this.edit) {
+      payload.id = this.id;
+    }
 
     this.prometheusService.setSilence(payload).subscribe(() => {
       this.router.navigate(['/silence']);

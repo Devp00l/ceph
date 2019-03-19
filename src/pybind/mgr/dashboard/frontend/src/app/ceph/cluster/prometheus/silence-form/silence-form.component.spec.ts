@@ -1,7 +1,7 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, fakeAsync, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router, Routes } from '@angular/router';
+import { ActivatedRoute, Router, Routes } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import * as _ from 'lodash';
@@ -35,6 +35,7 @@ describe('PrometheusFormComponent', () => {
   let fixtureH: FixtureHelper;
   let form: CdFormGroup;
   let originalDate;
+  let paramId;
   const baseTime = new Date('2022-02-22T00:00:00');
   const beginningDate = new Date('2022-02-22T00:00:12.35');
 
@@ -48,7 +49,13 @@ describe('PrometheusFormComponent', () => {
       SharedModule,
       ClusterModule
     ],
-    providers: [i18nProviders]
+    providers: [
+      i18nProviders,
+      {
+        provide: ActivatedRoute,
+        useValue: { params: { subscribe: (fn) => fn({ id: paramId }) } }
+      }
+    ]
   });
 
   beforeEach(() => {
@@ -137,23 +144,56 @@ describe('PrometheusFormComponent', () => {
   });
 
   describe('choose the right mode', () => {
-    const testChooseMode = (url: string, edit: boolean, recreate: boolean) => {
+    const testChooseMode = (url: string, edit: boolean, recreate: boolean, mode: string) => {
       Object.defineProperty(router, 'url', { value: url });
       component.chooseMode();
       expect(component.recreate).toBe(recreate);
       expect(component.edit).toBe(edit);
+      expect(component.mode).toBe(mode);
     };
 
+    beforeEach(() => {
+      spyOn(prometheusService, 'getSilences').and.callFake((params) =>
+        of([prometheus.createSilence(params.id)])
+      );
+    });
+
     it('should have no special mode activate by default', () => {
-      testChooseMode('/silence/add', false, false);
+      testChooseMode('/silence/add', false, false, 'Create silence');
+      expect(prometheusService.getSilences).not.toHaveBeenCalled();
+      expect(component.form.value).toEqual({
+        comment: null,
+        createdBy: null,
+        duration: '2h',
+        startsAt: baseTime,
+        endsAt: new Date('2022-02-22T02:00:00')
+      });
+    });
+
+    it('should be in edit mode if route includes edit', () => {
+      paramId = 'someNotExpiredId';
+      testChooseMode('/silence/edit/someNotExpiredId', true, false, 'Edit silence');
+      expect(prometheusService.getSilences).toHaveBeenCalled();
+      expect(component.form.value).toEqual({
+        comment: `A comment for ${paramId}`,
+        createdBy: `Creator of ${paramId}`,
+        duration: '1d',
+        startsAt: new Date('2022-02-22T22:22:00'),
+        endsAt: new Date('2022-02-23T22:22:00')
+      });
     });
 
     it('should be in recreation mode if route includes recreate', () => {
-      testChooseMode('/silence/edit/someNotExpiredId', true, false);
-    });
-
-    it('should be in recreation mode if route includes recreate', () => {
-      testChooseMode('/silence/recreate/someExpiredId', false, true);
+      paramId = 'someExpiredId';
+      testChooseMode('/silence/recreate/someExpiredId', false, true, 'Recreate silence');
+      expect(prometheusService.getSilences).toHaveBeenCalled();
+      expect(component.form.value).toEqual({
+        comment: `A comment for ${paramId}`,
+        createdBy: `Creator of ${paramId}`,
+        duration: '2h',
+        startsAt: baseTime,
+        endsAt: new Date('2022-02-22T02:00:00')
+      });
     });
   });
 
