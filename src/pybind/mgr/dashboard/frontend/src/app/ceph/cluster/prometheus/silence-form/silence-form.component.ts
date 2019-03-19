@@ -94,18 +94,24 @@ export class SilenceFormComponent implements OnInit {
     } else {
       this.mode = this.i18n('Create silence');
     }
-    if (this.edit || this.recreate) {
-      this.route.params.subscribe((params: { id: string }) => {
-        if (params.id) {
-          if (this.edit) {
-            this.id = params.id;
-          }
-          this.prometheusService.getSilences(params).subscribe((silences) => {
-            this.fillForm(silences[0]);
-          });
+    this.route.params.subscribe((params: { id: string }) => {
+      console.log(params)
+      const keys = Object.keys(params);
+      if (keys.length > 0 && !(this.edit || this.recreate)) {
+        keys.forEach((key) => this.setMatcher({
+          name: key,
+          value: params[key],
+          isRegex: false
+        }))
+      } else if (params.id) {
+        if (this.edit) {
+          this.id = params.id;
         }
-      });
-    }
+        this.prometheusService.getSilences(params).subscribe((silences) => {
+          this.fillForm(silences[0]);
+        });
+      }
+    });
   }
 
   fillForm(silence: PrometheusSilence) {

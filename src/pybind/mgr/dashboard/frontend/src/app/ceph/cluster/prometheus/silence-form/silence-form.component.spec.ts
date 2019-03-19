@@ -35,7 +35,7 @@ describe('PrometheusFormComponent', () => {
   let fixtureH: FixtureHelper;
   let form: CdFormGroup;
   let originalDate;
-  let paramId;
+  let params;
   const baseTime = new Date('2022-02-22T00:00:00');
   const beginningDate = new Date('2022-02-22T00:00:12.35');
 
@@ -53,12 +53,13 @@ describe('PrometheusFormComponent', () => {
       i18nProviders,
       {
         provide: ActivatedRoute,
-        useValue: { params: { subscribe: (fn) => fn({ id: paramId }) } }
+        useValue: { params: { subscribe: (fn) => fn(params) } }
       }
     ]
   });
 
   beforeEach(() => {
+    params = {};
     originalDate = Date;
     prometheusService = TestBed.get(PrometheusService);
     prometheus = new PrometheusHelper();
@@ -171,12 +172,12 @@ describe('PrometheusFormComponent', () => {
     });
 
     it('should be in edit mode if route includes edit', () => {
-      paramId = 'someNotExpiredId';
+      params = {id:'someNotExpiredId'};
       testChooseMode('/silence/edit/someNotExpiredId', true, false, 'Edit silence');
       expect(prometheusService.getSilences).toHaveBeenCalled();
       expect(component.form.value).toEqual({
-        comment: `A comment for ${paramId}`,
-        createdBy: `Creator of ${paramId}`,
+        comment: `A comment for ${params.id}`,
+        createdBy: `Creator of ${params.id}`,
         duration: '1d',
         startsAt: new Date('2022-02-22T22:22:00'),
         endsAt: new Date('2022-02-23T22:22:00')
@@ -184,12 +185,12 @@ describe('PrometheusFormComponent', () => {
     });
 
     it('should be in recreation mode if route includes recreate', () => {
-      paramId = 'someExpiredId';
+      params = {id:'someExpiredId'};
       testChooseMode('/silence/recreate/someExpiredId', false, true, 'Recreate silence');
       expect(prometheusService.getSilences).toHaveBeenCalled();
       expect(component.form.value).toEqual({
-        comment: `A comment for ${paramId}`,
-        createdBy: `Creator of ${paramId}`,
+        comment: `A comment for ${params.id}`,
+        createdBy: `Creator of ${params.id}`,
         duration: '2h',
         startsAt: baseTime,
         endsAt: new Date('2022-02-22T02:00:00')

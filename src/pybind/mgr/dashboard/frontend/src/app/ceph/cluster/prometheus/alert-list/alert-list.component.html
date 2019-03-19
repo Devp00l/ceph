@@ -7,6 +7,11 @@
           [customCss]="customCss"
           selectionType="single"
           (updateSelection)="updateSelection($event)">
+  <cd-table-actions class="table-actions"
+                    [permission]="permission"
+                    [selection]="selection"
+                    [tableActions]="tableActions">
+  </cd-table-actions>
   <tabset cdTableDetail *ngIf="selection.hasSingleSelection">
     <tab i18n-heading
          heading="Details">
