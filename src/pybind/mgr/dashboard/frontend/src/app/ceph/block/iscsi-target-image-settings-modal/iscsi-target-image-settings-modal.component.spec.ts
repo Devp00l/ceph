@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
+import { RouterTestingModule } from '@angular/router/testing';
 import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-helper';
 import { SharedModule } from '../../../shared/shared.module';
 import { IscsiTargetImageSettingsModalComponent } from './iscsi-target-image-settings-modal.component';
@@ -14,7 +15,7 @@ describe('IscsiTargetImageSettingsModalComponent', () => {
 
   configureTestBed({
     declarations: [IscsiTargetImageSettingsModalComponent],
-    imports: [SharedModule, FormsModule, HttpClientTestingModule],
+    imports: [SharedModule, FormsModule, HttpClientTestingModule, RouterTestingModule],
     providers: [BsModalRef, i18nProviders]
   });
 

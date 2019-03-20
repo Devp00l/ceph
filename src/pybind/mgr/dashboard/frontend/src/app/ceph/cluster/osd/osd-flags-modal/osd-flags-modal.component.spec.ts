@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { ToastModule } from 'ng2-toastr';
 import { BsModalRef, ModalModule } from 'ngx-bootstrap/modal';
 
+import { RouterTestingModule } from '@angular/router/testing';
 import { configureTestBed, i18nProviders } from '../../../../../testing/unit-test-helper';
 import { NotificationType } from '../../../../shared/enum/notification-type.enum';
 import { NotificationService } from '../../../../shared/services/notification.service';
@@ -30,6 +31,7 @@ describe('OsdFlagsModalComponent', () => {
       ModalModule.forRoot(),
       SharedModule,
       HttpClientTestingModule,
+      RouterTestingModule,
       ToastModule.forRoot()
     ],
     declarations: [OsdFlagsModalComponent],

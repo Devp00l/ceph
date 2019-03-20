@@ -4,6 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
+import { RouterTestingModule } from '@angular/router/testing';
 import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-helper';
 import { SharedModule } from '../../../shared/shared.module';
 import { IscsiTargetIqnSettingsModalComponent } from './iscsi-target-iqn-settings-modal.component';
@@ -14,7 +15,7 @@ describe('IscsiTargetIqnSettingsModalComponent', () => {
 
   configureTestBed({
     declarations: [IscsiTargetIqnSettingsModalComponent],
-    imports: [SharedModule, ReactiveFormsModule, HttpClientTestingModule],
+    imports: [SharedModule, ReactiveFormsModule, HttpClientTestingModule, RouterTestingModule],
     providers: [BsModalRef, i18nProviders]
   });
 

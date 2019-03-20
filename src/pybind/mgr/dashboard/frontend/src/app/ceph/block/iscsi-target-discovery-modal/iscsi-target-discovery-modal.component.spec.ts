@@ -9,6 +9,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ToastModule } from 'ng2-toastr';
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
+import { RouterTestingModule } from '@angular/router/testing';
 import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-helper';
 import { SharedModule } from '../../../shared/shared.module';
 import { IscsiTargetDiscoveryModalComponent } from './iscsi-target-discovery-modal.component';
@@ -21,7 +22,13 @@ describe('IscsiTargetDiscoveryModalComponent', () => {
 
   configureTestBed({
     declarations: [IscsiTargetDiscoveryModalComponent],
-    imports: [HttpClientTestingModule, ReactiveFormsModule, SharedModule, ToastModule.forRoot()],
+    imports: [
+      HttpClientTestingModule,
+      ReactiveFormsModule,
+      SharedModule,
+      ToastModule.forRoot(),
+      RouterTestingModule
+    ],
     providers: [i18nProviders, BsModalRef]
   });
 
