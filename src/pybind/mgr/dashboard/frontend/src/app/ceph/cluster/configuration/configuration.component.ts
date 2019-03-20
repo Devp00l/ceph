@@ -7,9 +7,9 @@ import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
 import { CdTableFetchDataContext } from '../../../shared/models/cd-table-fetch-data-context';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { Permission } from '../../../shared/models/permissions';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-configuration',
@@ -21,7 +21,6 @@ export class ConfigurationComponent implements OnInit {
   tableActions: CdTableAction[];
   data = [];
   columns: CdTableColumn[];
-  selection = new CdTableSelection();
   filters = [
     {
       label: this.i18n('Level'),
@@ -83,7 +82,8 @@ export class ConfigurationComponent implements OnInit {
   constructor(
     private authStorageService: AuthStorageService,
     private configurationService: ConfigurationService,
-    private i18n: I18n
+    private i18n: I18n,
+    public selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().configOpt;
     const getConfigOptUri = () =>
@@ -93,7 +93,7 @@ export class ConfigurationComponent implements OnInit {
       icon: 'fa-pencil',
       routerLink: () => `/configuration/edit/${getConfigOptUri()}`,
       name: this.i18n('Edit'),
-      disable: () => !this.isEditable(this.selection)
+      disable: () => !this.isEditable()
     };
     this.tableActions = [editAction];
   }
@@ -119,10 +119,6 @@ export class ConfigurationComponent implements OnInit {
     ];
   }
 
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
-  }
-
   getConfigurationList(context: CdTableFetchDataContext) {
     this.configurationService.getConfigData().subscribe(
       (data: any) => {
@@ -145,11 +141,11 @@ export class ConfigurationComponent implements OnInit {
     this.data = [...this.data];
   }
 
-  isEditable(selection: CdTableSelection): boolean {
-    if (selection.selected.length !== 1) {
+  private isEditable(): boolean {
+    if (this.selection.selected.length !== 1) {
       return false;
     }
 
-    return selection.selected[0].can_update_at_runtime;
+    return this.selection.selected[0].can_update_at_runtime;
   }
 }

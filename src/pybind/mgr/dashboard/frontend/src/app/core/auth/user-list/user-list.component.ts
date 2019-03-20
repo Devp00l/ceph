@@ -8,11 +8,11 @@ import { CriticalConfirmationModalComponent } from '../../../shared/components/c
 import { NotificationType } from '../../../shared/enum/notification-type.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { Permission } from '../../../shared/models/permissions';
 import { EmptyPipe } from '../../../shared/pipes/empty.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-user-list',
@@ -27,7 +27,6 @@ export class UserListComponent implements OnInit {
   tableActions: CdTableAction[];
   columns: CdTableColumn[];
   users: Array<any>;
-  selection = new CdTableSelection();
 
   modalRef: BsModalRef;
 
@@ -37,7 +36,8 @@ export class UserListComponent implements OnInit {
     private modalService: BsModalService,
     private notificationService: NotificationService,
     private authStorageService: AuthStorageService,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().user;
     const addAction: CdTableAction = {
@@ -94,10 +94,6 @@ export class UserListComponent implements OnInit {
     this.userService.list().subscribe((users: Array<any>) => {
       this.users = users;
     });
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   deleteUser(username: string) {

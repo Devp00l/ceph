@@ -4,9 +4,6 @@
           (fetchData)="loadFilesystems($event)"
           identifier="id"
           forceIdentifier="true"
-          selectionType="single"
-          (updateSelection)="updateSelection($event)">
-  <cd-cephfs-detail cdTableDetail
-                    [selection]="selection">
-  </cd-cephfs-detail>
+          selectionType="single">
+  <cd-cephfs-detail cdTableDetail></cd-cephfs-detail>
 </cd-table>

@@ -10,11 +10,11 @@ import { TableComponent } from '../../../shared/datatable/table/table.component'
 import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permissions } from '../../../shared/models/permissions';
 import { CephReleaseNamePipe } from '../../../shared/pipes/ceph-release-name.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { SummaryService } from '../../../shared/services/summary.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
@@ -35,7 +35,6 @@ export class IscsiTargetListComponent implements OnInit, OnDestroy {
   docsUrl: string;
   modalRef: BsModalRef;
   permissions: Permissions;
-  selection = new CdTableSelection();
   settings: any;
   status: string;
   summaryDataSubscription: Subscription;
@@ -58,6 +57,7 @@ export class IscsiTargetListComponent implements OnInit, OnDestroy {
     private cephReleaseNamePipe: CephReleaseNamePipe,
     private summaryservice: SummaryService,
     private modalService: BsModalService,
+    public selection: SelectionService,
     private taskWrapper: TaskWrapperService
   ) {
     this.permissions = this.authStorageService.getPermissions();
@@ -155,10 +155,6 @@ export class IscsiTargetListComponent implements OnInit, OnDestroy {
 
   taskFilter(task) {
     return ['iscsi/target/create', 'iscsi/target/edit', 'iscsi/target/delete'].includes(task.name);
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   deleteIscsiTargetModal() {

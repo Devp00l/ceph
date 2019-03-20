@@ -10,9 +10,9 @@ import { TableComponent } from '../../../shared/datatable/table/table.component'
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
 import { CdTableFetchDataContext } from '../../../shared/models/cd-table-fetch-data-context';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { Permission } from '../../../shared/models/permissions';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-rgw-bucket-list',
@@ -27,13 +27,13 @@ export class RgwBucketListComponent {
   tableActions: CdTableAction[];
   columns: CdTableColumn[] = [];
   buckets: object[] = [];
-  selection: CdTableSelection = new CdTableSelection();
 
   constructor(
     private authStorageService: AuthStorageService,
     private rgwBucketService: RgwBucketService,
     private bsModalService: BsModalService,
-    private i18n: I18n
+    private i18n: I18n,
+    public selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().rgw;
     this.columns = [
@@ -80,10 +80,6 @@ export class RgwBucketListComponent {
         context.error();
       }
     );
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   deleteAction() {

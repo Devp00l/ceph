@@ -12,12 +12,12 @@ import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { ViewCacheStatus } from '../../../shared/enum/view-cache-status.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { ExecutingTask } from '../../../shared/models/executing-task';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permission } from '../../../shared/models/permissions';
 import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
 import { RbdTrashPurgeModalComponent } from '../rbd-trash-purge-modal/rbd-trash-purge-modal.component';
@@ -43,7 +43,6 @@ export class RbdTrashListComponent implements OnInit {
   modalRef: BsModalRef;
   permission: Permission;
   retries: number;
-  selection = new CdTableSelection();
   tableActions: CdTableAction[];
   viewCacheStatusList: any[];
 
@@ -54,7 +53,8 @@ export class RbdTrashListComponent implements OnInit {
     private cdDatePipe: CdDatePipe,
     private taskListService: TaskListService,
     private taskWrapper: TaskWrapperService,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().rbdImage;
 
@@ -156,10 +156,6 @@ export class RbdTrashListComponent implements OnInit {
 
   taskFilter(task) {
     return ['rbd/trash/remove', 'rbd/trash/restore'].includes(task.name);
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   restoreModal() {

@@ -12,10 +12,10 @@ import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { ViewCacheStatus } from '../../../shared/enum/view-cache-status.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permission } from '../../../shared/models/permissions';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
 
@@ -36,7 +36,6 @@ export class NfsListComponent implements OnInit, OnDestroy {
 
   columns: CdTableColumn[];
   permission: Permission;
-  selection = new CdTableSelection();
   summaryDataSubscription: Subscription;
   viewCacheStatus: any;
   exports: any[];
@@ -60,6 +59,7 @@ export class NfsListComponent implements OnInit, OnDestroy {
     private i18n: I18n,
     private modalService: BsModalService,
     private nfsService: NfsService,
+    private selection: SelectionService,
     private taskListService: TaskListService,
     private taskWrapper: TaskWrapperService
   ) {
@@ -74,7 +74,7 @@ export class NfsListComponent implements OnInit, OnDestroy {
       permission: 'create',
       icon: 'fa-plus',
       routerLink: () => '/nfs/add',
-      canBePrimary: (selection: CdTableSelection) => !selection.hasSingleSelection,
+      canBePrimary: (s) => !s.hasSingleSelection,
       name: this.i18n('Add')
     };
 
@@ -186,10 +186,6 @@ export class NfsListComponent implements OnInit, OnDestroy {
 
   taskFilter(task) {
     return ['nfs/create', 'nfs/delete', 'nfs/edit'].includes(task.name);
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   deleteNfsModal() {

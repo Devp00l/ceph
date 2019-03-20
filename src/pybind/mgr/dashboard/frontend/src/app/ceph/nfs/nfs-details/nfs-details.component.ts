@@ -4,6 +4,7 @@ import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 
 import { CdTableSelection } from '../../../shared/models/cd-table-selection';
+import {SelectionService} from "../../../shared/services/selection.service";
 
 @Component({
   selector: 'cd-nfs-details',
@@ -11,13 +12,10 @@ import { CdTableSelection } from '../../../shared/models/cd-table-selection';
   styleUrls: ['./nfs-details.component.scss']
 })
 export class NfsDetailsComponent implements OnChanges {
-  @Input()
-  selection: CdTableSelection;
-
   selectedItem: any;
   data: any;
 
-  constructor(private i18n: I18n) {}
+  constructor(private i18n: I18n, public selection: SelectionService) {}
 
   ngOnChanges() {
     if (this.selection.hasSelection) {

@@ -1,7 +1,7 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, OnChanges } from '@angular/core';
 
 import { MgrModuleService } from '../../../../shared/api/mgr-module.service';
-import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
+import {SelectionService} from "../../../../shared/services/selection.service";
 
 @Component({
   selector: 'cd-mgr-module-details',
@@ -11,10 +11,7 @@ import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
 export class MgrModuleDetailsComponent implements OnChanges {
   module_config: any;
 
-  @Input()
-  selection: CdTableSelection;
-
-  constructor(private mgrModuleService: MgrModuleService) {}
+  constructor(private mgrModuleService: MgrModuleService, public selection: SelectionService) {}
 
   ngOnChanges() {
     if (this.selection.hasSelection) {

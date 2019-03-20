@@ -25,8 +25,8 @@ import { Observable, timer as observableTimer } from 'rxjs';
 import { CellTemplate } from '../../enum/cell-template.enum';
 import { CdTableColumn } from '../../models/cd-table-column';
 import { CdTableFetchDataContext } from '../../models/cd-table-fetch-data-context';
-import { CdTableSelection } from '../../models/cd-table-selection';
 import { CdUserConfig } from '../../models/cd-user-config';
+import { SelectionService } from '../../services/selection.service';
 
 @Component({
   selector: 'cd-table',
@@ -119,22 +119,6 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   @Output()
   fetchData = new EventEmitter();
 
-  /**
-   * This should be defined if you need access to the selection object.
-   *
-   * Each time the table selection changes, this will be triggered and
-   * the new selection object will be sent.
-   *
-   * @memberof TableComponent
-   */
-  @Output()
-  updateSelection = new EventEmitter();
-
-  /**
-   * Use this variable to access the selected row(s).
-   */
-  selection = new CdTableSelection();
-
   tableColumns: CdTableColumn[];
   cellTemplates: {
     [key: string]: TemplateRef<any>;
@@ -160,7 +144,13 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   // table columns after the browser window has been resized.
   private currentWidth: number;
 
-  constructor(private ngZone: NgZone, private cdRef: ChangeDetectorRef) {}
+  constructor(
+    public selection: SelectionService,
+    private ngZone: NgZone,
+    private cdRef: ChangeDetectorRef
+  ) {
+    selection.clear();
+  }
 
   ngOnInit() {
     this._addTemplates();
@@ -423,13 +413,12 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
     ) {
       return;
     }
-    this.selection.selected = newSelected;
+    this.selection.updateWith(newSelected);
     this.onSelect();
   }
 
   onSelect() {
     this.selection.update();
-    this.updateSelection.emit(_.clone(this.selection));
   }
 
   toggleColumn($event: any) {

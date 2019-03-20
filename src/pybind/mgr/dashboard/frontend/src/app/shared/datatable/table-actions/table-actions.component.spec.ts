@@ -4,8 +4,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { configureTestBed, PermissionHelper } from '../../../../testing/unit-test-helper';
 import { ComponentsModule } from '../../components/components.module';
 import { CdTableAction } from '../../models/cd-table-action';
-import { CdTableSelection } from '../../models/cd-table-selection';
 import { Permission } from '../../models/permissions';
+import { SelectionService } from '../../services/selection.service';
+import { SharedModule } from '../../shared.module';
 import { TableActionsComponent } from './table-actions.component';
 
 describe('TableActionsComponent', () => {
@@ -19,6 +20,7 @@ describe('TableActionsComponent', () => {
   let copyAction: CdTableAction;
   let scenario;
   let permissionHelper: PermissionHelper;
+  let selection: SelectionService;
 
   const setUpTableActions = () => {
     component.tableActions = [
@@ -38,15 +40,14 @@ describe('TableActionsComponent', () => {
   };
 
   configureTestBed({
-    declarations: [TableActionsComponent],
-    imports: [ComponentsModule, RouterTestingModule]
+    imports: [ComponentsModule, RouterTestingModule, SharedModule]
   });
 
   beforeEach(() => {
     addAction = {
       permission: 'create',
       icon: 'fa-plus',
-      canBePrimary: (selection: CdTableSelection) => !selection.hasSelection,
+      canBePrimary: (s) => !s.hasSelection,
       name: 'Add'
     };
     editAction = {
@@ -57,36 +58,35 @@ describe('TableActionsComponent', () => {
     copyAction = {
       permission: 'create',
       icon: 'fa-copy',
-      canBePrimary: (selection: CdTableSelection) => selection.hasSingleSelection,
-      disable: (selection: CdTableSelection) =>
-        !selection.hasSingleSelection || selection.first().cdExecuting,
+      canBePrimary: (s) => s.hasSingleSelection,
+      disable: (s) => !s.hasSingleSelection || s.first().cdExecuting,
       name: 'Copy'
     };
     deleteAction = {
       permission: 'delete',
       icon: 'fa-times',
-      canBePrimary: (selection: CdTableSelection) => selection.hasSelection,
-      disable: (selection: CdTableSelection) =>
-        !selection.hasSelection || selection.first().cdExecuting,
+      canBePrimary: (s) => s.hasSelection,
+      disable: (s) => !s.hasSelection || s.first().cdExecuting,
       name: 'Delete'
     };
     protectAction = {
       permission: 'update',
       icon: 'fa-lock',
       canBePrimary: () => false,
-      visible: (selection: CdTableSelection) => selection.hasSingleSelection,
+      visible: (s) => s.hasSingleSelection,
       name: 'Protect'
     };
     unprotectAction = {
       permission: 'update',
       icon: 'fa-unlock',
       canBePrimary: () => false,
-      visible: (selection: CdTableSelection) => !selection.hasSingleSelection,
+      visible: (s) => !s.hasSingleSelection,
       name: 'Unprotect'
     };
     fixture = TestBed.createComponent(TableActionsComponent);
     component = fixture.componentInstance;
-    component.selection = new CdTableSelection();
+    selection = TestBed.get(SelectionService);
+    selection.clear();
     component.permission = new Permission();
     component.permission.read = true;
     permissionHelper = new PermissionHelper(component.permission, () => getTableActionComponent());

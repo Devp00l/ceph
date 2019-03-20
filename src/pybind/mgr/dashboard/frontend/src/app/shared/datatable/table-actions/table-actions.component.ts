@@ -3,9 +3,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import * as _ from 'lodash';
 
 import { CdTableAction } from '../../models/cd-table-action';
-import { CdTableSelection } from '../../models/cd-table-selection';
 import { Permission } from '../../models/permissions';
-import {SelectionService} from "../../services/selection.service";
+import { SelectionService } from '../../services/selection.service';
 
 @Component({
   selector: 'cd-table-actions',
@@ -15,8 +14,6 @@ import {SelectionService} from "../../services/selection.service";
 export class TableActionsComponent implements OnInit {
   @Input()
   permission: Permission;
-  @Input()
-  selection: CdTableSelection;
   @Input()
   tableActions: CdTableAction[];
 
@@ -29,9 +26,7 @@ export class TableActionsComponent implements OnInit {
   // Array with all visible actions
   dropDownActions: CdTableAction[] = [];
 
-  constructor(public pselection: SelectionService) {
-    pselection.clear();
-  }
+  constructor(private selection: SelectionService) {}
 
   ngOnInit() {
     this.removeActionsWithNoPermissions();
@@ -61,7 +56,7 @@ export class TableActionsComponent implements OnInit {
 
   private updateDropDownActions() {
     this.dropDownActions = this.tableActions.filter((action) =>
-      action.visible ? action.visible(this.pselection) : action
+      action.visible ? action.visible(this.selection) : action
     );
   }
 
@@ -95,9 +90,9 @@ export class TableActionsComponent implements OnInit {
    */
   private showableAction(action: CdTableAction): boolean {
     const condition = action.canBePrimary;
-    const singleSelection = this.pselection.hasSingleSelection;
+    const singleSelection = this.selection.hasSingleSelection;
     const defaultCase = action.permission === 'create' ? !singleSelection : singleSelection;
-    return (condition && condition(this.pselection)) || (!condition && defaultCase);
+    return (condition && condition(this.selection)) || (!condition && defaultCase);
   }
 
   useRouterLink(action: CdTableAction): string {
@@ -121,9 +116,9 @@ export class TableActionsComponent implements OnInit {
     const permission = action.permission;
     const disable = action.disable;
     if (disable) {
-      return Boolean(disable(this.pselection));
+      return Boolean(disable(this.selection));
     }
-    const selected = this.pselection.hasSingleSelection && this.pselection.first();
+    const selected = this.selection.hasSingleSelection && this.selection.first();
     return Boolean(
       ['update', 'delete'].includes(permission) && (!selected || selected.cdExecuting)
     );

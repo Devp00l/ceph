@@ -11,12 +11,12 @@ import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { ViewCacheStatus } from '../../../shared/enum/view-cache-status.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { ExecutingTask } from '../../../shared/models/executing-task';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permissions } from '../../../shared/models/permissions';
 import { DimlessPipe } from '../../../shared/pipes/dimless.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
 import { PgCategoryService } from '../../shared/pg-category.service';
@@ -39,7 +39,6 @@ export class PoolListComponent implements OnInit {
 
   pools: Pool[] = [];
   columns: CdTableColumn[];
-  selection = new CdTableSelection();
   modalRef: BsModalRef;
   executingTasks: ExecutingTask[] = [];
   permissions: Permissions;
@@ -55,8 +54,12 @@ export class PoolListComponent implements OnInit {
     private modalService: BsModalService,
     private i18n: I18n,
     private pgCategoryService: PgCategoryService,
-    private dimlessPipe: DimlessPipe
+    private dimlessPipe: DimlessPipe,
+    public selection: SelectionService
   ) {
+    this.selection.selectObserver.subscribe(() => {
+      this.getSelectionTiers();
+    });
     this.permissions = this.authStorageService.getPermissions();
     this.tableActions = [
       {
@@ -169,11 +172,6 @@ export class PoolListComponent implements OnInit {
       (pool, task) => task.metadata['pool_name'] === pool.pool_name,
       { default: (task: ExecutingTask) => new Pool(task.metadata['pool_name']) }
     );
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
-    this.getSelectionTiers();
   }
 
   deletePoolModal() {

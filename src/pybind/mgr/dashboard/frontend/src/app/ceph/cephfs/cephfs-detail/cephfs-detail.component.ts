@@ -1,14 +1,14 @@
-import { Component, Input, OnChanges, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, OnChanges, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 
 import { CephfsService } from '../../../shared/api/cephfs.service';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { Permission } from '../../../shared/models/permissions';
 import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { DimlessPipe } from '../../../shared/pipes/dimless.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import {SelectionService} from "../../../shared/services/selection.service";
 
 @Component({
   selector: 'cd-cephfs-detail',
@@ -20,9 +20,6 @@ export class CephfsDetailComponent implements OnChanges, OnInit {
   poolUsageTpl: TemplateRef<any>;
   @ViewChild('activityTmpl')
   activityTmpl: TemplateRef<any>;
-
-  @Input()
-  selection: CdTableSelection;
 
   selectedItem: any;
 
@@ -44,7 +41,8 @@ export class CephfsDetailComponent implements OnChanges, OnInit {
     private cephfsService: CephfsService,
     private dimlessBinary: DimlessBinaryPipe,
     private dimless: DimlessPipe,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.grafanaPermission = this.authStorageService.getPermissions().grafana;
   }

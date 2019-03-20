@@ -11,10 +11,10 @@ import { TableComponent } from '../../../../shared/datatable/table/table.compone
 import { CellTemplate } from '../../../../shared/enum/cell-template.enum';
 import { CdTableAction } from '../../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
 import { Permissions } from '../../../../shared/models/permissions';
 import { DimlessBinaryPipe } from '../../../../shared/pipes/dimless-binary.pipe';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 import { OsdFlagsModalComponent } from '../osd-flags-modal/osd-flags-modal.component';
 import { OsdRecvSpeedModalComponent } from '../osd-recv-speed-modal/osd-recv-speed-modal.component';
 import { OsdReweightModalComponent } from '../osd-reweight-modal/osd-reweight-modal.component';
@@ -47,7 +47,6 @@ export class OsdListComponent implements OnInit {
   columns: CdTableColumn[];
 
   osds = [];
-  selection = new CdTableSelection();
 
   protected static collectStates(osd) {
     return [osd['in'] ? 'in' : 'out', osd['up'] ? 'up' : 'down'];
@@ -58,7 +57,8 @@ export class OsdListComponent implements OnInit {
     private osdService: OsdService,
     private dimlessBinaryPipe: DimlessBinaryPipe,
     private modalService: BsModalService,
-    private i18n: I18n
+    private i18n: I18n,
+    public selection: SelectionService
   ) {
     this.permissions = this.authStorageService.getPermissions();
     this.tableActions = [
@@ -184,10 +184,6 @@ export class OsdListComponent implements OnInit {
       return !!osd;
     }
     return false;
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   /**

@@ -12,12 +12,12 @@ import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { ViewCacheStatus } from '../../../shared/enum/view-cache-status.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permission } from '../../../shared/models/permissions';
 import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { DimlessPipe } from '../../../shared/pipes/dimless.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
 import { RbdParentModel } from '../rbd-form/rbd-parent.model';
@@ -48,7 +48,6 @@ export class RbdListComponent implements OnInit {
   columns: CdTableColumn[];
   retries: number;
   viewCacheStatusList: any[];
-  selection = new CdTableSelection();
 
   modalRef: BsModalRef;
 
@@ -76,6 +75,7 @@ export class RbdListComponent implements OnInit {
     private dimlessPipe: DimlessPipe,
     private modalService: BsModalService,
     private taskWrapper: TaskWrapperService,
+    public selection: SelectionService,
     private taskListService: TaskListService,
     private i18n: I18n
   ) {
@@ -89,7 +89,7 @@ export class RbdListComponent implements OnInit {
       permission: 'create',
       icon: 'fa-plus',
       routerLink: () => '/block/rbd/add',
-      canBePrimary: (selection: CdTableSelection) => !selection.hasSingleSelection,
+      canBePrimary: (s) => !s.hasSingleSelection,
       name: this.i18n('Add')
     };
     const editAction: CdTableAction = {
@@ -106,17 +106,15 @@ export class RbdListComponent implements OnInit {
     };
     const copyAction: CdTableAction = {
       permission: 'create',
-      canBePrimary: (selection: CdTableSelection) => selection.hasSingleSelection,
-      disable: (selection: CdTableSelection) =>
-        !selection.hasSingleSelection || selection.first().cdExecuting,
+      canBePrimary: (s) => s.hasSingleSelection,
+      disable: (s) => !s.hasSingleSelection || s.first().cdExecuting,
       icon: 'fa-copy',
       routerLink: () => `/block/rbd/copy/${getImageUri()}`,
       name: this.i18n('Copy')
     };
     const flattenAction: CdTableAction = {
       permission: 'update',
-      disable: (selection: CdTableSelection) =>
-        !selection.hasSingleSelection || selection.first().cdExecuting || !selection.first().parent,
+      disable: (s) => !s.hasSingleSelection || s.first().cdExecuting || !s.first().parent,
       icon: 'fa-chain-broken',
       click: () => this.flattenRbdModal(),
       name: this.i18n('Flatten')
@@ -266,10 +264,6 @@ export class RbdListComponent implements OnInit {
       'rbd/flatten',
       'rbd/trash/move'
     ].includes(task.name);
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   deleteRbdModal() {

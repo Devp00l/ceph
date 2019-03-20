@@ -1,4 +1,4 @@
-import { CdTableSelection } from './cd-table-selection';
+import {SelectionService} from "../services/selection.service";
 
 export class CdTableAction {
   // It's possible to assign a string
@@ -20,7 +20,7 @@ export class CdTableAction {
   // You can define the condition to disable the action.
   // By default all 'update' and 'delete' actions will only be enabled
   // if one selection is made and no task is running on the selected item.
-  disable?: (_: CdTableSelection) => boolean;
+  disable?: (_: SelectionService) => boolean;
 
   /**
    * Defines if the button can become 'primary' (displayed as button and not
@@ -29,9 +29,9 @@ export class CdTableAction {
    * items are selected. Also, all 'update' and 'delete' actions can be the
    * action button by default, provided only one item is selected.
    */
-  canBePrimary?: (_: CdTableSelection) => boolean;
+  canBePrimary?: (_: SelectionService) => boolean;
 
   // In some rare cases you want to hide a action that can be used by the user for example
   // if one action can lock the item and another action unlocks it
-  visible?: (_: CdTableSelection) => boolean;
+  visible?: (_: SelectionService) => boolean;
 }

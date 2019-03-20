@@ -21,12 +21,10 @@
           [columns]="columns"
           identifier="target_iqn"
           forceIdentifier="true"
-          selectionType="single"
-          (updateSelection)="updateSelection($event)">
+          selectionType="single">
   <div class="table-actions btn-toolbar">
     <cd-table-actions class="btn-group"
                       [permission]="permissions.iscsi"
-                      [selection]="selection"
                       [tableActions]="tableActions">
     </cd-table-actions>
 

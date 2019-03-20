@@ -11,7 +11,6 @@ import { CriticalConfirmationModalComponent } from '../../../shared/components/c
 import { CellTemplate } from '../../../shared/enum/cell-template.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { ExecutingTask } from '../../../shared/models/executing-task';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permission } from '../../../shared/models/permissions';
@@ -19,6 +18,7 @@ import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
 import { NotificationService } from '../../../shared/services/notification.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { SummaryService } from '../../../shared/services/summary.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { TaskManagerService } from '../../../shared/services/task-manager.service';
@@ -47,7 +47,6 @@ export class RbdSnapshotListComponent implements OnInit, OnChanges {
   rollbackTpl: TemplateRef<any>;
 
   permission: Permission;
-  selection = new CdTableSelection();
   tableActions: CdTableAction[];
 
   data: RbdSnapshotModel[];
@@ -74,6 +73,7 @@ export class RbdSnapshotListComponent implements OnInit, OnChanges {
     private notificationService: NotificationService,
     private summaryService: SummaryService,
     private taskListService: TaskListService,
+    private selection: SelectionService,
     private i18n: I18n
   ) {
     this.permission = this.authStorageService.getPermissions().rbdImage;
@@ -277,9 +277,5 @@ export class RbdSnapshotListComponent implements OnInit, OnChanges {
         submitAction: () => this._asyncTask('deleteSnapshot', 'rbd/snap/delete', snapshotName)
       }
     });
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 }

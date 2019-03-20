@@ -11,6 +11,7 @@ import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
 import { FinishedTask } from '../../../../shared/models/finished-task';
 import { Permission } from '../../../../shared/models/permissions';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 import { TaskWrapperService } from '../../../../shared/services/task-wrapper.service';
 import { PoolEditModeModalComponent } from '../pool-edit-mode-modal/pool-edit-mode-modal.component';
 import { PoolEditPeerModalComponent } from '../pool-edit-peer-modal/pool-edit-peer-modal.component';
@@ -28,7 +29,6 @@ export class PoolListComponent implements OnInit, OnDestroy {
 
   permission: Permission;
   tableActions: CdTableAction[];
-  selection = new CdTableSelection();
 
   modalRef: BsModalRef;
 
@@ -40,7 +40,8 @@ export class PoolListComponent implements OnInit, OnDestroy {
     private rbdMirroringService: RbdMirroringService,
     private modalService: BsModalService,
     private taskWrapper: TaskWrapperService,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.data = [];
     this.permission = this.authStorageService.getPermissions().rbdMirroring;
@@ -162,9 +163,5 @@ export class PoolListComponent implements OnInit, OnDestroy {
     if (pool && pool['peer_uuids']) {
       return pool['peer_uuids'][0];
     }
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 }

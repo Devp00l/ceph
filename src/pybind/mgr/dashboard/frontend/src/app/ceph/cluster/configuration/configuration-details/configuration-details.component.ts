@@ -1,9 +1,9 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, OnChanges } from '@angular/core';
 
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 
-import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
+import {SelectionService} from "../../../../shared/services/selection.service";
 
 @Component({
   selector: 'cd-configuration-details',
@@ -11,8 +11,6 @@ import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
   styleUrls: ['./configuration-details.component.scss']
 })
 export class ConfigurationDetailsComponent implements OnChanges {
-  @Input()
-  selection: CdTableSelection;
   selectedItem: any;
   flags = {
     runtime: this.i18n('The value can be updated at runtime.'),
@@ -25,7 +23,7 @@ export class ConfigurationDetailsComponent implements OnChanges {
     create: this.i18n('Option only affects daemon creation.')
   };
 
-  constructor(private i18n: I18n) {}
+  constructor(private i18n: I18n, public selection: SelectionService) {}
 
   ngOnChanges() {
     if (this.selection.hasSelection) {

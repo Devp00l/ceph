@@ -10,10 +10,10 @@ import { CellTemplate } from '../../../../shared/enum/cell-template.enum';
 import { CdTableAction } from '../../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../../shared/models/cd-table-column';
 import { CdTableFetchDataContext } from '../../../../shared/models/cd-table-fetch-data-context';
-import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
 import { Permission } from '../../../../shared/models/permissions';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { NotificationService } from '../../../../shared/services/notification.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-mgr-module-list',
@@ -30,13 +30,13 @@ export class MgrModuleListComponent {
   tableActions: CdTableAction[];
   columns: CdTableColumn[] = [];
   modules: object[] = [];
-  selection: CdTableSelection = new CdTableSelection();
 
   constructor(
     private authStorageService: AuthStorageService,
     private mgrModuleService: MgrModuleService,
     private notificationService: NotificationService,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().configOpt;
     this.columns = [
@@ -95,10 +95,6 @@ export class MgrModuleListComponent {
         context.error();
       }
     );
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   /**

@@ -97,6 +97,7 @@ describe('RbdSnapshotListComponent', () => {
         notificationService,
         null,
         null,
+        null,
         i18n
       );
       spyOn(rbdService, 'deleteSnapshot').and.returnValue(observableThrowError({ status: 500 }));

@@ -8,6 +8,7 @@ import { configureTestBed } from '../../../../testing/unit-test-helper';
 import { ComponentsModule } from '../../components/components.module';
 import { CellTemplate } from '../../enum/cell-template.enum';
 import { CdTableColumn } from '../../models/cd-table-column';
+import { ServicesModule } from '../../services/services.module';
 import { TableComponent } from '../table/table.component';
 import { TableKeyValueComponent } from './table-key-value.component';
 
@@ -17,7 +18,13 @@ describe('TableKeyValueComponent', () => {
 
   configureTestBed({
     declarations: [TableComponent, TableKeyValueComponent],
-    imports: [FormsModule, NgxDatatableModule, ComponentsModule, RouterTestingModule]
+    imports: [
+      FormsModule,
+      NgxDatatableModule,
+      ComponentsModule,
+      RouterTestingModule,
+      ServicesModule
+    ]
   });
 
   beforeEach(() => {

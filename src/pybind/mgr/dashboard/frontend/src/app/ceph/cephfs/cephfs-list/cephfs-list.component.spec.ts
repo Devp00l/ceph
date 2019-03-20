@@ -3,15 +3,11 @@ import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-helper';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsListComponent } from './cephfs-list.component';
 
 @Component({ selector: 'cd-cephfs-detail', template: '' })
-class CephfsDetailStubComponent {
-  @Input()
-  selection: CdTableSelection;
-}
+class CephfsDetailStubComponent {}
 
 describe('CephfsListComponent', () => {
   let component: CephfsListComponent;

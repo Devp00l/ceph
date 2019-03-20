@@ -5,11 +5,9 @@
               (fetchData)="getOsdList()"
               [columns]="columns"
               selectionType="single"
-              (updateSelection)="updateSelection($event)"
               [updateSelectionOnRefresh]="'never'">
       <div class="table-actions btn-toolbar">
         <cd-table-actions [permission]="permissions.osd"
-                          [selection]="selection"
                           class="btn-group"
                           [tableActions]="tableActions">
         </cd-table-actions>

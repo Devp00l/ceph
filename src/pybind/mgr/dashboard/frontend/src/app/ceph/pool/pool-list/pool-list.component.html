@@ -7,11 +7,9 @@
     <cd-table #table
               [data]="pools"
               [columns]="columns"
-              selectionType="single"
-              (updateSelection)="updateSelection($event)">
+              selectionType="single">
       <cd-table-actions class="table-actions"
                         [permission]="permissions.pool"
-                        [selection]="selection"
                         [tableActions]="tableActions">
       </cd-table-actions>
       <cd-pool-details cdTableDetail

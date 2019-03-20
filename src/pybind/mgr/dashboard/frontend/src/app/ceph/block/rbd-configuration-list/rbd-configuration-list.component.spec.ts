@@ -14,6 +14,7 @@ import { RbdConfigurationEntry } from '../../../shared/models/configuration';
 import { PipesModule } from '../../../shared/pipes/pipes.module';
 import { FormatterService } from '../../../shared/services/formatter.service';
 import { RbdConfigurationService } from '../../../shared/services/rbd-configuration.service';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { RbdConfigurationListComponent } from './rbd-configuration-list.component';
 
 describe('RbdConfigurationListComponent', () => {
@@ -35,7 +36,7 @@ describe('RbdConfigurationListComponent', () => {
       ErrorPanelComponent,
       SparklineComponent
     ],
-    providers: [FormatterService, RbdConfigurationService, i18nProviders]
+    providers: [FormatterService, SelectionService, RbdConfigurationService, i18nProviders]
   });
 
   beforeEach(() => {

@@ -104,8 +104,7 @@ export class PermissionHelper {
   }
 
   setSelection(selection: object[]) {
-    this.tableActions.selection.selected = selection;
-    this.tableActions.selection.update();
+    this.tableActions.selection.updateWith(selection);
   }
 }
 

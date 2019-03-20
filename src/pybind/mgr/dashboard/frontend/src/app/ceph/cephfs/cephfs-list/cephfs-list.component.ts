@@ -5,7 +5,6 @@ import { I18n } from '@ngx-translate/i18n-polyfill';
 import { CephfsService } from '../../../shared/api/cephfs.service';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
 import { CdTableFetchDataContext } from '../../../shared/models/cd-table-fetch-data-context';
-import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 
 @Component({
   selector: 'cd-cephfs-list',
@@ -15,9 +14,11 @@ import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 export class CephfsListComponent implements OnInit {
   columns: CdTableColumn[];
   filesystems: any = [];
-  selection = new CdTableSelection();
 
-  constructor(private cephfsService: CephfsService, private i18n: I18n) {}
+  constructor(
+    private cephfsService: CephfsService,
+    private i18n: I18n
+  ) {}
 
   ngOnInit() {
     this.columns = [
@@ -48,9 +49,5 @@ export class CephfsListComponent implements OnInit {
         context.error();
       }
     );
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 }

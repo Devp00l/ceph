@@ -10,6 +10,7 @@ import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-h
 import { RbdService } from '../../../shared/api/rbd.service';
 import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { ExecutingTask } from '../../../shared/models/executing-task';
+import { SelectionService } from '../../../shared/services/selection.service';
 import { SummaryService } from '../../../shared/services/summary.service';
 import { TaskListService } from '../../../shared/services/task-list.service';
 import { SharedModule } from '../../../shared/shared.module';
@@ -44,16 +45,6 @@ describe('RbdTrashListComponent', () => {
 
     summaryService['summaryDataSource'].next({ executingTasks: null });
     expect(rbdService.listTrash).toHaveBeenCalled();
-  });
-
-  it('should call updateSelection', () => {
-    const selection = new CdTableSelection();
-    selection.selected = ['foo'];
-    selection.update();
-
-    expect(component.selection.hasSelection).toBeFalsy();
-    component.updateSelection(selection);
-    expect(component.selection.hasSelection).toBeTruthy();
   });
 
   describe('handling of executing tasks', () => {

@@ -8,7 +8,9 @@ import * as _ from 'lodash';
 import { configureTestBed } from '../../../../testing/unit-test-helper';
 import { ComponentsModule } from '../../components/components.module';
 import { CdTableFetchDataContext } from '../../models/cd-table-fetch-data-context';
+import { ServicesModule } from '../../services/services.module';
 import { TableComponent } from './table.component';
+import {Route} from "@angular/router";
 
 describe('TableComponent', () => {
   let component: TableComponent;
@@ -33,7 +35,13 @@ describe('TableComponent', () => {
 
   configureTestBed({
     declarations: [TableComponent],
-    imports: [NgxDatatableModule, FormsModule, ComponentsModule, RouterTestingModule]
+    imports: [
+      NgxDatatableModule,
+      FormsModule,
+      ComponentsModule,
+      RouterTestingModule,
+      ServicesModule
+    ]
   });
 
   beforeEach(() => {

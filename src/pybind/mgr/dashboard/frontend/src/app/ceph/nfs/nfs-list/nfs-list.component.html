@@ -4,19 +4,15 @@
           [columns]="columns"
           identifier="id"
           forceIdentifier="true"
-          selectionType="single"
-          (updateSelection)="updateSelection($event)">
+          selectionType="single">
   <div class="table-actions btn-toolbar">
     <cd-table-actions class="btn-group"
                       [permission]="permission"
-                      [selection]="selection"
                       [tableActions]="tableActions">
     </cd-table-actions>
   </div>
 
-  <cd-nfs-details cdTableDetail
-                  [selection]="selection">
-  </cd-nfs-details>
+  <cd-nfs-details cdTableDetail></cd-nfs-details>
 </cd-table>
 
 <ng-template #nfsFsal
