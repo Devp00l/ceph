@@ -8,6 +8,7 @@ import { BsLocaleService } from 'ngx-bootstrap/datepicker';
 import { deLocale, ptBrLocale } from 'ngx-bootstrap/locale';
 import { BsModalService } from 'ngx-bootstrap/modal';
 
+import { I18n } from '@ngx-translate/i18n-polyfill';
 import { LocaleHelper } from '../../../../locale.helper';
 import { PrometheusService } from '../../../../shared/api/prometheus.service';
 import { CdFormBuilder } from '../../../../shared/forms/cd-form-builder';
@@ -22,8 +23,8 @@ import {
 } from '../../../../shared/models/prometheus-silence';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { PrometheusSilenceMatcherService } from '../../../../shared/services/prometheus-silence-matcher.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 import { SilenceMatcherModalComponent } from '../silence-matcher-modal/silence-matcher-modal.component';
-import { I18n } from '@ngx-translate/i18n-polyfill';
 
 @Component({
   selector: 'cd-prometheus-form',
@@ -75,7 +76,8 @@ export class SilenceFormComponent implements OnInit {
     private bsModalService: BsModalService,
     private router: Router,
     private route: ActivatedRoute,
-    private i18n: I18n
+    private i18n: I18n,
+    private selection: SelectionService
   ) {
     this.chooseMode();
     this.authenticate();
@@ -94,15 +96,18 @@ export class SilenceFormComponent implements OnInit {
     } else {
       this.mode = this.i18n('Create silence');
     }
+    console.log('selection', this.selection.selected);
     this.route.params.subscribe((params: { id: string }) => {
-      console.log(params)
+      console.log(params);
       const keys = Object.keys(params);
       if (keys.length > 0 && !(this.edit || this.recreate)) {
-        keys.forEach((key) => this.setMatcher({
-          name: key,
-          value: params[key],
-          isRegex: false
-        }))
+        keys.forEach((key) =>
+          this.setMatcher({
+            name: key,
+            value: params[key],
+            isRegex: false
+          })
+        );
       } else if (params.id) {
         if (this.edit) {
           this.id = params.id;
@@ -156,7 +161,7 @@ export class SilenceFormComponent implements OnInit {
         comment: [null, [Validators.required]]
       },
       {
-        validators: CdValidators.custom('matcherRequired', (rule) => this.matchers.length === 0)
+        validators: CdValidators.custom('matcherRequired', () => this.matchers.length === 0)
       }
     );
   }

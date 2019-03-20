@@ -15,6 +15,7 @@ import { Permission } from '../../../../shared/models/permissions';
 import { PrometheusSilence } from '../../../../shared/models/prometheus-silence';
 import { CdDatePipe } from '../../../../shared/pipes/cd-date.pipe';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-silences-list',
@@ -26,7 +27,6 @@ export class SilencesListComponent implements OnInit {
   columns: CdTableColumn[];
   tableActions: CdTableAction[];
   permission: Permission;
-  selection = new CdTableSelection();
   modalRef: BsModalRef;
   customCss = {
     'label label-danger': 'active',
@@ -41,7 +41,8 @@ export class SilencesListComponent implements OnInit {
     private prometheusService: PrometheusService,
     private modalService: BsModalService,
     private i18n: I18n,
-    private cdDatePipe: CdDatePipe
+    private cdDatePipe: CdDatePipe,
+    public selection: SelectionService
   ) {
     this.permission = this.authStorageService.getPermissions().prometheus;
   }
@@ -146,10 +147,6 @@ export class SilencesListComponent implements OnInit {
         );
       }
     });
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 
   expireSilence() {

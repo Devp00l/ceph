@@ -1,13 +1,13 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import { CellTemplate } from '../../../../shared/enum/cell-template.enum';
-import { CdTableColumn } from '../../../../shared/models/cd-table-column';
-import { CdTableSelection } from '../../../../shared/models/cd-table-selection';
-import { CdDatePipe } from '../../../../shared/pipes/cd-date.pipe';
-import { PrometheusAlertService } from '../../../../shared/services/prometheus-alert.service';
 import { CdTableAction } from '../../../../shared/models/cd-table-action';
+import { CdTableColumn } from '../../../../shared/models/cd-table-column';
 import { Permission } from '../../../../shared/models/permissions';
+import { CdDatePipe } from '../../../../shared/pipes/cd-date.pipe';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
+import { PrometheusAlertService } from '../../../../shared/services/prometheus-alert.service';
+import { SelectionService } from '../../../../shared/services/selection.service';
 
 @Component({
   selector: 'cd-prometheus-list',
@@ -20,7 +20,6 @@ export class AlertListComponent implements OnInit {
   columns: CdTableColumn[];
   tableActions: CdTableAction[];
   permission: Permission;
-  selection = new CdTableSelection();
   customCss = {
     'label label-danger': 'active',
     'label label-warning': 'unprocessed',
@@ -32,6 +31,7 @@ export class AlertListComponent implements OnInit {
     private authStorageService: AuthStorageService,
     public prometheusAlertService: PrometheusAlertService,
     private i18n: I18n,
+    public selection: SelectionService,
     private cdDatePipe: CdDatePipe
   ) {
     this.permission = this.authStorageService.getPermissions().prometheus;
@@ -41,11 +41,10 @@ export class AlertListComponent implements OnInit {
     this.tableActions = [
       {
         permission: 'create',
-        canBePrimary: (selection: CdTableSelection) =>
+        canBePrimary: (selection) =>
           selection.hasSingleSelection && selection.first().status.state === 'expired',
-        disable: (selection: CdTableSelection) =>
-          !selection.hasSingleSelection ||
-          selection.first().cdExecuting,
+        disable: (selection) =>
+          !selection.hasSingleSelection || selection.first().cdExecuting,
         icon: 'fa-plus',
         routerLink: () => ['/silence/add', this.selection.first().labels],
         name: this.i18n('Create silence')
@@ -83,9 +82,5 @@ export class AlertListComponent implements OnInit {
         cellTemplate: this.externalLinkTpl
       }
     ];
-  }
-
-  updateSelection(selection: CdTableSelection) {
-    this.selection = selection;
   }
 }

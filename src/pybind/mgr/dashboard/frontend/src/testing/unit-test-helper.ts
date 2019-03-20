@@ -226,12 +226,14 @@ export class PrometheusHelper {
       comment: `A comment for ${id}`,
       startsAt: new Date('2022-02-22T22:22:00').toISOString(),
       endsAt: new Date('2022-02-23T22:22:00').toISOString(),
-      matchers: [{
-        name: 'job',
-        value: 'someJob',
-        isRegex: true
-      }]
-    }
+      matchers: [
+        {
+          name: 'job',
+          value: 'someJob',
+          isRegex: true
+        }
+      ]
+    };
   }
 
   createRule(name, severity, alerts: any[]): PrometheusRule {

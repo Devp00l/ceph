@@ -5,6 +5,7 @@ import * as _ from 'lodash';
 import { CdTableAction } from '../../models/cd-table-action';
 import { CdTableSelection } from '../../models/cd-table-selection';
 import { Permission } from '../../models/permissions';
+import {SelectionService} from "../../services/selection.service";
 
 @Component({
   selector: 'cd-table-actions',
@@ -28,7 +29,9 @@ export class TableActionsComponent implements OnInit {
   // Array with all visible actions
   dropDownActions: CdTableAction[] = [];
 
-  constructor() {}
+  constructor(public pselection: SelectionService) {
+    pselection.clear();
+  }
 
   ngOnInit() {
     this.removeActionsWithNoPermissions();
@@ -58,7 +61,7 @@ export class TableActionsComponent implements OnInit {
 
   private updateDropDownActions() {
     this.dropDownActions = this.tableActions.filter((action) =>
-      action.visible ? action.visible(this.selection) : action
+      action.visible ? action.visible(this.pselection) : action
     );
   }
 
@@ -92,9 +95,9 @@ export class TableActionsComponent implements OnInit {
    */
   private showableAction(action: CdTableAction): boolean {
     const condition = action.canBePrimary;
-    const singleSelection = this.selection.hasSingleSelection;
+    const singleSelection = this.pselection.hasSingleSelection;
     const defaultCase = action.permission === 'create' ? !singleSelection : singleSelection;
-    return (condition && condition(this.selection)) || (!condition && defaultCase);
+    return (condition && condition(this.pselection)) || (!condition && defaultCase);
   }
 
   useRouterLink(action: CdTableAction): string {
@@ -118,9 +121,9 @@ export class TableActionsComponent implements OnInit {
     const permission = action.permission;
     const disable = action.disable;
     if (disable) {
-      return Boolean(disable(this.selection));
+      return Boolean(disable(this.pselection));
     }
-    const selected = this.selection.hasSingleSelection && this.selection.first();
+    const selected = this.pselection.hasSingleSelection && this.pselection.first();
     return Boolean(
       ['update', 'delete'].includes(permission) && (!selected || selected.cdExecuting)
     );

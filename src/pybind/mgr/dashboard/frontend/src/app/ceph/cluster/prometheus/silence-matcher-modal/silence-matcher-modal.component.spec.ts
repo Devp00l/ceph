@@ -3,6 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { BsModalRef } from 'ngx-bootstrap/modal';
 
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouterTestingModule } from '@angular/router/testing';
+import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
 import {
   configureTestBed,
   FixtureHelper,
@@ -11,7 +14,6 @@ import {
   PrometheusHelper
 } from '../../../../../testing/unit-test-helper';
 import { SharedModule } from '../../../../shared/shared.module';
-import { ClusterModule } from '../../cluster.module';
 import { SilenceMatcherModalComponent } from './silence-matcher-modal.component';
 
 describe('SilenceMatcherModalComponent', () => {
@@ -22,7 +24,14 @@ describe('SilenceMatcherModalComponent', () => {
   let prometheus: PrometheusHelper;
 
   configureTestBed({
-    imports: [HttpClientTestingModule, SharedModule, ClusterModule],
+    declarations: [SilenceMatcherModalComponent],
+    imports: [
+      HttpClientTestingModule,
+      SharedModule,
+      ReactiveFormsModule,
+      TypeaheadModule.forRoot(),
+      RouterTestingModule
+    ],
     providers: [BsModalRef, i18nProviders]
   });
 

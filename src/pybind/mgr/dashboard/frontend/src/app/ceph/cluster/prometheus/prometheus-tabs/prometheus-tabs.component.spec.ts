@@ -4,6 +4,7 @@ import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { TabsModule } from 'ngx-bootstrap/tabs';
 import { configureTestBed } from '../../../../../testing/unit-test-helper';
 import { ClusterModule } from '../../cluster.module';
 import { PrometheusTabsComponent } from './prometheus-tabs.component';
@@ -18,7 +19,8 @@ describe('PrometheusTabsComponent', () => {
   };
 
   configureTestBed({
-    imports: [RouterTestingModule, HttpClientTestingModule, ClusterModule]
+    declarations: [PrometheusTabsComponent],
+    imports: [RouterTestingModule, TabsModule.forRoot(), HttpClientTestingModule]
   });
 
   beforeEach(() => {

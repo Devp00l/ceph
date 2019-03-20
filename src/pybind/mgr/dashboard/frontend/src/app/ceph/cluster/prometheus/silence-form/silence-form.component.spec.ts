@@ -9,6 +9,8 @@ import { BsDatepickerDirective, BsDatepickerModule } from 'ngx-bootstrap/datepic
 import { BsModalService } from 'ngx-bootstrap/modal';
 import { of } from 'rxjs';
 
+import { ReactiveFormsModule } from '@angular/forms';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import {
   configureTestBed,
   FixtureHelper,
@@ -22,10 +24,12 @@ import { CdFormGroup } from '../../../../shared/forms/cd-form-group';
 import { Permission } from '../../../../shared/models/permissions';
 import { AuthStorageService } from '../../../../shared/services/auth-storage.service';
 import { SharedModule } from '../../../../shared/shared.module';
+import { DashboardComponent } from '../../../dashboard/dashboard/dashboard.component';
+import { PoolListComponent } from '../../../pool/pool-list/pool-list.component';
 import { ClusterModule } from '../../cluster.module';
 import { SilenceFormComponent } from './silence-form.component';
 
-describe('PrometheusFormComponent', () => {
+describe('SilenceFormComponent', () => {
   let component: SilenceFormComponent;
   let fixture: ComponentFixture<SilenceFormComponent>;
   let prometheusService: PrometheusService;
@@ -41,13 +45,14 @@ describe('PrometheusFormComponent', () => {
 
   const routes: Routes = [{ path: '404', component: NotFoundComponent }];
   configureTestBed({
-    declarations: [NotFoundComponent],
+    declarations: [NotFoundComponent, SilenceFormComponent],
     imports: [
       HttpClientTestingModule,
       RouterTestingModule.withRoutes(routes),
       BsDatepickerModule.forRoot(),
-      SharedModule,
-      ClusterModule
+      TooltipModule.forRoot(),
+      ReactiveFormsModule,
+      SharedModule
     ],
     providers: [
       i18nProviders,
@@ -172,7 +177,7 @@ describe('PrometheusFormComponent', () => {
     });
 
     it('should be in edit mode if route includes edit', () => {
-      params = {id:'someNotExpiredId'};
+      params = { id: 'someNotExpiredId' };
       testChooseMode('/silence/edit/someNotExpiredId', true, false, 'Edit silence');
       expect(prometheusService.getSilences).toHaveBeenCalled();
       expect(component.form.value).toEqual({
@@ -185,7 +190,7 @@ describe('PrometheusFormComponent', () => {
     });
 
     it('should be in recreation mode if route includes recreate', () => {
-      params = {id:'someExpiredId'};
+      params = { id: 'someExpiredId' };
       testChooseMode('/silence/recreate/someExpiredId', false, true, 'Recreate silence');
       expect(prometheusService.getSilences).toHaveBeenCalled();
       expect(component.form.value).toEqual({

@@ -44,7 +44,7 @@ describe('PrometheusAlertService', () => {
       const resp = { status: status, error: {} };
       service = new PrometheusAlertService(null, ({
         ifAlertmanagerConfigured: (fn) => fn(),
-        list: () => ({ subscribe: (_fn, err) => err(resp) }),
+        getAlerts: () => ({ subscribe: (_fn, err) => err(resp) }),
         disableAlertmanagerConfig: () => (disabledSetting = true)
       } as object) as PrometheusService);
       service.refresh();
