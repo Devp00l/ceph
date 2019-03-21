@@ -20,7 +20,7 @@ export class SettingsService {
           this.settings[url] = this.getSettingsValue(data);
           this.ifSettingConfigured(url, fn, elseFn);
         },
-        (resp) => {
+        () => {
           this.settings[url] = '';
         }
       );
