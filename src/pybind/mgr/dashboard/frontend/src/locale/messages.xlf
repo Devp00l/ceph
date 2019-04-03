@@ -485,7 +485,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-list/osd-list.component.html</context>
-          <context context-type="linenumber">73</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/block/rbd-images/rbd-images.component.html</context>
@@ -873,11 +873,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-flags-modal/osd-flags-modal.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-recv-speed-modal/osd-recv-speed-modal.component.html</context>
-          <context context-type="linenumber">89</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-reweight-modal/osd-reweight-modal.component.html</context>
@@ -941,11 +941,11 @@
         <source>Submit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-flags-modal/osd-flags-modal.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-recv-speed-modal/osd-recv-speed-modal.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-scrub-modal/osd-scrub-modal.component.html</context>
@@ -1039,7 +1039,7 @@
         <source><x id="INTERPOLATION" equiv-text="{{ action | titlecase }}"/> <x id="INTERPOLATION_1" equiv-text="{{ resource | upperFirst }}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-pg-scrub-modal/osd-pg-scrub-modal.component.html</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">app/core/auth/role-form/role-form.component.html</context>
@@ -1204,12 +1204,6 @@
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-scrub-modal/osd-scrub-modal.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-      </trans-unit><trans-unit id="4beacb61e2236200b5627677b5c0054d2b482ed4" datatype="html">
-        <source>Set Cluster-wide Flags</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">app/ceph/cluster/osd/osd-list/osd-list.component.html</context>
-          <context context-type="linenumber">25</context>
-        </context-group>
       </trans-unit><trans-unit id="b49d7877d24112d4bdfce9256edf61a007fae888" datatype="html">
         <source>OSDs List</source>
         <context-group purpose="location">
@@ -1221,20 +1215,20 @@
   <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ markActionDescription }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> if you proceed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-list/osd-list.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">82</context>
         </context-group>
       </trans-unit><trans-unit id="2d3a73f6440a7d896d74356fe0a725d731e71cbb" datatype="html">
         <source>The OSD is not safe to destroy!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-list/osd-list.component.html</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">91</context>
         </context-group>
       </trans-unit><trans-unit id="9d08116242443953ebbfe10bc2092e0a694b4adf" datatype="html">
         <source><x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>OSD <x id="INTERPOLATION" equiv-text="{{ selection.first().id }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> will be
   <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION_1" equiv-text="{{ actionDescription }}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> if you proceed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">app/ceph/cluster/osd/osd-list/osd-list.component.html</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit><trans-unit id="4f8b2bb476981727ab34ed40fde1218361f92c45" datatype="html">
         <source>Details</source>
@@ -5184,15 +5178,22 @@
           <context context-type="linenumber">1</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="9617df8e0504d997d0ff45b6c206a12becd13c37" datatype="html">
-        <source>Set Cluster-wide Recovery Priority</source>
+      <trans-unit id="43be3b1a806ff6b7eda5f9530b0595c081d2ad0f" datatype="html">
+        <source>Cluster-wide Flags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/ceph/cluster/osd/osd-list/osd-list.component.ts</context>
           <context context-type="linenumber">1</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="683d8cc9d5c713244744da681121762f602c1e92" datatype="html">
-        <source>PG scrub configuration</source>
+      <trans-unit id="a1334f5ad3090d59be02f4add0f3e98c8697c504" datatype="html">
+        <source>Cluster-wide Recovery Priority</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/ceph/cluster/osd/osd-list/osd-list.component.ts</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="359dad5a3a912ef9dece3194035020856805aa96" datatype="html">
+        <source>PG scrub</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/ceph/cluster/osd/osd-list/osd-list.component.ts</context>
           <context context-type="linenumber">1</context>
