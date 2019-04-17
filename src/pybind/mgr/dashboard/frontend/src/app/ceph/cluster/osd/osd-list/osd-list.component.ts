@@ -46,7 +46,7 @@ export class OsdListComponent implements OnInit {
   tableActions: CdTableAction[];
   bsModalRef: BsModalRef;
   columns: CdTableColumn[];
-  advancedTableActions: any[];
+  advancedTableActions: CdTableAction[];
 
   osds = [];
   selection = new CdTableSelection();
@@ -197,8 +197,6 @@ export class OsdListComponent implements OnInit {
         cellTransformation: CellTemplate.perSecond
       }
     ];
-
-    this.removeActionsWithNoPermissions();
   }
 
   get hasOsdSelected() {
@@ -333,17 +331,5 @@ export class OsdListComponent implements OnInit {
 
   configurePgScrubAction() {
     this.bsModalRef = this.modalService.show(OsdPgScrubModalComponent, {});
-  }
-
-  /**
-   * Removes all actions from 'advancedTableActions' that need a permission the user doesn't have.
-   */
-  private removeActionsWithNoPermissions() {
-    if (!this.permissions) {
-      this.advancedTableActions = [];
-      return;
-    }
-
-    this.advancedTableActions = this.advancedTableActions.filter((action) => action.permission);
   }
 }

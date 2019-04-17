@@ -9,7 +9,7 @@ export class CdTableAction {
   // This is the function that will be triggered on a click event if defined
   click?: Function;
 
-  permission: 'create' | 'update' | 'delete' | 'read';
+  permission: 'create' | 'update' | 'delete' | 'read' | boolean;
 
   // The name of the action
   name: string;

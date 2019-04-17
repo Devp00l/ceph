@@ -18,6 +18,8 @@ export class TableActionsComponent implements OnInit {
   selection: CdTableSelection;
   @Input()
   tableActions: CdTableAction[];
+  @Input()
+  btnColor: string = 'primary';
 
   // Use this if you just want to display a drop down button,
   // labeled with the given text, with all actions in it.
@@ -51,9 +53,10 @@ export class TableActionsComponent implements OnInit {
       return;
     }
     const permissions = Object.keys(this.permission).filter((key) => this.permission[key]);
-    this.tableActions = this.tableActions.filter((action) =>
-      permissions.includes(action.permission)
-    );
+    this.tableActions = this.tableActions.filter((action) => {
+      const perm = action.permission;
+      return _.isBoolean(perm) ? perm : permissions.includes(<string>perm);
+    });
   }
 
   private updateDropDownActions() {
@@ -115,14 +118,17 @@ export class TableActionsComponent implements OnInit {
    * @returns {Boolean}
    */
   disableSelectionAction(action: CdTableAction): Boolean {
-    const permission = action.permission;
     const disable = action.disable;
     if (disable) {
       return Boolean(disable(this.selection));
     }
+    const permission = action.permission;
+    if (_.isBoolean(permission)) {
+      return !permission;
+    }
     const selected = this.selection.hasSingleSelection && this.selection.first();
     return Boolean(
-      ['update', 'delete'].includes(permission) && (!selected || selected.cdExecuting)
+      ['update', 'delete'].includes(<string>permission) && (!selected || selected.cdExecuting)
     );
   }
 
