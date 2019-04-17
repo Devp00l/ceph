@@ -53,36 +53,37 @@ export class ConfigOptionComponent implements OnInit {
   }
 
   private loadStoredData() {
-    this.configService.filter(this.optionNames).subscribe((data: any) => {
-      data.forEach((configOption) => {
-        // Set general information and value
-        configOption.text = ConfigOptionComponent.optionNameToText(configOption.name);
-        configOption.value = _.find(configOption.value, (p) => {
-          return p.section === 'osd'; // TODO: Can handle any other section
-        });
-        if (configOption.value) {
-          this.optionsForm.get(configOption.name).setValue(configOption.value.value);
-        }
-
-        // Set type information
-        configOption.additionalTypeInfo = ConfigOptionTypes.getType(configOption.type);
-
-        // Set validators
+    this.configService.filter(this.optionNames).subscribe((data: any[]) => {
+      this.options = data.map((configOption) => {
         const typeValidators = ConfigOptionTypes.getTypeValidators(configOption);
-        if (typeValidators) {
-          configOption.patternHelpText = typeValidators.patternHelpText;
-          if ('max' in typeValidators && typeValidators.max !== '') {
-            configOption.maxValue = typeValidators.max;
-          }
-          if ('min' in typeValidators && typeValidators.min !== '') {
-            configOption.minValue = typeValidators.min;
-          }
-          this.optionsForm.get(configOption.name).setValidators(typeValidators.validators);
+        this.extendOption(configOption, typeValidators);
+        const formControl = this.optionsForm.get(configOption.name);
+        if (configOption.value) {
+          formControl.setValue(configOption.value.value);
         }
-
-        this.options.push(configOption);
+        if (typeValidators) {
+          formControl.setValidators(typeValidators.validators);
+        }
+        return configOption;
       });
     });
+  }
+
+  private extendOption(configOption, typeValidators?) {
+    configOption.text = ConfigOptionComponent.optionNameToText(configOption.name);
+    configOption.value = _.find(configOption.value, (p) => {
+      return p.section === 'osd'; // TODO: Can handle any other section
+    });
+    configOption.additionalTypeInfo = ConfigOptionTypes.getType(configOption.type);
+    if (typeValidators) {
+      configOption.patternHelpText = typeValidators.patternHelpText;
+      if ('max' in typeValidators && typeValidators.max !== '') {
+        configOption.maxValue = typeValidators.max;
+      }
+      if ('min' in typeValidators && typeValidators.min !== '') {
+        configOption.minValue = typeValidators.min;
+      }
+    }
   }
 
   saveValues() {
