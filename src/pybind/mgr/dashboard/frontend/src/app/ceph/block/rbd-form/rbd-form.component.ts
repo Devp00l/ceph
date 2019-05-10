@@ -20,6 +20,7 @@ import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
 import { FormatterService } from '../../../shared/services/formatter.service';
 import { TaskWrapperService } from '../../../shared/services/task-wrapper.service';
+import { RbdImageFeature } from './rbd-feature.interface';
 import { RbdFormCloneRequestModel } from './rbd-form-clone-request.model';
 import { RbdFormCopyRequestModel } from './rbd-form-copy-request.model';
 import { RbdFormCreateRequestModel } from './rbd-form-create-request.model';
@@ -51,8 +52,8 @@ export class RbdFormComponent implements OnInit {
   allPools: Array<string> = null;
   dataPools: Array<string> = null;
   allDataPools: Array<string> = null;
-  features: any;
-  featuresList = [];
+  features: { [key: string]: RbdImageFeature };
+  featuresList: RbdImageFeature[] = [];
   initializeConfigData = new EventEmitter<{
     initialData: RbdConfigurationEntry[];
     sourceType: RbdConfigurationSourceField;
