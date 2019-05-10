@@ -81,6 +81,7 @@ export class OsdRecvSpeedModalComponent implements OnInit {
 
   ngOnInit() {
     this.configService.filter(Object.keys(this.priorityAttrs)).subscribe((data: any) => {
+      console.log(data)
       const config_option_values = this.getCurrentValues(data);
       this.detectPriority(config_option_values.values, (priority) => {
         this.setPriority(priority);

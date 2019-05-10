@@ -33,7 +33,6 @@ describe('OsdRecvSpeedModalComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(OsdRecvSpeedModalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
 
     configOptions = [
       {
@@ -65,6 +64,63 @@ describe('OsdRecvSpeedModalComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should do stuff on init', () => {
+    const config = {
+      osd_max_backfills: {
+        name: 'osd_max_backfills',
+        type: 'uint',
+        desc: 'osd max desc ',
+        default: 1,
+        min: '',
+        max: '',
+        value: [{ section: 'osd', value: '10' }]
+      },
+      osd_recovery_max_active: {
+        name: 'osd_recovery_max_active',
+        type: 'uint',
+        desc: '',
+        default: 3,
+        min: '',
+        max: '',
+        value: [{ section: 'osd', value: '10' }]
+      },
+      osd_recovery_max_single_start: {
+        name: 'osd_recovery_max_single_start',
+        type: 'uint',
+        desc: '',
+        default: 1,
+        min: '',
+        max: '',
+        value: [{ section: 'osd', value: '10' }]
+      },
+      osd_recovery_sleep: {
+        name: 'osd_recovery_sleep',
+        type: 'float',
+        desc: 'osd recovery sleep desc',
+        default: 0,
+        min: '',
+        max: '',
+        value: [{ section: 'osd', value: '10' }]
+      }
+    };
+    spyOn(TestBed.get(ConfigurationService), 'get').and.callFake((attr) => of(config[attr]));
+    spyOn(component, 'detectPriority').and.callThrough();
+    fixture.detectChanges();
+    expect(component.detectPriority).toHaveBeenCalled();
+    expect(component.priorities.length).toBe(5);
+    expect(component.priorities[4]).toEqual({
+      name: 'custom',
+      text: 'Custom',
+      values: {
+        osd_max_backfills: 10,
+        osd_recovery_max_active: 10,
+        osd_recovery_max_single_start: 10,
+        osd_recovery_sleep: 10
+      }
+    });
+    expect(component.priorityAttrs).toEqual({})
   });
 
   describe('setPriority', () => {
