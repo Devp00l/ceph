@@ -136,7 +136,7 @@ export class RbdFormComponent implements OnInit {
         allowDisable: true
       },
       'fast-diff': {
-        desc: this.i18n('Fast diff (requires object-map)'),
+        desc: this.i18n('Fast diff (interlocked with object-map)'),
         requires: 'object-map',
         allowEnable: true,
         allowDisable: true
@@ -399,6 +399,26 @@ export class RbdFormComponent implements OnInit {
     });
   }
 
+  interlockCheck(key, checked) {
+    if (checked) {
+      _.filter(this.features, (f) => f.interlockedWith === key).forEach((feature) =>
+        this.rbdForm.get(feature.key).setValue(true, { emitEvent: false })
+      );
+    } else {
+      const feature = _.find(this.features, (f) => f.key === key);
+      if (feature.interlockedWith) {
+        // Don't skip emitting the event here, as it prevents `fast-diff` from
+        // becoming disabled when manually unchecked.  This is because it
+        // triggers an update on `object-map` and if `object-map` doesn't emit,
+        // `fast-diff` will not be automatically disabled.
+        this.rbdForm
+          .get('features')
+          .get(feature.interlockedWith)
+          .setValue(false);
+      }
+    }
+  }
+
   featureFormUpdate(key, checked) {
     if (checked) {
       const required = this.features[key].requires;
@@ -412,6 +432,7 @@ export class RbdFormComponent implements OnInit {
 
   watchDataFeatures(key, checked) {
     this.featureFormUpdate(key, checked);
+    this.interlockCheck(key, checked);
   }
 
   setFeatures(features: Array<string>) {
