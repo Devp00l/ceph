@@ -266,7 +266,7 @@ export class RbdFormComponent implements OnInit {
           }
         });
     }
-    _.each(this.features, (feature) => {
+    Object.values(this.features).forEach((feature) => {
       this.rbdForm
         .get(`features.${feature.key}`)
         .valueChanges.subscribe((value) => this.featureFormUpdate(feature.key, value));
@@ -352,12 +352,12 @@ export class RbdFormComponent implements OnInit {
     };
   }
 
-  protected getDependendChildFeatures(featureKey: string) {
-    return _.filter(this.features, (f) => f.requires === featureKey) || [];
+  protected getDependentChildFeatures(featureKey: string) {
+    return Object.values(this.features).filter((f) => f.requires === featureKey) || [];
   }
 
   deepBoxCheck(key, checked) {
-    const childFeatures = this.getDependendChildFeatures(key);
+    const childFeatures = this.getDependentChildFeatures(key);
     childFeatures.forEach((feature) => {
       const featureControl = this.rbdForm.get(feature.key);
       if (checked) {
@@ -369,13 +369,11 @@ export class RbdFormComponent implements OnInit {
       }
 
       const featureFormGroup = this.rbdForm.get('features');
-      if (this.mode === this.rbdFormMode.editing && featureFormGroup.get(feature.key).enabled) {
-        if (this.response.features_name.indexOf(feature.key) !== -1 && !feature.allowDisable) {
-          featureFormGroup.get(feature.key).disable();
-        } else if (
-          this.response.features_name.indexOf(feature.key) === -1 &&
-          !feature.allowEnable
-        ) {
+      const editing =
+        this.mode === this.rbdFormMode.editing && featureFormGroup.get(feature.key).enabled;
+      if (editing) {
+        const included = this.response.features_name.includes(feature.key); // This can only be determined if editing
+        if ((included && !feature.allowDisable) || (!included && !feature.allowEnable)) {
           featureFormGroup.get(feature.key).disable();
         }
       }
@@ -385,7 +383,7 @@ export class RbdFormComponent implements OnInit {
   interlockCheck(key, checked) {
     if (checked) {
       _.filter(this.features, (f) => f.interlockedWith === key).forEach((feature) =>
-        this.rbdForm.get(feature.key).setValue(true, { emitEvent: false })
+        this.rbdForm.silentSet(feature.key, true)
       );
     } else {
       const feature = _.find(this.features, (f) => f.key === key);

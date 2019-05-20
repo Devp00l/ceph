@@ -1,5 +1,5 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -21,6 +21,7 @@ describe('RbdFormComponent', () => {
   let component: RbdFormComponent;
   let fixture: ComponentFixture<RbdFormComponent>;
   let activatedRoute: ActivatedRouteStub;
+  let rbdService: RbdService;
 
   const queryNativeElement = (cssSelector) =>
     fixture.debugElement.query(By.css(cssSelector)).nativeElement;
@@ -49,6 +50,7 @@ describe('RbdFormComponent', () => {
     fixture = TestBed.createComponent(RbdFormComponent);
     component = fixture.componentInstance;
     activatedRoute = TestBed.get(ActivatedRoute);
+    rbdService = TestBed.get(RbdService);
   });
 
   it('should create', () => {
@@ -56,10 +58,7 @@ describe('RbdFormComponent', () => {
   });
 
   describe('should test decodeURIComponent of params', () => {
-    let rbdService: RbdService;
-
     beforeEach(() => {
-      rbdService = TestBed.get(RbdService);
       component.mode = RbdFormMode.editing;
       fixture.detectChanges();
       spyOn(rbdService, 'get').and.callThrough();
@@ -88,7 +87,7 @@ describe('RbdFormComponent', () => {
   });
 
   describe('tests for feature flags', () => {
-    let deepFlatten, layering, exclusiveLock, objectMap, journaling, fastDiff;
+    let features: { [key: string]: any };
 
     const setFeatures = (features) => {
       component.features = features;
@@ -96,28 +95,22 @@ describe('RbdFormComponent', () => {
       component.createForm();
     };
 
-    const resetFeatures = (
-      defaultFeatures = ['deep-flatten', 'exclusive-lock', 'fast-diff', 'layering', 'object-map']
-    ) => {
-      const rbdService = TestBed.get(RbdService);
-      spyOn(rbdService, 'defaultFeatures').and.returnValue(of(defaultFeatures));
+    beforeEach(() => {
+      spyOn(rbdService, 'defaultFeatures').and.returnValue(
+        of(['deep-flatten', 'exclusive-lock', 'fast-diff', 'layering', 'object-map'])
+      );
       component.router = { url: '/block/rbd/create' } as Router;
-      component.ngOnInit();
-      tick();
       fixture.detectChanges();
-    };
-
-    beforeEach(fakeAsync(() => {
-      resetFeatures();
-      [deepFlatten, layering, exclusiveLock, objectMap, journaling, fastDiff] = [
+      features = {};
+      [
         'deep-flatten',
         'layering',
         'exclusive-lock',
         'object-map',
         'journaling',
         'fast-diff'
-      ].map((f) => queryNativeElement(`#${f}`));
-    }));
+      ].forEach((f) => (features[f] = queryNativeElement(`#${f}`)));
+    });
 
     it('should convert feature flags correctly in the constructor', () => {
       setFeatures({
@@ -132,34 +125,23 @@ describe('RbdFormComponent', () => {
       ]);
     });
 
-    it('should initialize the checkboxes correctly', fakeAsync(() => {
-      expect(deepFlatten.disabled).toBe(false);
-      expect(layering.disabled).toBe(false);
-      expect(exclusiveLock.disabled).toBe(false);
-      expect(objectMap.disabled).toBe(false);
-      expect(journaling.disabled).toBe(false);
-      expect(fastDiff.disabled).toBe(false);
+    it('should initialize the checkboxes correctly', () => {
+      Object.values(features).forEach((f) => expect(f.disabled).toBe(false));
+      Object.keys(features).forEach((f) => expect(features[f].checked).toBe(f !== 'journaling'));
+    });
 
-      expect(deepFlatten.checked).toBe(true);
-      expect(layering.checked).toBe(true);
-      expect(exclusiveLock.checked).toBe(true);
-      expect(objectMap.checked).toBe(true);
-      expect(journaling.checked).toBe(false);
-      expect(fastDiff.checked).toBe(true);
-    }));
+    it('should disable features if their requirements are not met (exclusive-lock)', () => {
+      features['exclusive-lock'].click();
+      Object.keys(features).forEach((f) =>
+        expect(features[f].disabled).toBe(['object-map', 'journaling', 'fast-diff'].includes(f))
+      );
+    });
 
-    it('should disable features if their requirements are not met (exclusive-lock)', fakeAsync(() => {
-      exclusiveLock.click(); // unchecks exclusive-lock
-      tick();
-      expect(objectMap.disabled).toBe(true);
-      expect(journaling.disabled).toBe(true);
-      expect(fastDiff.disabled).toBe(true);
-    }));
-
-    it('should disable features if their requirements are not met (object-map)', fakeAsync(() => {
-      objectMap.click(); // unchecks object-map
-      tick();
-      expect(fastDiff.disabled).toBe(true);
-    }));
+    it('should disable features if their requirements are not met (object-map)', () => {
+      features['object-map'].click();
+      Object.keys(features).forEach((f) =>
+        expect(features[f].disabled).toBe(['fast-diff'].includes(f))
+      );
+    });
   });
 });
