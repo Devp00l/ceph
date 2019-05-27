@@ -113,7 +113,7 @@ class CephService(object):
                 s[stat_name] = {
                     'latest': stat_series[0][1],
                     'rate': get_rate(stat_series),
-                    'series': [i for i in stat_series]
+                    'rates': get_rates_from_data(stat_series)
                 }
             pool['stats'] = s
             pools_w_stats.append(pool)
