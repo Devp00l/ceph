@@ -15,6 +15,8 @@ import {
   PrometheusNotificationAlert
 } from '../app/shared/models/prometheus-alerts';
 import { _DEV_ } from '../unit-test-configuration';
+import { CdTableAction } from '../app/shared/models/cd-table-action';
+import { CdTableSelection } from '../app/shared/models/cd-table-selection';
 
 export function configureTestBed(configuration, useOldMethod?) {
   if (_DEV_ && !useOldMethod) {
@@ -39,14 +41,85 @@ export function configureTestBed(configuration, useOldMethod?) {
   }
 }
 
+export class ActionHelper {
+  constructor(private actions: CdTableAction[]) {}
+
+  checkDisable(
+    actionName: string,
+    {
+      empty,
+      single,
+      executing,
+      customExpectation,
+      customSelection
+    }: {
+      empty: boolean;
+      single: boolean;
+      executing: boolean;
+      customExpectation?: boolean;
+      customSelection?: object[];
+    }
+  ) {
+    const fn = (selection) => this.findAction(actionName).disable(selection);
+    this.testActionScenario([{ cdExecuting: 'someAction' }], fn, executing);
+    this.testActionScenario([{}], fn, single); // 'select non-executing item'
+    this.testActionScenario([], fn, empty); // 'no selection'
+    if (customSelection) {
+      this.testActionScenario(customSelection, fn, customExpectation);
+    }
+  }
+
+  private findAction(actionName: string): CdTableAction {
+    return _.find(this.actions, (action) => action.name === actionName);
+  }
+
+  testActionScenario(selected: object[], fn: Function, expected: any) {
+    const selection = new CdTableSelection();
+    selection.selected = selected;
+    selection.update();
+    if (expected) {
+      expect(fn(selection)).toBeTruthy();
+    } else {
+      expect(fn(selection)).toBeFalsy();
+    }
+  }
+}
+
 export class PermissionHelper {
   tableActions: TableActionsComponent;
   permission: Permission;
   getTableActionComponent: () => TableActionsComponent;
 
-  constructor(permission: Permission, getTableActionComponent: () => TableActionsComponent) {
+  constructor(permission: Permission, fixture: ComponentFixture<any>) {
     this.permission = permission;
-    this.getTableActionComponent = getTableActionComponent;
+    this.getTableActionComponent = () => {
+      fixture.detectChanges();
+      return fixture.debugElement.queryAll(By.directive(TableActionsComponent))[0]
+        .componentInstance;
+    };
+  }
+
+  megaTest() {
+    const getSecondAction = () =>
+      this.tableActions.tableActions.length > 1
+        ? this.tableActions.tableActions[1]
+        : this.tableActions.tableActions[0];
+
+    [[1,1,1],[1,1,0],[1,0,1],[1,0,0]].forEach((p)=> {
+      this.setPermissionsAndGetActions(p[0],p[1],p[2]);
+      this.testScenarios({
+        fn: () => this.tableActions.getCurrentButton(),
+        single: getSecondAction(),
+        empty: this.tableActions.tableActions[0]
+      });
+      /*
+      this.testScenarios({
+        fn: () => this.tableActions.disableSelectionAction(this.tableActions.getCurrentButton()),
+        single: false,
+        empty: false
+      });
+       */
+    })
   }
 
   setPermissionsAndGetActions(

@@ -12,6 +12,7 @@ import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { BehaviorSubject, of } from 'rxjs';
 
 import {
+  ActionHelper,
   configureTestBed,
   i18nProviders,
   PermissionHelper
@@ -197,26 +198,41 @@ describe('RbdListComponent', () => {
     });
   });
 
+  describe('action self tests', () => {
+    let actionHelper: ActionHelper;
+
+    beforeEach(() => {
+      actionHelper = new ActionHelper(component.tableActions);
+    });
+
+    it('test disable of flatten action', () => {
+      actionHelper.checkDisable('Flatten', {
+        empty: true,
+        single: true,
+        executing: true,
+        customSelection: [{ parent: true }],
+        customExpectation: false
+      });
+    });
+  });
+
   describe('show action buttons and drop down actions depending on permissions', () => {
     let tableActions: TableActionsComponent;
     let scenario: { fn; empty; single };
     let permissionHelper: PermissionHelper;
 
-    const getTableActionComponent = (): TableActionsComponent => {
-      fixture.detectChanges();
-      return fixture.debugElement.query(By.directive(TableActionsComponent)).componentInstance;
-    };
-
     beforeEach(() => {
-      permissionHelper = new PermissionHelper(component.permission, () =>
-        getTableActionComponent()
-      );
+      permissionHelper = new PermissionHelper(component.permission, fixture);
       scenario = {
         fn: () => tableActions.getCurrentButton().name,
         single: ActionLabels.EDIT,
         empty: ActionLabels.CREATE
       };
     });
+
+    it('tests all', () => {
+      permissionHelper.megaTest();
+    })
 
     describe('with all', () => {
       beforeEach(() => {
