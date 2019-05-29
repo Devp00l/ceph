@@ -105,21 +105,40 @@ export class PermissionHelper {
         ? this.tableActions.tableActions[1]
         : this.tableActions.tableActions[0];
 
-    [[1,1,1],[1,1,0],[1,0,1],[1,0,0]].forEach((p)=> {
-      this.setPermissionsAndGetActions(p[0],p[1],p[2]);
+    [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0]].forEach((p) => {
+      this.setPermissionsAndGetActions(p[0], p[1], p[2]);
       this.testScenarios({
         fn: () => this.tableActions.getCurrentButton(),
         single: getSecondAction(),
         empty: this.tableActions.tableActions[0]
       });
-      /*
+      this.testScenarios({
+        fn: () => this.tableActions.disableSelectionAction(this.tableActions.getCurrentButton()),
+        single:  this.tableActions.tableActions.length > 1 ? false : true,
+        singleExecuting: true,
+        empty: false
+      });
+    });
+    [[0, 1, 1], [0, 1, 0], [0, 0, 1]].forEach((p) => {
+      this.setPermissionsAndGetActions(p[0], p[1], p[2]);
+      this.testScenarios({
+        fn: () => this.tableActions.getCurrentButton(),
+        single: this.tableActions.tableActions[0],
+        empty: this.tableActions.tableActions[0]
+      });
       this.testScenarios({
         fn: () => this.tableActions.disableSelectionAction(this.tableActions.getCurrentButton()),
         single: false,
-        empty: false
+        singleExecuting: true,
+        empty: true
       });
-       */
-    })
+    });
+    this.setPermissionsAndGetActions(0,0,0);
+    this.testScenarios({
+      fn: () => this.tableActions.getCurrentButton(),
+      single: undefined,
+      empty: undefined
+    });
   }
 
   setPermissionsAndGetActions(
@@ -127,10 +146,12 @@ export class PermissionHelper {
     updatePerm: number | boolean,
     deletePerm: number | boolean
   ): TableActionsComponent {
+    console.log(createPerm, updatePerm, deletePerm)
     this.permission.create = Boolean(createPerm);
     this.permission.update = Boolean(updatePerm);
     this.permission.delete = Boolean(deletePerm);
     this.tableActions = this.getTableActionComponent();
+    this.tableActions.ngOnInit();
     return this.tableActions;
   }
 
@@ -147,19 +168,23 @@ export class PermissionHelper {
     singleExecuting?: any; // uses 'single' if not defined
     multiple?: any; // uses 'empty' if not defined
   }) {
+    console.log('multiple')
     this.testScenario(
       // 'multiple selections'
       [{}, {}],
       fn,
       _.isUndefined(multiple) ? empty : multiple
     );
+    console.log('exec')
     this.testScenario(
       // 'select executing item'
       [{ cdExecuting: 'someAction' }],
       fn,
       _.isUndefined(singleExecuting) ? single : singleExecuting
     );
+    console.log('single')
     this.testScenario([{}], fn, single); // 'select non-executing item'
+    console.log('empty')
     this.testScenario([], fn, empty); // 'no selection'
   }
 
