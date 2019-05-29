@@ -230,9 +230,29 @@ describe('RbdListComponent', () => {
       };
     });
 
-    it('tests all', () => {
-      permissionHelper.megaTest();
+    describe('mega tests', () => {
+      it('tests all', () => {
+        permissionHelper.megaTest();
+      })
+
+      it('tests all with names', () => {
+        permissionHelper.megaTest({
+          create: {
+            single: 'Copy',
+            empty: 'Create'
+          },
+          update: {
+            single: 'Edit',
+            empty: 'Edit'
+          },
+          delete: {
+            single: 'Delete',
+            empty: 'Delete'
+          },
+        });
+      })
     })
+
 
     describe('with all', () => {
       beforeEach(() => {

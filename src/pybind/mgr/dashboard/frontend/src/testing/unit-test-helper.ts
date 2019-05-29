@@ -85,6 +85,12 @@ export class ActionHelper {
   }
 }
 
+export class actionTest {
+  create: { single: string; empty: string };
+  update: { single: string; empty: string };
+  delete: { single: string; empty: string };
+}
+
 export class PermissionHelper {
   tac: TableActionsComponent;
   getTableActionComponent: () => TableActionsComponent;
@@ -102,19 +108,46 @@ export class PermissionHelper {
     };
   }
 
-  megaTest() {
+  megaTest(expected?: actionTest) {
     const getSecondAction = () =>
       this.tac.tableActions.length > 1 ? this.tac.tableActions[1] : this.tac.tableActions[0];
+    const getExpectedValues = (p) => {
+      const ka = {
+        create: 0,
+        update: 1,
+        delete: 2
+      };
+      const empty = ['create', 'update', 'delete'].find(
+        (key) => p[ka[key]] && expected[key] && expected[key].empty
+      );
+      const single = ['update', 'create', 'delete'].find(
+        (key) => p[ka[key]] && expected[key] && expected[key].single
+      );
+      return { single, empty };
+    };
+    const checkButton = () => this.tac.getCurrentButton();
+    const checkButtonName = () => this.tac.getCurrentButton().name;
+    const checkDisable = () => this.tac.disableSelectionAction(this.tac.getCurrentButton());
 
     [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0]].forEach((p) => {
       this.setPermissionsAndGetActions(p[0], p[1], p[2]);
       this.testScenarios({
-        fn: () => this.tac.getCurrentButton(),
+        fn: () => checkButton(),
         single: getSecondAction(),
         empty: this.tac.tableActions[0]
       });
+      if (expected) {
+        const expectedScenario = getExpectedValues(p);
+        if (expectedScenario.empty && expectedScenario.single) {
+          this.testScenarios(
+            _.merge(expectedScenario, {
+              fn: () => checkButtonName()
+            })
+          );
+        }
+      }
       this.testScenarios({
-        fn: () => this.tac.disableSelectionAction(this.tac.getCurrentButton()),
+        fn: () => checkDisable(),
         single: this.tac.tableActions.length > 1 ? false : true,
         singleExecuting: true,
         empty: false
@@ -123,12 +156,12 @@ export class PermissionHelper {
     [[0, 1, 1], [0, 1, 0], [0, 0, 1]].forEach((p) => {
       this.setPermissionsAndGetActions(p[0], p[1], p[2]);
       this.testScenarios({
-        fn: () => this.tac.getCurrentButton(),
+        fn: () => checkButton(),
         single: this.tac.tableActions[0],
         empty: this.tac.tableActions[0]
       });
       this.testScenarios({
-        fn: () => this.tac.disableSelectionAction(this.tac.getCurrentButton()),
+        fn: () => checkDisable(),
         single: false,
         singleExecuting: true,
         empty: true
@@ -136,7 +169,7 @@ export class PermissionHelper {
     });
     this.setPermissionsAndGetActions(0, 0, 0);
     this.testScenarios({
-      fn: () => this.tac.getCurrentButton(),
+      fn: () => checkButton(),
       single: undefined,
       empty: undefined
     });
@@ -152,7 +185,7 @@ export class PermissionHelper {
     this.permission.update = Boolean(updatePerm);
     this.permission.delete = Boolean(deletePerm);
     this.tac = this.getTableActionComponent();
-    this.tac.tableActions = [...this.tableActions]
+    this.tac.tableActions = [...this.tableActions];
     this.tac.ngOnInit();
     return this.tac;
   }
@@ -170,7 +203,7 @@ export class PermissionHelper {
     singleExecuting?: any; // uses 'single' if not defined
     multiple?: any; // uses 'empty' if not defined
   }) {
-    console.log('multiple')
+    console.log('multiple');
     this.testScenario(
       // 'multiple selections'
       [{}, {}],
