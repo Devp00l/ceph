@@ -222,7 +222,7 @@ describe('RbdListComponent', () => {
     let permissionHelper: PermissionHelper;
 
     beforeEach(() => {
-      permissionHelper = new PermissionHelper(component.permission, fixture);
+      permissionHelper = new PermissionHelper(component.permission, fixture, component.tableActions);
       scenario = {
         fn: () => tableActions.getCurrentButton().name,
         single: ActionLabels.EDIT,

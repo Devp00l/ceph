@@ -86,11 +86,14 @@ export class ActionHelper {
 }
 
 export class PermissionHelper {
-  tableActions: TableActionsComponent;
-  permission: Permission;
+  tac: TableActionsComponent;
   getTableActionComponent: () => TableActionsComponent;
 
-  constructor(permission: Permission, fixture: ComponentFixture<any>) {
+  constructor(
+    private permission: Permission,
+    private fixture: ComponentFixture<any>,
+    private tableActions: CdTableAction[]
+  ) {
     this.permission = permission;
     this.getTableActionComponent = () => {
       fixture.detectChanges();
@@ -101,20 +104,18 @@ export class PermissionHelper {
 
   megaTest() {
     const getSecondAction = () =>
-      this.tableActions.tableActions.length > 1
-        ? this.tableActions.tableActions[1]
-        : this.tableActions.tableActions[0];
+      this.tac.tableActions.length > 1 ? this.tac.tableActions[1] : this.tac.tableActions[0];
 
     [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0]].forEach((p) => {
       this.setPermissionsAndGetActions(p[0], p[1], p[2]);
       this.testScenarios({
-        fn: () => this.tableActions.getCurrentButton(),
+        fn: () => this.tac.getCurrentButton(),
         single: getSecondAction(),
-        empty: this.tableActions.tableActions[0]
+        empty: this.tac.tableActions[0]
       });
       this.testScenarios({
-        fn: () => this.tableActions.disableSelectionAction(this.tableActions.getCurrentButton()),
-        single:  this.tableActions.tableActions.length > 1 ? false : true,
+        fn: () => this.tac.disableSelectionAction(this.tac.getCurrentButton()),
+        single: this.tac.tableActions.length > 1 ? false : true,
         singleExecuting: true,
         empty: false
       });
@@ -122,20 +123,20 @@ export class PermissionHelper {
     [[0, 1, 1], [0, 1, 0], [0, 0, 1]].forEach((p) => {
       this.setPermissionsAndGetActions(p[0], p[1], p[2]);
       this.testScenarios({
-        fn: () => this.tableActions.getCurrentButton(),
-        single: this.tableActions.tableActions[0],
-        empty: this.tableActions.tableActions[0]
+        fn: () => this.tac.getCurrentButton(),
+        single: this.tac.tableActions[0],
+        empty: this.tac.tableActions[0]
       });
       this.testScenarios({
-        fn: () => this.tableActions.disableSelectionAction(this.tableActions.getCurrentButton()),
+        fn: () => this.tac.disableSelectionAction(this.tac.getCurrentButton()),
         single: false,
         singleExecuting: true,
         empty: true
       });
     });
-    this.setPermissionsAndGetActions(0,0,0);
+    this.setPermissionsAndGetActions(0, 0, 0);
     this.testScenarios({
-      fn: () => this.tableActions.getCurrentButton(),
+      fn: () => this.tac.getCurrentButton(),
       single: undefined,
       empty: undefined
     });
@@ -146,13 +147,14 @@ export class PermissionHelper {
     updatePerm: number | boolean,
     deletePerm: number | boolean
   ): TableActionsComponent {
-    console.log(createPerm, updatePerm, deletePerm)
+    console.log(createPerm, updatePerm, deletePerm);
     this.permission.create = Boolean(createPerm);
     this.permission.update = Boolean(updatePerm);
     this.permission.delete = Boolean(deletePerm);
-    this.tableActions = this.getTableActionComponent();
-    this.tableActions.ngOnInit();
-    return this.tableActions;
+    this.tac = this.getTableActionComponent();
+    this.tac.tableActions = [...this.tableActions]
+    this.tac.ngOnInit();
+    return this.tac;
   }
 
   testScenarios({
@@ -175,16 +177,16 @@ export class PermissionHelper {
       fn,
       _.isUndefined(multiple) ? empty : multiple
     );
-    console.log('exec')
+    console.log('exec');
     this.testScenario(
       // 'select executing item'
       [{ cdExecuting: 'someAction' }],
       fn,
       _.isUndefined(singleExecuting) ? single : singleExecuting
     );
-    console.log('single')
+    console.log('single');
     this.testScenario([{}], fn, single); // 'select non-executing item'
-    console.log('empty')
+    console.log('empty');
     this.testScenario([], fn, empty); // 'no selection'
   }
 
@@ -194,8 +196,8 @@ export class PermissionHelper {
   }
 
   setSelection(selection: object[]) {
-    this.tableActions.selection.selected = selection;
-    this.tableActions.selection.update();
+    this.tac.selection.selected = selection;
+    this.tac.selection.update();
   }
 }
 
