@@ -1,6 +1,15 @@
 import contextlib
 import socket
 
+try:
+    from more_itertools import pairwise
+except ImportError:
+    def pairwise(iterable):
+        from itertools import tee
+        a, b = tee(iterable)
+        next(b, None)
+        return zip(a, b)
+
 (
     BLACK,
     RED,
@@ -110,3 +119,24 @@ def get_default_addr():
         get_default_addr.result = result
         return result
 
+
+def get_rates_from_data(data):
+    if not data:
+        return [(0, 0.0)]
+    if len(data) == 1:
+        return [(data[0][0], 0.0)]
+    return [(data2[0], differentiate(data1, data2)) for data1, data2 in pairwise(data)]
+
+
+def differentiate(data1, data2):
+    """
+    >>> times = [0, 2]
+    >>> values = [100, 101]
+    >>> differentiate(*zip(times, values))
+    0.5
+    >>> times = [0, 2]
+    >>> values = [100, 99]
+    >>> differentiate(*zip(times, values))
+    0.5
+    """
+    return abs((data2[1] - data1[1]) / float(data2[0] - data1[0]))

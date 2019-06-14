@@ -6,15 +6,7 @@ import json
 import rados
 
 from mgr_module import CommandResult
-
-try:
-    from more_itertools import pairwise
-except ImportError:
-    def pairwise(iterable):
-        from itertools import tee
-        a, b = tee(iterable)
-        next(b, None)
-        return zip(a, b)
+from mgr_util import differentiate, get_rates_from_data
 
 from .. import logger, mgr
 
@@ -179,11 +171,7 @@ class CephService(object):
         :return: the derivative of mgr.get_counter()
         :rtype: list[tuple[int, float]]"""
         data = mgr.get_counter(svc_type, svc_name, path)[path]
-        if not data:
-            return [(0, 0.0)]
-        if len(data) == 1:
-            return [(data[0][0], 0.0)]
-        return [(data2[0], differentiate(data1, data2)) for data1, data2 in pairwise(data)]
+        return get_rates_from_data(data)
 
     @classmethod
     def get_rate(cls, svc_type, svc_name, path):
@@ -258,13 +246,3 @@ class CephService(object):
             'statuses': pg_summary['all'],
             'pgs_per_osd': pgs_per_osd,
         }
-
-
-def differentiate(data1, data2):
-    """
-    >>> times = [0, 2]
-    >>> values = [100, 101]
-    >>> differentiate(*zip(times, values))
-    0.5
-    """
-    return (data2[1] - data1[1]) / float(data2[0] - data1[0])
