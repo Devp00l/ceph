@@ -4,6 +4,13 @@ codecov:
 
 coverage:
   status:
+    patch:
+      default: off
+      dashboard:
+        target: auto
+        threshold: null
+        base: auto
+        flags: dashboard
     default: off
     dashboard:
       flags: dashboard
