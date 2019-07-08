@@ -30,6 +30,7 @@
   "private": true,
   "jest": {
     "preset": "jest-preset-angular",
+    "collectCoverage": true,
     "setupFilesAfterEnv": [
       "<rootDir>/src/setupJest.ts"
     ],
