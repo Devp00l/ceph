@@ -115,6 +115,17 @@ export class DimlessBinaryDirective implements OnInit {
     return size;
   }
 
+  doSomethingNew(a, b, c) { // This is untested!
+    if (a > b) {
+      return a + c;
+    } else if (a < c) {
+      return a + b;
+    } else if (b > c) {
+      return a + b - c;
+    }
+    return a + b + c;
+  }
+
   @HostListener('blur', ['$event.target.value'])
   onBlur(value) {
     this.setValue(value);
