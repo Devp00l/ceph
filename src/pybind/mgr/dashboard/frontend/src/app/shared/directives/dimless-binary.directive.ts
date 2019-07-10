@@ -115,7 +115,8 @@ export class DimlessBinaryDirective implements OnInit {
     return size;
   }
 
-  doSomethingNew(a, b, c) { // This is untested!
+  doSomethingNew(a, b, c) {
+    // This is untested!
     if (a > b) {
       return a + c;
     } else if (a < c) {
