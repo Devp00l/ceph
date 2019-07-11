@@ -14,13 +14,10 @@ coverage:
     patch:
       default: off
       dashboard:
-        target: auto
+        target: 10
         threshold: 0
         base: auto
         flags: dashboard
-    default: off
-    dashboard:
-      flags: dashboard
   precision: 3
   round: nearest
   range: "20...80"
@@ -30,9 +27,12 @@ parsers:
     enable_partials: yes
 
 comment:
-  layout: "header, diff"
-  behavior: default
-  require_changes: no
+  layout: "reach, diff, flags, files"
+  behavior: new
+  require_changes: yes
+  require_base: yes
+  require_head: yes
+  branches: null
 
 fixes:
   - "src/app::src/pybind/mgr/dashboard/frontend/src/app"
