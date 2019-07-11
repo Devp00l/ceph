@@ -5,20 +5,19 @@ codecov:
 coverage:
   precision: 4
   round: nearest
-  range: "20...80"
   status:
     project:
       default: off
       dashboard:
-        target: 90%
-        threshold: 0%
+        target: 90
+        threshold: 0
         base: auto
         flags: dashboard
     patch:
       default: off
       dashboard:
-        target: 20%
-        threshold: 0%
+        target: 100
+        threshold: 0
         base: auto
         flags: dashboard
 
@@ -27,14 +26,10 @@ parsers:
     enable_partials: yes
 
 comment:
-  layout: "reach, diff, flags, uncovered, files, tree"
   behavior: new
   require_changes: yes
   require_base: yes
   require_head: yes
-
-fixes:
-  - "src/app::src/pybind/mgr/dashboard/frontend/src/app"
 
 flags:
   dashboard:
