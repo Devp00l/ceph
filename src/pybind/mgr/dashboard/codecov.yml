@@ -8,17 +8,17 @@ coverage:
       default: off
       dashboard:
         target: auto
-        threshold: 0
+        threshold: 0%
         base: auto
         flags: dashboard
     patch:
       default: off
       dashboard:
-        target: 10
-        threshold: 0
+        target: 10%
+        threshold: 0%
         base: auto
         flags: dashboard
-  precision: 3
+  precision: 4
   round: nearest
   range: "20...80"
 
