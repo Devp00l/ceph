@@ -4,18 +4,25 @@ codecov:
 
 coverage:
   status:
+    project:
+      default: off
+      dashboard:
+        target: auto
+        threshold: 0
+        base: auto
+        flags: dashboard
     patch:
       default: off
       dashboard:
         target: auto
-        threshold: null
+        threshold: 0
         base: auto
         flags: dashboard
     default: off
     dashboard:
       flags: dashboard
   precision: 3
-  round: down
+  round: nearest
   range: "20...80"
 
 parsers:
