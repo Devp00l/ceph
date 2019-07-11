@@ -2,7 +2,7 @@
 # $1 = Pull request number in order to attach report
 
 function codecov {
-  bash <(curl -s https://codecov.io/bash) -y src/pybind/mgr/dashboard/codecov.yml -s . -t 70e39e58-fa7d-40bf-a428-0925eb779c33
+  bash <(curl -s https://codecov.io/bash) -F dashboard -t 70e39e58-fa7d-40bf-a428-0925eb779c33
 }
 
 if [ -n "$1" ]; then
