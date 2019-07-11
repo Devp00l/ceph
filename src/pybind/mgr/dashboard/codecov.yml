@@ -10,12 +10,17 @@ coverage:
     project:
       default: off
       dashboard:
-        target: auto
+        target: 90%
         threshold: 0%
         base: auto
         flags: dashboard
-    patch: no
-    changes: no
+    patch:
+      default: off
+      dashboard:
+        target: 20%
+        threshold: 0%
+        base: auto
+        flags: dashboard
 
 parsers:
   javascript:
