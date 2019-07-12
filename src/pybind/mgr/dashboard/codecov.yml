@@ -17,5 +17,4 @@ coverage:
         base: auto
 
 comment:
-  behavior: new
   require_changes: yes
