@@ -1,2 +1,8 @@
 coverage:
   precision: 4
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: null
+        base: auto
