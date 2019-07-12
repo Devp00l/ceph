@@ -7,16 +7,16 @@ coverage:
       default: off
       dashboard:
         target: auto
-        threshold: null
+        threshold: 0%
         base: auto
         flags: dashboard
+        path: "src/pybind/mgr/dashboard/"
     patch:
       default: off
       dashboard:
         target: 50%
-        threshold: null
+        threshold: 0%
         base: auto
 
 comment:
-  behavior: new
   require_changes: yes
