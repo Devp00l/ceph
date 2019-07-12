@@ -2,12 +2,15 @@ coverage:
   precision: 4
   status:
     project:
-      default:
+      default: off
+      dashboard:
         target: auto
         threshold: null
         base: auto
+        flags: dashboard
     patch:
-      default:
+      default: off
+      dashboard:
         target: 90%
         threshold: null
         base: auto
