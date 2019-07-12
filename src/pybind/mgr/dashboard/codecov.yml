@@ -1,3 +1,7 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
 coverage:
   precision: 4
   status:
@@ -14,3 +18,7 @@ coverage:
         target: 90%
         threshold: null
         base: auto
+
+comment:
+  behavior: new
+  require_changes: yes
