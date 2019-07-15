@@ -5,7 +5,7 @@ DASHBOARD=$PWD/src/pybind/mgr/dashboard
 
 echo "Run backend unit tests"
 cd $DASHBOARD
-pip3.7 install --user -r requirements.txt
+pip install --user -r requirements.txt
 tox `readlink -f tox.ini` -e "py3-cov" || failed=true
 
 
