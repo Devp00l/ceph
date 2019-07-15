@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 failed=false
-: ${CEPH_ROOT:=$PWD}
+: ${CEPH_ROOT:=$PWD/../../../../}
 cd $CEPH_ROOT/src/pybind/mgr/dashboard/frontend
-npm install
-
 if [ `uname` != "FreeBSD" ]; then
   .  $CEPH_ROOT/build/src/pybind/mgr/dashboard/node-env/bin/activate
 fi
@@ -45,8 +43,7 @@ fixed, please check the I18N suggestions in 'HACKING.rst':\n"
 fi
 
 if [ `uname` != "FreeBSD" ]; then
-  echo $(uname)
-  #deactivate
+  deactivate
 fi
 
 if [ "$failed" = "true" ]; then

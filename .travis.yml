@@ -1,9 +1,5 @@
-install: pip install --user -r src/pybind/mgr/dashboard/requirements.txt
-
 script:
-  - ./src/pybind/mgr/dashboard/run-frontend-unittests.sh
-  - ./src/pybind/mgr/dashboard/run-tox.sh
-  - ./src/pybind/mgr/dashboard/update-codecov.sh
+  - ./src/pybind/mgr/dashboard/run-by-travis.sh
 
 git:
   submodules: false
