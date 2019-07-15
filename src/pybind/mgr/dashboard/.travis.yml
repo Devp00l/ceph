@@ -1,7 +1,0 @@
-language:
-  - node_js
-  - python
-
-script:
-  - ./run-frontend-unittests.sh
-  - ./run-tox.sh

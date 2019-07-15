@@ -1,0 +1,3 @@
+script:
+  - ./src/pybind/mgr/dashboard/run-frontend-unittests.sh
+  - ./src/pybind/mgr/dashboard/run-tox.sh
