@@ -4,6 +4,10 @@ python:
 node_js:
   - "10.15.0"
 
+install:
+  - pip install --user --upgrade pip
+  - pip install --user -r src/pybind/mgr/dashboard/requirements.txt
+
 script:
   - ./src/pybind/mgr/dashboard/run-by-travis.sh
 

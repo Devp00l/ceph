@@ -5,7 +5,8 @@ DASHBOARD=$PWD/src/pybind/mgr/dashboard
 
 echo "Run backend unit tests"
 cd $DASHBOARD
-pip install --user -r requirements.txt
+: ${CEPH_BUILD_DIR:=$DASHBOARD/.tox}
+mkdir $CEPH_BUILD_DIR
 tox `readlink -f tox.ini` -e "py3-cov" || failed=true
 
 
