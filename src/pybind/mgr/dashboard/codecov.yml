@@ -11,12 +11,7 @@ coverage:
         base: auto
         flags: dashboard
         path: "src/pybind/mgr/dashboard/"
-    patch:
-      default: off
-      dashboard:
-        target: 50%
-        threshold: 0%
-        base: auto
+    patch: no
 
 comment:
   require_changes: yes
