@@ -10,7 +10,7 @@ import cherrypy
 from cherrypy._cptools import HandlerWrapperTool
 from cherrypy.test import helper
 
-from mgr_module import CLICommand, MgrModule
+from mgr_module import CLICommand
 
 from .. import logger, mgr
 from ..controllers import json_error_page, generate_controller_routes

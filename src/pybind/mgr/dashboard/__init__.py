@@ -35,7 +35,8 @@ if 'UNITTEST' not in os.environ:
     mgr = _ModuleProxy()
     logger = _LoggerProxy()
 
-    from .module import Module, StandbyModule
+    # DO NOT REMOVE: required for ceph-mgr to load a module
+    from .module import Module, StandbyModule  # noqa: F401
 else:
     import logging
     logging.basicConfig(level=logging.DEBUG)

@@ -562,25 +562,25 @@ Alternatively, you can use Python's native package installation method::
   $ pip install tox
   $ pip install coverage
 
-To run the tests, run ``run-tox.sh`` in the dashboard directory (where
+To run the tests, run ``run_tox.sh`` in the dashboard directory (where
 ``tox.ini`` is located)::
 
   ## Run Python 2+3 tests+lint commands:
-  $ ./run-tox.sh
+  $ ../../../script/run_tox.sh --tox-env py27,py3,lint,check
 
   ## Run Python 3 tests+lint commands:
-  $ WITH_PYTHON2=OFF ./run-tox.sh
+  $ ../../../script/run_tox.sh --tox-env py3,lint,check
 
   ## Run Python 3 arbitrary command (e.g. 1 single test):
-  $ WITH_PYTHON2=OFF ./run-tox.sh pytest tests/test_rgw_client.py::RgwClientTest::test_ssl_verify
+  $ WITH_PYTHON2=OFF ../../../script/run_tox.sh --tox-env py3 "" tests/test_rgw_client.py::RgwClientTest::test_ssl_verify
 
-You can also run tox instead of ``run-tox.sh``::
+You can also run tox instead of ``run_tox.sh``::
 
   ## Run Python 3 tests command:
-  $ CEPH_BUILD_DIR=.tox tox -e py3-cov
+  $ tox -e py3
 
   ## Run Python 3 arbitrary command (e.g. 1 single test):
-  $ CEPH_BUILD_DIR=.tox tox -e py3-run pytest tests/test_rgw_client.py::RgwClientTest::test_ssl_verify
+  $ tox -e py3 tests/test_rgw_client.py::RgwClientTest::test_ssl_verify
 
 We also collect coverage information from the backend code when you run tests. You can check the
 coverage information provided by the tox output, or by running the following

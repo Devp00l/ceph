@@ -50,7 +50,7 @@ if sys.version_info < (3, 0):
     GeneratorContextManager.__call__ = call
 
     # pylint: disable=function-redefined
-    def contextmanager(func):
+    def contextmanager(func):  # noqa: F811
 
         @wraps(func)
         def helper(*args, **kwds):
