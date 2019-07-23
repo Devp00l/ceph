@@ -9,13 +9,12 @@ node_js:
 
 before_install:
   - sudo apt-get update
-  - sudo apt-get install xmlsec1
+  - sudo apt-get install xmlsec1 libxmlsec1-dev
 
 install:
-  - pip install --user --upgrade pip
-  - pip install --user tox-travis
-  - pip install --user xmlsec
-  - pip install --user -r src/pybind/mgr/dashboard/requirements.txt
+  - sudo pip install pip
+  - sudo pip install tox-travis
+  - sudo pip install -r src/pybind/mgr/dashboard/requirements.txt
 
 script:
   - ./src/pybind/mgr/dashboard/run-by-travis.sh
