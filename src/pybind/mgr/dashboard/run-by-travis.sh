@@ -5,8 +5,9 @@ DASHBOARD=$PWD/src/pybind/mgr/dashboard
 
 echo "Run backend unit tests"
 cd $DASHBOARD
-: ${CEPH_BUILD_DIR:=$DASHBOARD/.tox}
+: ${CEPH_BUILD_DIR:=$DASHBOARD/../.tox}
 mkdir $CEPH_BUILD_DIR
+# Somehow I have to build rados first :/
 tox `readlink -f tox.ini` -e "py3-cov" || failed=true
 
 
