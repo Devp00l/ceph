@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from .helper import DashboardTestCase
+from .helper import DashboardTestCase, JObj, JList, JLeaf
 
 
 class CephfsTest(DashboardTestCase):
@@ -71,3 +71,68 @@ class CephfsTest(DashboardTestCase):
         self.assertIn('mdsmap', cephfs)
         self.assertIsNotNone(cephfs['id'])
         self.assertIsNotNone(cephfs['mdsmap'])
+
+    def test_ls_mk_rm_dir(self):
+        data = self._get("/api/cephfs/1/ls_dir", params={'path': '/'})
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 0)
+
+        self._post("/api/cephfs/1/mk_dirs", params={'path': '/pictures/birds'})
+        self.assertStatus(200)
+
+        data = self._get("/api/cephfs/1/ls_dir", params={'path': '/pictures'})
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+
+        self._post("/api/cephfs/1/rm_dir", params={'path': '/pictures'})
+        self.assertStatus(500)
+        self._post("/api/cephfs/1/rm_dir", params={'path': '/pictures/birds'})
+        self.assertStatus(200)
+        self._post("/api/cephfs/1/rm_dir", params={'path': '/pictures'})
+        self.assertStatus(200)
+
+        data = self._get("/api/cephfs/1/ls_dir", params={'path': '/'})
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 0)
+
+    def test_snapshots(self):
+        self._post("/api/cephfs/1/mk_dirs", params={'path': '/movies/dune'})
+        self.assertStatus(200)
+
+        self._post("/api/cephfs/1/mk_snapshot",
+                   params={'path': '/movies/dune', 'name': 'test'})
+        self.assertStatus(200)
+
+        data = self._get("/api/cephfs/1/ls_dir", params={'path': '/movies'})
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), 1)
+        self.assertSchema(data[0], JObj(sub_elems={
+            'name': JLeaf(str),
+            'path': JLeaf(str),
+            'snapshots': JList(JObj(sub_elems={
+                'name': JLeaf(str),
+                'path': JLeaf(str),
+                'created': JLeaf(str)
+            })),
+            'quotas': JObj(sub_elems={
+                'max_bytes': JLeaf(int),
+                'max_files': JLeaf(int)
+            })
+        }))
+        snapshots = data[0]['snapshots']
+        self.assertEqual(len(snapshots), 1)
+        snapshot = snapshots[0]
+        self.assertEqual(snapshot['name'], "test")
+        self.assertEqual(snapshot['path'], "/movies/dune/.snap/test")
+
+        self._post("/api/cephfs/1/rm_snapshot",
+                   params={'path': '/movies/dune', 'name': 'test'})
+        self.assertStatus(200)
+
+        data = self._get("/api/cephfs/1/ls_dir", params={'path': '/movies'})
+        self.assertStatus(200)
+        self.assertEqual(len(data[0]['snapshots']), 0)
