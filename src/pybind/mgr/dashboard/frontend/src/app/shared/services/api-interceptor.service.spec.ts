@@ -10,9 +10,11 @@ import { AppModule } from '../../app.module';
 import { CdNotificationConfig } from '../models/cd-notification';
 import { ApiInterceptorService } from './api-interceptor.service';
 import { NotificationService } from './notification.service';
+import {PermanentNotificationService} from "./permanent-notification.service";
 
 describe('ApiInterceptorService', () => {
   let notificationService: NotificationService;
+  let permanentNotificationService: PermanentNotificationService;
   let httpTesting: HttpTestingController;
   let httpClient: HttpClient;
   let router: Router;
@@ -36,11 +38,16 @@ describe('ApiInterceptorService', () => {
     expect(router.navigate).toHaveBeenCalledWith(...expectedCallParams);
   };
 
-  const runNotificationTest = (error, errorOpts, expectedCallParams) => {
+  const runNotificationTest = (error, errorOpts, expectedCallParams, isPermanent=false) => {
     httpError(error, errorOpts);
     httpTesting.verify();
-    expect(notificationService.show).toHaveBeenCalled();
-    expect(notificationService.save).toHaveBeenCalledWith(expectedCallParams);
+
+    if (isPermanent) {
+      expect(permanentNotificationService.show).toHaveBeenCalled();
+    } else {
+      expect(notificationService.show).toHaveBeenCalled();
+      expect(notificationService.save).toHaveBeenCalledWith(expectedCallParams);
+    }
   };
 
   const createCdNotification = (type, title?, message?, options?, application?, isPermanent?) => {
@@ -71,6 +78,9 @@ describe('ApiInterceptorService', () => {
     notificationService = TestBed.get(NotificationService);
     spyOn(notificationService, 'show').and.callThrough();
     spyOn(notificationService, 'save');
+
+    permanentNotificationService = TestBed.get(PermanentNotificationService);
+    spyOn(permanentNotificationService, 'show').and.callThrough();
 
     router = TestBed.get(Router);
     spyOn(router, 'navigate');
@@ -122,7 +132,8 @@ describe('ApiInterceptorService', () => {
           status: 504,
           statusText: 'AAA bbb CCC'
         },
-        createCdNotification(0, '504 - AAA bbb CCC', 'abc')
+        createCdNotification(0, '504 - AAA bbb CCC', 'abc', null, null, true),
+        true
       );
     });
 
