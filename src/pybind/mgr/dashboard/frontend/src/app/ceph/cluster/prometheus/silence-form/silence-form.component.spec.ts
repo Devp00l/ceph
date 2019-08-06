@@ -380,7 +380,7 @@ describe('SilenceFormComponent', () => {
 
   describe('matchers', () => {
     const expectMatch = (helpText) => {
-      expect(fixtureH.getText('#match-state')).toBe(helpText);
+      fixtureH.expectText('#match-state', helpText);
     };
 
     it('should show the add matcher button', () => {

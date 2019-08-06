@@ -84,7 +84,7 @@ describe('SilenceMatcherModalComponent', () => {
         value: value,
         isRegex: false
       });
-      expect(fixtureH.getText('#match-state')).toBe(helpText);
+      fixtureH.expectText('#match-state', helpText);
     };
 
     it('should match no rule and no alert', () => {

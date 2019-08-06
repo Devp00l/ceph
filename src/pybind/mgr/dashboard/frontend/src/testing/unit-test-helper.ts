@@ -164,6 +164,10 @@ export class FormHelper {
     expect(this.getControl(control).errors).toBe(null);
   }
 
+  expectValue(control: AbstractControl | string, expected: any) {
+    expect(this.getControl(control).value).toBe(expected);
+  }
+
   /**
    * Change the value of the control and expect a specific error.
    */
@@ -215,6 +219,10 @@ export class FixtureHelper {
   clickElement(css: string) {
     this.getElementByCss(css).triggerEventHandler('click', null);
     this.fixture.detectChanges();
+  }
+
+  expectText(css: string, value: string) {
+    expect(this.getText(css)).toBe(value);
   }
 
   getText(css: string) {
