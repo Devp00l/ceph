@@ -227,6 +227,35 @@ describe('PoolFormComponent', () => {
     });
   });
 
+  describe('pool custom pgs', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+      formHelper.setValue('name', 'some-name');
+      formHelper.setValue('poolType', 'erasure');
+    })
+
+    it('should show "power of 2 box" as checked', () => {
+      fixtureHelper.expectElementVisible('#pg-power-check', true)
+      fixtureHelper.expectFormFieldToBe('#pg-power-check', 'true')
+      fixtureHelper.expectText('.tc-pg-power-label', 'Power of two')
+    });
+
+    it('should show "power of 2 box" as checked and in green', () => {});
+
+    it('should disable "power of 2 box" and show warning', () => {});
+
+    it('should disable "power of 2 box" and checkbox color changes', () => {});
+
+    it('should disable "power of 2 box" and allow custom values', () => {
+      formHelper.setValue('pgPowerCheck', false)
+      fixtureHelper.expectFormFieldToBe('#pg-power-check', 'false')
+      setPgNum(2)
+      formHelper.expectValue('pgNum', 2);
+    });
+
+    it('should disable "power of 2 box" and use custom values and enable power of two - value should change to nearest', () => {});
+  });
+
   describe('pool form validation', () => {
     beforeEach(() => {
       fixture.detectChanges();

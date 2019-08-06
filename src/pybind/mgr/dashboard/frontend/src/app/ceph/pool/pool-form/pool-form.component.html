@@ -89,18 +89,43 @@
               <span class="invalid-feedback"
                     *ngIf="form.showError('pgNum', formDir, '34')"
                     i18n>Your cluster can't handle this many PGs. Please recalculate the PG amount needed.</span>
+              <span class="form-text text-muted"
+                    *ngIf="externalPgChange"
+                    i18n>The current PGs settings were calculated for you, you
+                    should make sure the values suit your needs before submit.</span>
+            </div>
+          </div>
+
+          <!-- pg-power-check -->
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox"
+                       class="custom-control-input"
+                       id="pg-power-check"
+                       formControlName="pgPowerCheck">
+                <label class="custom-control-label tc-pg-power-label"
+                       for="pg-power-check"
+                       i18n>Power of two</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- pg help -->
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
               <span class="form-text text-muted">
                 <a i18n
                    target="_blank"
                    href="http://ceph.com/pgcalc">Calculation help</a>
               </span>
-              <span class="form-text text-muted"
-                    *ngIf="externalPgChange"
-                    i18n>The current PGs settings were calculated for you, you
-                should make sure the values suit your needs before submit.</span>
             </div>
           </div>
 
+          <div class="form-group row">
+            <div class="offset-sm-3 col-sm-9">
+            </div>
+          </div>
           <!-- Crush ruleset selection -->
           <div class="form-group row"
                *ngIf="form.getValue('poolType') && current.rules.length > 0">

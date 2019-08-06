@@ -137,6 +137,7 @@ export class PoolFormComponent implements OnInit {
         pgNum: new FormControl('', {
           validators: [Validators.required, Validators.min(1)]
         }),
+        pgPowerCheck: new FormControl(true),
         ecOverwrites: new FormControl(false),
         compression: compressionForm,
         max_bytes: new FormControl(''),
@@ -251,6 +252,9 @@ export class PoolFormComponent implements OnInit {
 
   private listenToChangesDuringAddEdit() {
     this.form.get('pgNum').valueChanges.subscribe((pgs) => {
+      if (!this.form.getValue('pgPowerCheck')) {
+        return;
+      }
       const change = pgs - this.data.pgs;
       if (Math.abs(change) !== 1 || pgs === 2) {
         this.data.pgs = pgs;
@@ -270,7 +274,12 @@ export class PoolFormComponent implements OnInit {
   }
 
   private setPgs(power: number) {
-    const pgs = Math.pow(2, power < 0 ? 0 : power); // Set size the nearest accurate size.
+    let pgs = 0;
+    if (this.form.getValue('pgPowerCheck')) {
+      pgs = Math.pow(2, power < 0 ? 0 : power); // Set size the nearest accurate size.
+    } else {
+      pgs = power < 1 ? 1 : power;
+    }
     this.data.pgs = pgs;
     this.form.silentSet('pgNum', pgs);
   }
@@ -406,7 +415,11 @@ export class PoolFormComponent implements OnInit {
   }
 
   private alignPgs(pgs = this.form.getValue('pgNum')) {
-    this.setPgs(Math.round(this.calculatePgPower(pgs < 1 ? 1 : pgs)));
+    pgs = pgs < 1 ? 1 : pgs
+    if (this.form.getValue('pgPowerCheck')) {
+      pgs = this.calculatePgPower(pgs)
+    }
+    this.setPgs(Math.round(pgs));
   }
 
   private setComplexValidators() {
