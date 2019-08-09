@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
 failed=false
-DASHBOARD=$PWD/src/pybind/mgr/dashboard
-setupVirtualenv=$PWD/src/tools/setup-virtualenv.sh
+CEPH_ROOT=$PWD
+DASHBOARD=$CEPH_ROOT/src/pybind/mgr/dashboard
+setupVirtualenv=$CEPH_ROOT/src/tools/setup-virtualenv.sh
 
 echo "Setup virtualenv"
 cd $DASHBOARD
-$setupVirtualenv /ceph/build/mgr-dashboard-virtualenv
+mkdir -p $CEPH_ROOT/build
+$setupVirtualenv $CEPH_ROOT/build/mgr-dashboard-virtualenv
 
 echo "Run backend unit tests"
 #tox -e py3,check || failed=true
