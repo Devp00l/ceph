@@ -90,12 +90,14 @@ export class NotificationService {
     application?: string,
     isPermanent?: boolean,
   ): number {
-    const config = this.getNotificationConfig(arg, title, message, options, application, isPermanent);
+    const getConfig = () =>
+      this.getNotificationConfig(arg, title, message, options, application, isPermanent);
+    const config = getConfig();
     if (config.isPermanent) {
       return this.permToShow(config);
     } else {
       return window.setTimeout(() => {
-        this.queueToShow(config);
+        this.queueToShow(getConfig());
       }, 10);
     }
   }
