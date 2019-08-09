@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 import * as _ from 'lodash';
-import { IndividualConfig, ToastrService } from 'ngx-toastr';
+import {ActiveToast, IndividualConfig, ToastrService} from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
 
 import { NotificationType } from '../enum/notification-type.enum';
@@ -70,6 +70,7 @@ export class NotificationService {
    *   for error notifications only.
    * @param {*} [options] toastr compatible options, used when creating a toastr
    * @param {string} [application] Only needed if notification comes from an external application
+   * @param {boolean} [isPermanent] Set if the notification will be closed by itself.
    * @returns The timeout ID that is set to be able to cancel the notification.
    */
   show(
@@ -77,7 +78,8 @@ export class NotificationService {
     title: string,
     message?: string,
     options?: any | IndividualConfig,
-    application?: string
+    application?: string,
+    isPermanent?: boolean,
   ): number;
   show(config: CdNotificationConfig | (() => CdNotificationConfig)): number;
   show(
@@ -85,25 +87,90 @@ export class NotificationService {
     title?: string,
     message?: string,
     options?: any | IndividualConfig,
-    application?: string
+    application?: string,
+    isPermanent?: boolean,
   ): number {
-    return window.setTimeout(() => {
-      let config: CdNotificationConfig;
-      if (_.isFunction(arg)) {
-        config = arg() as CdNotificationConfig;
-      } else if (_.isObject(arg)) {
-        config = arg as CdNotificationConfig;
-      } else {
-        config = new CdNotificationConfig(
-          arg as NotificationType,
-          title,
-          message,
-          options,
-          application
-        );
+    const config = this.getNotificationConfig(arg, title, message, options, application, isPermanent);
+    if (config.isPermanent) {
+      return this.permToShow(config);
+    } else {
+      return window.setTimeout(() => {
+        this.queueToShow(config);
+      }, 10);
+    }
+  }
+
+  removeNotificationById(id: number) {
+    this.toastr.remove(id);
+  }
+
+  removeNotificationByTitle(title: string) {
+    this.toastr.toasts.forEach((toast) => {
+      if (toast.toastRef.componentInstance.title === title) {
+        this.toastr.remove(toast.toastId);
       }
-      this.queueToShow(config);
-    }, 10);
+    });
+  }
+
+  private getNotificationConfig(
+    arg: NotificationType | CdNotificationConfig | (() => CdNotificationConfig),
+    title?: string,
+    message?: string,
+    options?: any | IndividualConfig,
+    application?: string,
+    isPermanent?: boolean
+  ): CdNotificationConfig {
+    let config: CdNotificationConfig;
+    if (_.isFunction(arg)) {
+      config = arg() as CdNotificationConfig;
+    } else if (_.isObject(arg)) {
+      config = arg as CdNotificationConfig;
+    } else {
+      config = new CdNotificationConfig(
+        arg as NotificationType,
+        title,
+        message,
+        options,
+        application,
+        isPermanent
+      );
+    }
+    return config;
+  }
+
+  private permToShow(config: CdNotificationConfig) {
+    const existingToast = _.find(this.toastr.toasts, (t) => {
+      if (t.toastRef.componentInstance.title === config.title) {
+        return t;
+      }
+    }) as ActiveToast<any>;
+    if (existingToast) {
+      const existingMessage = existingToast.message.includes(config.message);
+      if (existingMessage) {
+        return;
+      }
+      let messageUpdate = '';
+      if (existingToast.message.includes('</ul>')) {
+        messageUpdate = _.replace(existingToast.message, '</ul>', '');
+        messageUpdate = messageUpdate + '<li>' + config.message + '</li></ul>';
+      } else {
+        messageUpdate =
+          '<ul><li>' +
+          existingToast.message +
+          '</li><li>' +
+          config.message +
+          '</li></ul>';
+      }
+      this.toastr.remove(existingToast.toastId);
+      config.message = messageUpdate;
+    }
+
+    const newNotification = this.toastr[['error', 'info', 'success'][config.type]](
+      config.message,
+      config.title,
+      config.options
+    );
+    return newNotification.toastId;
   }
 
   private queueToShow(config: CdNotificationConfig) {
