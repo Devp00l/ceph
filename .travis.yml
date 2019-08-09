@@ -15,6 +15,7 @@ install:
   - sudo pip install pip
   - sudo pip install tox-travis
   - sudo pip install -r src/pybind/mgr/dashboard/requirements.txt
+  - sudo pip install -r src/pybind/mgr/dashboard/requirements-test.txt
 
 script:
   - ./src/pybind/mgr/dashboard/run-by-travis.sh
