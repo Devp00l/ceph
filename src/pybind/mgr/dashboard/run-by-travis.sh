@@ -7,12 +7,12 @@ setupVirtualenv=$CEPH_ROOT/src/tools/setup-virtualenv.sh
 
 echo "Setup virtualenv"
 cd $DASHBOARD
-mkdir -p $CEPH_ROOT/build
-$setupVirtualenv $CEPH_ROOT/build/mgr-dashboard-virtualenv
+#mkdir -p $CEPH_ROOT/build
+#$setupVirtualenv $CEPH_ROOT/build/mgr-dashboard-virtualenv
 
 echo "Run backend unit tests"
-#tox -e py3,check || failed=true
-WITH_PYTHON2=OFF ../../../script/run_tox.sh --tox-env py3 || failed=true
+tox -e py3 || failed=true
+#WITH_PYTHON2=OFF ../../../script/run_tox.sh --tox-env py3 || failed=true
 
 if [ "$failed" = "true" ]; then
   echo "Backend unit tests have failed!"
