@@ -149,6 +149,7 @@ export class CephfsChartComponent implements OnChanges, OnInit {
         }
       ] as ChartDataSets[]
     });
+    this.chart.datasets = [...this.chart.datasets]; // Force angular to update
   }
 
   // Convert ceph-mgr's time series format (list of 2-tuples
