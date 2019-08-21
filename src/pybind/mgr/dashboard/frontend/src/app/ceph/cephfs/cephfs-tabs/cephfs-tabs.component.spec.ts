@@ -14,6 +14,7 @@ import { CdTableSelection } from '../../../shared/models/cd-table-selection';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsClientsComponent } from '../cephfs-clients/cephfs-clients.component';
 import { CephfsDetailComponent } from '../cephfs-detail/cephfs-detail.component';
+import { CephfsDirectoriesComponent } from '../cephfs-directories/cephfs-directories.component';
 import { CephfsTabsComponent } from './cephfs-tabs.component';
 
 describe('CephfsTabsComponent', () => {
@@ -67,6 +68,7 @@ describe('CephfsTabsComponent', () => {
       CephfsTabsComponent,
       CephfsChartStubComponent,
       CephfsDetailComponent,
+      CephfsDirectoriesComponent,
       CephfsClientsComponent
     ],
     providers: [i18nProviders]

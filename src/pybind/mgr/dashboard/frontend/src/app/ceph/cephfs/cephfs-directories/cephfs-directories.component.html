@@ -1,0 +1,27 @@
+<cd-table [data]="dirs"
+          [columns]="columns"
+          identifier="path"
+          [forceIdentifier]="true"
+          selectionType="single"
+          [autoReload]="false"
+          (fetchData)="getDirList($event)"
+          (updateSelection)="updateSelection($event)">
+  <tabset cdTableDetail *ngIf="selection.first()">
+    <tab [heading]="getTabHeading()">
+      <cd-cephfs-directories [id]="id" [path]="selectedPath">
+      </cd-cephfs-directories>
+    </tab>
+  </tabset>
+</cd-table>
+
+<ng-template #quotas
+             let-row="row"
+             let-value="value">
+  <span [innerHTML]="displayQuotas(value)"></span>
+</ng-template>
+
+<ng-template #snapshots
+             let-row="row"
+             let-value="value">
+  <span [innerHTML]="displaySnapshots(value)"></span>
+</ng-template>
