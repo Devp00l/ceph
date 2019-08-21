@@ -10,6 +10,7 @@ import { SharedModule } from '../../shared/shared.module';
 import { CephfsChartComponent } from './cephfs-chart/cephfs-chart.component';
 import { CephfsClientsComponent } from './cephfs-clients/cephfs-clients.component';
 import { CephfsDetailComponent } from './cephfs-detail/cephfs-detail.component';
+import { CephfsDirectoriesComponent } from './cephfs-directories/cephfs-directories.component';
 import { CephfsListComponent } from './cephfs-list/cephfs-list.component';
 import { CephfsTabsComponent } from './cephfs-tabs/cephfs-tabs.component';
 
@@ -27,7 +28,8 @@ import { CephfsTabsComponent } from './cephfs-tabs/cephfs-tabs.component';
     CephfsClientsComponent,
     CephfsChartComponent,
     CephfsListComponent,
-    CephfsTabsComponent
+    CephfsTabsComponent,
+    CephfsDirectoriesComponent
   ]
 })
 export class CephfsModule {}
