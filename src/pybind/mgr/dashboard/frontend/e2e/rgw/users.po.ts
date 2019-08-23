@@ -57,6 +57,22 @@ export class UsersPageHelper extends PageHelper {
     });
   }
 
+  deletePresentUsers(names: string[]) {
+    this.navigateTo();
+    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell('dev')), Helper.TIMEOUT); // wait for table to load
+
+    const deletePresentUser = (name: string) =>
+      this.getFirstTableCellWithText(name)
+        .isPresent()
+        .then((present) => {
+          console.log('present ', present);
+          if (present) {
+            this.delete(name);
+          }
+        });
+    names.forEach((name) => deletePresentUser(name));
+  }
+
   delete(name) {
     this.navigateTo();
 
@@ -83,8 +99,7 @@ export class UsersPageHelper extends PageHelper {
     });
   }
 
-  invalidCreate() {
-    const uname = '000invalid_create_user';
+  invalidCreate(uname) {
     // creating this user in order to check that you can't give two users the same name
     this.create(uname, 'xxx', 'xxx@xxx', '1');
 
@@ -157,8 +172,7 @@ export class UsersPageHelper extends PageHelper {
     this.delete(uname);
   }
 
-  invalidEdit() {
-    const uname = '000invalid_edit_user';
+  invalidEdit(uname) {
     // creating this user to edit for the test
     this.create(uname, 'xxx', 'xxx@xxx', '1');
 

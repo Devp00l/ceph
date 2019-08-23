@@ -2,10 +2,15 @@ import { Helper } from '../helper.po';
 
 describe('RGW users page', () => {
   let users: Helper['users'];
-  const user_name = '000user_create_edit_delete';
+  const validUser = '000user_create_edit_delete';
+  const invalidCreateUser = '000invalid_create_user';
+  const invalidEditUser = '000invalid_edit_user';
 
   beforeAll(() => {
     users = new Helper().users;
+
+    // Delete tests users from failed tests
+    users.deletePresentUsers([validUser, invalidCreateUser, invalidEditUser]);
   });
 
   afterEach(() => {
@@ -28,18 +33,18 @@ describe('RGW users page', () => {
     });
 
     it('should create user', () => {
-      users.create(user_name, 'Some Name', 'original@website.com', '1200');
-      expect(users.getTableCell(user_name).isPresent()).toBe(true);
+      users.create(validUser, 'Some Name', 'original@website.com', '1200');
+      expect(users.getTableCell(validUser).isPresent()).toBe(true);
     });
 
     it('should edit users full name, email and max buckets', () => {
-      users.edit(user_name, 'Another Identity', 'changed@othersite.com', '1969');
-      // checks for succsessful editing are done within edit function
+      users.edit(validUser, 'Another Identity', 'changed@othersite.com', '1969');
+      // checks for successful editing are done within edit function
     });
 
     it('should delete user', () => {
-      users.delete(user_name);
-      expect(users.getTableCell(user_name).isPresent()).toBe(false);
+      users.delete(validUser);
+      expect(users.getTableCell(validUser).isPresent()).toBe(false);
     });
   });
 
@@ -49,11 +54,11 @@ describe('RGW users page', () => {
     });
 
     it('should put invalid input into user creation form and check fields are marked invalid', () => {
-      users.invalidCreate();
+      users.invalidCreate(invalidCreateUser);
     });
 
     it('should put invalid input into user edit form and check fields are marked invalid', () => {
-      users.invalidEdit();
+      users.invalidEdit(invalidEditUser);
     });
   });
 });
