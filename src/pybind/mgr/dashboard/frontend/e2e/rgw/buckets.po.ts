@@ -12,7 +12,7 @@ export class BucketsPageHelper extends PageHelper {
     this.navigateTo('create');
 
     // Enter in bucket name
-    element(by.id('bid')).sendKeys(name);
+    this.setInputById('bid', name)
 
     // Select bucket owner
     element(by.id('owner')).click();
@@ -100,7 +100,7 @@ export class BucketsPageHelper extends PageHelper {
     const ownerDropDown = element(by.id('owner')); // Grab owner field
 
     // Gives an invalid name (too short), then waits for dashboard to determine validity
-    nameInputField.sendKeys('rq');
+    this.setInput(nameInputField, 'rq')
 
     this.moveClick(ownerDropDown); // To trigger a validation
 
