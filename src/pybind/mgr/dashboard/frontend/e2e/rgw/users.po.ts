@@ -14,21 +14,12 @@ export class UsersPageHelper extends PageHelper {
 
     expect(this.getBreadcrumbText()).toBe('Create');
 
-    // Enter in  username
-    element(by.id('uid')).sendKeys(username);
-
-    // Enter in full name
-    this.moveClick(element(by.id('display_name')));
-    element(by.id('display_name')).sendKeys(fullname);
-
-    // Enter in email
-    this.moveClick(element(by.id('email')));
-    element(by.id('email')).sendKeys(email);
-
-    // Eneter max buckets
-    this.moveClick(element(by.id('max_buckets')));
-    element(by.id('max_buckets')).clear();
-    element(by.id('max_buckets')).sendKeys(maxbuckets);
+    this.setInputsById({
+      uid: username,
+      display_name: fullname,
+      email: email,
+      max_buckets: maxbuckets
+    });
 
     // Click the create button and wait for user to be made
     const createButton = element(by.cssContainingText('button', 'Create User'));
@@ -46,20 +37,11 @@ export class UsersPageHelper extends PageHelper {
 
     expect(this.getBreadcrumbText()).toEqual('Edit');
 
-    // Change the full name field
-    this.moveClick(element(by.id('display_name')));
-    element(by.id('display_name')).clear();
-    element(by.id('display_name')).sendKeys(new_fullname);
-
-    // Change the email field
-    this.moveClick(element(by.id('email')));
-    element(by.id('email')).clear();
-    element(by.id('email')).sendKeys(new_email);
-
-    // Change the max buckets field
-    this.moveClick(element(by.id('max_buckets')));
-    element(by.id('max_buckets')).clear();
-    element(by.id('max_buckets')).sendKeys(new_maxbuckets);
+    this.setInputsById({
+      display_name: new_fullname,
+      email: new_email,
+      max_buckets: new_maxbuckets
+    });
 
     const editbutton = element(by.cssContainingText('button', 'Edit User'));
     this.moveClick(editbutton).then(() => {
@@ -112,23 +94,21 @@ export class UsersPageHelper extends PageHelper {
     expect(username_field.getAttribute('class')).toContain('ng-invalid');
 
     // Try to give user already taken name. Should make field invalid.
-    username_field.clear().then(() => {
-      username_field.sendKeys(uname).then(() => {
-        browser
-          .wait(function() {
-            return username_field.getAttribute('class').then(function(classValue) {
-              return classValue.indexOf('ng-pending') === -1;
-            });
-          }, 6000)
-          .then(() => {
-            expect(username_field.getAttribute('class')).toContain('ng-invalid');
-            this.moveClick(element(by.id('display_name'))); // trigger validation check
-            expect(element(by.css('#uid + .invalid-feedback')).getText()).toMatch(
-              'The chosen user ID is already in use.'
-            );
-          });
+    this.setInput(username_field, uname);
+    const name = element(by.id('display_name'));
+    browser
+      .wait(function() {
+        return username_field.getAttribute('class').then(function(classValue) {
+          return classValue.indexOf('ng-pending') === -1;
+        });
+      }, Helper.TIMEOUT)
+      .then(() => {
+        expect(username_field.getAttribute('class')).toContain('ng-invalid');
+        this.moveClick(name); // trigger validation check
+        expect(element(by.css('#uid + .invalid-feedback')).getText()).toMatch(
+          'The chosen user ID is already in use.'
+        );
       });
-    });
 
     // check that username field is marked invalid if username has been cleared off
     for (let i = 0; i < uname.length; i++) {
@@ -189,9 +169,9 @@ export class UsersPageHelper extends PageHelper {
     expect(this.getBreadcrumbText()).toEqual('Edit');
 
     // put invalid email to make field invalid
-    this.moveClick(element(by.id('email')));
-    element(by.id('email')).clear();
-    element(by.id('email')).sendKeys('a');
+    const email = element(by.id('email'));
+    const name = element(by.id('display_name'));
+    this.setInput(email, 'a');
     browser
       .wait(function() {
         return element(by.id('email'))
@@ -220,11 +200,10 @@ export class UsersPageHelper extends PageHelper {
     );
 
     // put negative max buckets to make field invalid
-    this.moveClick(element(by.id('max_buckets')));
-    element(by.id('max_buckets')).clear();
-    element(by.id('max_buckets')).sendKeys('-5');
-    expect(element(by.id('max_buckets')).getAttribute('class')).toContain('ng-invalid');
-    this.moveClick(element(by.id('email'))); // trigger validation check
+    const maxBuckets = element(by.id('max_buckets'));
+    this.setInput(maxBuckets, '-5');
+    expect(maxBuckets.getAttribute('class')).toContain('ng-invalid');
+    this.moveClick(email); // trigger validation check
     expect(element(by.css('#max_buckets + .invalid-feedback')).getText()).toMatch(
       'The entered value must be >= 0.'
     );
