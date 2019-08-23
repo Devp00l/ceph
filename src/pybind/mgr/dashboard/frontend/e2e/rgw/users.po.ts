@@ -117,19 +117,19 @@ export class UsersPageHelper extends PageHelper {
       username_field.sendKeys(protractor.Key.BACK_SPACE);
     }
     expect(username_field.getAttribute('class')).toContain('ng-invalid');
-    this.moveClick(element(by.id('display_name'))); // trigger validation check
+    this.moveClick(name); // trigger validation check
     expect(element(by.css('#uid + .invalid-feedback')).getText()).toMatch(
       'This field is required.'
     );
 
     // No display name has been given so field should be invalid
-    expect(element(by.id('display_name')).getAttribute('class')).toContain('ng-invalid');
+    expect(name.getAttribute('class')).toContain('ng-invalid');
 
     // display name field should also be marked invalid if given input then emptied
-    this.moveClick(element(by.id('display_name')));
-    element(by.id('display_name')).sendKeys('a');
-    element(by.id('display_name')).sendKeys(protractor.Key.BACK_SPACE);
-    expect(element(by.id('display_name')).getAttribute('class')).toContain('ng-invalid');
+    this.moveClick(name);
+    name.sendKeys('a');
+    name.sendKeys(protractor.Key.BACK_SPACE);
+    expect(name.getAttribute('class')).toContain('ng-invalid');
     this.moveClick(username_field); // trigger validation check
     expect(element(by.css('#display_name + .invalid-feedback')).getText()).toMatch(
       'This field is required.'
@@ -175,28 +175,28 @@ export class UsersPageHelper extends PageHelper {
     const name = element(by.id('display_name'));
     this.setInput(email, 'a');
     browser
-      .wait(function() {
-        return element(by.id('email'))
-          .getAttribute('class')
-          .then(function(classValue) {
+      .wait(
+        () =>
+          email.getAttribute('class').then(function(classValue) {
             return classValue.indexOf('ng-pending') === -1;
-          });
-      }, 6000)
+          }),
+        Helper.TIMEOUT
+      )
       .then(() => {
-        expect(element(by.id('email')).getAttribute('class')).toContain('ng-invalid');
-        this.moveClick(element(by.id('display_name'))); // trigger validation check
+        expect(email.getAttribute('class')).toContain('ng-invalid');
+        this.moveClick(name); // trigger validation check
         expect(element(by.css('#email + .invalid-feedback')).getText()).toMatch(
           'This is not a valid email address.'
         );
       });
 
     // empty the display name field making it invalid
-    this.moveClick(element(by.id('display_name')));
+    this.moveClick(name);
     for (let i = 0; i < 3; i++) {
-      element(by.id('display_name')).sendKeys(protractor.Key.BACK_SPACE);
+      name.sendKeys(protractor.Key.BACK_SPACE);
     }
-    expect(element(by.id('display_name')).getAttribute('class')).toContain('ng-invalid');
-    this.moveClick(element(by.id('email'))); // trigger validation check
+    expect(name.getAttribute('class')).toContain('ng-invalid');
+    this.moveClick(email); // trigger validation check
     expect(element(by.css('#display_name + .invalid-feedback')).getText()).toMatch(
       'This field is required.'
     );
