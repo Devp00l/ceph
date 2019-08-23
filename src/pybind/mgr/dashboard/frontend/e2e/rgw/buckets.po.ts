@@ -38,7 +38,7 @@ export class BucketsPageHelper extends PageHelper {
   edit(name, new_owner) {
     this.navigateTo();
 
-    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), 10000); // wait for table to load
+    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), Helper.TIMEOUT); // wait for table to load
     this.getTableCell(name).click(); // click on the bucket you want to edit in the table
     element(by.cssContainingText('button', 'Edit')).click(); // click button to move to edit page
 
@@ -57,7 +57,7 @@ export class BucketsPageHelper extends PageHelper {
       // wait to be back on buckets page with table visible
       browser.wait(
         Helper.EC.elementToBeClickable(this.getTableCell(name)),
-        10000,
+        Helper.TIMEOUT,
         'Could not return to buckets page and load table after editing bucket'
       );
 
@@ -74,20 +74,20 @@ export class BucketsPageHelper extends PageHelper {
     this.navigateTo();
 
     // wait for table to load
-    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), 10000);
+    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), Helper.TIMEOUT);
 
     this.getTableCell(name).click(); // click on the bucket you want to delete in the table
     $('.table-actions button.dropdown-toggle').click(); // click toggle menu
     $('li.delete a').click(); // click delete
     // wait for pop-up to be visible (checks for title of pop-up)
-    browser.wait(Helper.EC.visibilityOf($('.modal-title.float-left')), 10000).then(() => {
-      browser.wait(Helper.EC.visibilityOf($('.custom-control-label')), 5000);
+    browser.wait(Helper.EC.visibilityOf($('.modal-title.float-left')), Helper.TIMEOUT).then(() => {
+      browser.wait(Helper.EC.visibilityOf($('.custom-control-label')), Helper.TIMEOUT);
       $('.custom-control-label').click();
       element(by.cssContainingText('button', 'Delete bucket'))
         .click()
         .then(() => {
           this.navigateTo();
-          browser.wait(Helper.EC.not(Helper.EC.presenceOf(this.getTableCell(name))), 10000);
+          browser.wait(Helper.EC.not(Helper.EC.presenceOf(this.getTableCell(name))), Helper.TIMEOUT);
         });
     });
   }
@@ -111,7 +111,7 @@ export class BucketsPageHelper extends PageHelper {
           return classValue.indexOf('ng-pending') === -1;
         });
       },
-      5000,
+      Helper.TIMEOUT,
       'Timed out waiting for dashboard to decide bucket name validity'
     );
 
@@ -174,7 +174,7 @@ export class BucketsPageHelper extends PageHelper {
 
     browser.wait(
       Helper.EC.elementToBeClickable(this.getTableCell(name)),
-      10000,
+      Helper.TIMEOUT,
       'Failed waiting for bucket to be present in table'
     ); // wait for table to load
     this.getTableCell(name).click(); // click on the bucket you want to edit in the table
@@ -185,7 +185,7 @@ export class BucketsPageHelper extends PageHelper {
     // Chooses 'Select a user' rather than a valid owner on Edit Bucket page
     // and checks if it's an invalid input
     const ownerDropDown = element(by.id('owner'));
-    browser.wait(Helper.EC.elementToBeClickable(ownerDropDown), 5000);
+    browser.wait(Helper.EC.elementToBeClickable(ownerDropDown), Helper.TIMEOUT);
 
     this.moveClick(ownerDropDown); // Clicks the Owner drop down on the Create Bucket page
     // select the first option, which is invalid because it is a placeholder
