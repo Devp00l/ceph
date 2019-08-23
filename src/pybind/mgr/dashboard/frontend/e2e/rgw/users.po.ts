@@ -24,14 +24,14 @@ export class UsersPageHelper extends PageHelper {
     // Click the create button and wait for user to be made
     const createButton = element(by.cssContainingText('button', 'Create User'));
     this.moveClick(createButton).then(() => {
-      browser.wait(Helper.EC.presenceOf(this.getTableCell(username)), 10000);
+      browser.wait(Helper.EC.presenceOf(this.getTableCell(username)), Helper.TIMEOUT);
     });
   }
 
   edit(name, new_fullname, new_email, new_maxbuckets) {
     this.navigateTo();
 
-    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), 10000); // wait for table to load
+    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), Helper.TIMEOUT); // wait for table to load
     this.getTableCell(name).click(); // click on the bucket you want to edit in the table
     element(by.cssContainingText('button', 'Edit')).click(); // click button to move to edit page
 
@@ -45,13 +45,15 @@ export class UsersPageHelper extends PageHelper {
 
     const editbutton = element(by.cssContainingText('button', 'Edit User'));
     this.moveClick(editbutton).then(() => {
-      browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), 10000).then(() => {
-        // Click the user and check its details table for updated content
-        this.getTableCell(name).click();
-        expect($('.active.tab-pane').getText()).toMatch(new_fullname); // check full name was changed
-        expect($('.active.tab-pane').getText()).toMatch(new_email); // check email was changed
-        expect($('.active.tab-pane').getText()).toMatch(new_maxbuckets); // check max buckets was changed
-      });
+      browser
+        .wait(Helper.EC.elementToBeClickable(this.getTableCell(name)), Helper.TIMEOUT)
+        .then(() => {
+          // Click the user and check its details table for updated content
+          this.getTableCell(name).click();
+          expect($('.active.tab-pane').getText()).toMatch(new_fullname); // check full name was changed
+          expect($('.active.tab-pane').getText()).toMatch(new_email); // check email was changed
+          expect($('.active.tab-pane').getText()).toMatch(new_maxbuckets); // check max buckets was changed
+        });
     });
   }
 
@@ -60,22 +62,22 @@ export class UsersPageHelper extends PageHelper {
 
     // wait for table to load
     const my_user = this.getFirstTableCellWithText(name);
-    browser.wait(Helper.EC.elementToBeClickable(my_user), 10000);
+    browser.wait(Helper.EC.elementToBeClickable(my_user), Helper.TIMEOUT);
 
     my_user.click(); // click on the user you want to delete in the table
     $('.table-actions button.dropdown-toggle').click(); // click toggle menu
     $('li.delete a').click(); // click delete
 
     // wait for pop-up to be visible (checks for title of pop-up)
-    browser.wait(Helper.EC.visibilityOf($('.modal-title.float-left')), 10000).then(() => {
-      browser.wait(Helper.EC.visibilityOf($('.custom-control-label')), 5000);
+    browser.wait(Helper.EC.visibilityOf($('.modal-title.float-left')), Helper.TIMEOUT).then(() => {
+      browser.wait(Helper.EC.visibilityOf($('.custom-control-label')), Helper.TIMEOUT);
       $('.custom-control-label').click(); // click confirmation checkbox
       element(by.cssContainingText('button', 'Delete user'))
         .click()
         .then(() => {
           browser.wait(
             Helper.EC.not(Helper.EC.presenceOf(this.getFirstTableCellWithText(name))),
-            10000
+            Helper.TIMEOUT
           );
         });
     });
@@ -162,7 +164,7 @@ export class UsersPageHelper extends PageHelper {
 
     this.navigateTo();
 
-    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(uname)), 10000); // wait for table to load
+    browser.wait(Helper.EC.elementToBeClickable(this.getTableCell(uname)), Helper.TIMEOUT); // wait for table to load
     this.getTableCell(uname).click(); // click on the bucket you want to edit in the table
     element(by.cssContainingText('button', 'Edit')).click(); // click button to move to edit page
 
