@@ -95,15 +95,13 @@ export abstract class PageHelper {
    * single row is shown in the data table.
    */
   getTableCellByContent(content: string): promise.Promise<ElementFinder> {
-    const searchInput = $('#pool-list > div .search input');
     const rowAmountInput = $('#pool-list > div > div > .dataTables_paginate input');
+    this.setInput(rowAmountInput, '10');
+
+    const searchInput = $('#pool-list > div .search input');
+    this.setInput(searchInput, content);
+
     const footer = $('#pool-list > div datatable-footer');
-
-    rowAmountInput.clear();
-    rowAmountInput.sendKeys('10');
-    searchInput.clear();
-    searchInput.sendKeys(content);
-
     return footer.getAttribute('ng-reflect-row-count').then((rowCount: string) => {
       const count = Number(rowCount);
       if (count !== 0 && count > 1) {
@@ -114,6 +112,22 @@ export abstract class PageHelper {
         );
       }
     });
+  }
+
+  setInputsById(o: { [id: string]: string }) {
+    for (let id in o) {
+      this.setInputById(id, o[id]);
+    }
+  }
+
+  setInputById(id: string, input: string) {
+    const e = element(by.id(id));
+    this.setInput(e, input);
+  }
+
+  setInput(e: ElementFinder, input: string) {
+    this.inputClear(e);
+    e.sendKeys(input);
   }
 
   // used when .clear() does not work on a text box, sends a Ctrl + a, BACKSPACE
