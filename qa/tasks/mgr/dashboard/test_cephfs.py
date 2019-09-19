@@ -168,6 +168,7 @@ class CephfsTest(DashboardTestCase):
         self.assertSchema(data[0], JObj(sub_elems={
             'name': JLeaf(str),
             'path': JLeaf(str),
+            'parent': JLeaf(str),
             'snapshots': JList(JObj(sub_elems={
                 'name': JLeaf(str),
                 'path': JLeaf(str),

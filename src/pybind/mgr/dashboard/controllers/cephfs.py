@@ -350,6 +350,7 @@ class CephFS(RESTController):
             paths = [{
                 'name': os.path.basename(p.decode()),
                 'path': p.decode(),
+                'parent': os.path.dirname(p.decode()),
                 'snapshots': cfs.ls_snapshots(p.decode()),
                 'quotas': cfs.get_quotas(p.decode())
             } for p in paths if p != path.encode()]
