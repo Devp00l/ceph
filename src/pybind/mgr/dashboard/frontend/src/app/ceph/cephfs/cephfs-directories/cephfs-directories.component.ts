@@ -121,6 +121,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     const selected = selection.first();
     if (selected) {
       this.selectedPath = selected.path;
+      this.triggerTreeStatus(selected);
       this.getDirectory(selected.path);
     }
   }
