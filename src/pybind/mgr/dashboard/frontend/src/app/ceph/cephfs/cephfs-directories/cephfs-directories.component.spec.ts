@@ -13,6 +13,7 @@ import { CephfsQuotas, CephfsSnapshot } from '../../../shared/models/cephfs-dire
 import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsDirectoriesComponent } from './cephfs-directories.component';
+import { TableComponent } from '../../../shared/datatable/table/table.component';
 
 describe('CephfsDirectoriesComponent', () => {
   let component: CephfsDirectoriesComponent;
@@ -36,23 +37,24 @@ describe('CephfsDirectoriesComponent', () => {
       return snapshots;
     },
     dir: (path, name, modifier) => {
-      const dirPath = `${path}/${name}`;
+      const dirPath = `${path === '/' ? '' : path}/${name}`;
       return {
         name,
         path: dirPath,
+        parent: path,
         quota: mock.quotas(1024 * modifier, 10 * modifier),
         snapshots: mock.snapshots(path, modifier)
       };
     },
-    lsDir: (_id, path = '') => {
+    lsDir: (id, path = '') => {
       if (path.includes('two')) {
         // 'two' has no sub directories
         return of([]);
       }
       const mockData = [
-        mock.dir(path, 'one', 1),
-        mock.dir(path, 'two', 2),
-        mock.dir(path, 'three', 3)
+        mock.dir(path, 'one' + id, 1),
+        mock.dir(path, 'two' + id, 2),
+        mock.dir(path, 'three' + id, 3)
       ];
       return of(mockData);
     },
@@ -62,6 +64,7 @@ describe('CephfsDirectoriesComponent', () => {
   const updateId = (id: number) => {
     component.id = id;
     component.ngOnChanges();
+    component.updateDirList();
   };
 
   configureTestBed({
@@ -89,50 +92,107 @@ describe('CephfsDirectoriesComponent', () => {
     component.ngOnChanges();
     expect(lsDirSpy).not.toHaveBeenCalled();
     updateId(1);
-    expect(lsDirSpy).toHaveBeenCalledWith(1, undefined);
+    expect(component.pathList).toEqual([
+      '/',
+      '/one1', // new -> 3 directories
+      '/two1', // new -> 0 directories
+      '/three1' // new -> 3 directories
+    ]);
     updateId(2);
-    expect(lsDirSpy).toHaveBeenCalledWith(2, undefined);
+    expect(component.pathList).toEqual([
+      '/',
+      '/one2', // new -> 3 directories
+      '/two2', // new -> 0 directories
+      '/three2' // new -> 3 directories
+    ]);
   });
 
   describe('listing sub directories', () => {
-    let innerComponent: CephfsDirectoriesComponent;
+    let table: TableComponent;
+    let selection: CdTableSelection;
 
-    const selection = new CdTableSelection();
+    const findDir = (path: string) => _.find(component.dirs, (dir) => dir.path === path);
 
-    const selectDir = (index: number) => {
-      selection.selected = [component.dirs[index]];
-      selection.update();
-      component.updateSelection(selection);
+    const selectDir = (path: string) => {
+      selection.selected = [findDir(path)];
+      table.onSelect();
+    };
 
-      fixture.detectChanges();
-      innerComponent = fixture.debugElement.query(By.directive(CephfsDirectoriesComponent))
-        .componentInstance;
+    const expectTreeStatus = (path, status) => expect(findDir(path).treeStatus).toBe(status);
+
+    const expectTriggerTreeStatus = (path, beforeTriggerStatus, afterTriggerStatus) => {
+      expectTreeStatus(path, beforeTriggerStatus);
+      component.onTreeAction({ row: findDir(path) });
+      expectTreeStatus(path, afterTriggerStatus);
     };
 
     beforeEach(() => {
       updateId(1);
-      selectDir(0);
+      table = fixture.debugElement.query(By.directive(TableComponent)).componentInstance;
+      selection = table.selection;
     });
 
-    it('sets a custom header for each selection', () => {
-      expect(component.getTabHeading()).toBe('Directories in /one');
-      selectDir(1);
-      expect(component.getTabHeading()).toBe('Directories in /two');
+    it('should extend the list by subdirectories on first call', () => {
+      expect(lsDirSpy).toHaveBeenCalledTimes(4);
+      expect(component.pathList).toEqual([
+        '/',
+        '/one1', // new -> 3 directories
+        '/two1', // new -> 0 directories
+        '/three1' // new -> 3 directories
+      ]);
+      component.pathList.forEach((path) => expect(lsDirSpy).toHaveBeenCalledWith(1, path));
+      expect(component.dirs.length).toBe(9);
     });
 
-    it('called lsDir with the selected directory path', () => {
-      expect(lsDirSpy).toHaveBeenCalledWith(1, '/one');
-      selectDir(1);
-      expect(lsDirSpy).toHaveBeenCalledWith(1, '/two');
+    it('should extend the list by subdirectories on selection and omit already called path', () => {
+      selectDir('/one1');
+      expect(lsDirSpy).toHaveBeenCalledTimes(7);
+      expect(component.pathList).toEqual([
+        '/',
+        '/one1', // Call got omitted
+        '/two1',
+        '/three1',
+        '/one1/one1', // new -> 3 directories
+        '/one1/two1', // new -> 0 directories
+        '/one1/three1' // new -> 3 directories
+      ]);
+      expect(component.dirs.length).toBe(15);
     });
 
-    it('has different directories in the sub directories tab', () => {
-      expect(component.dirs).not.toEqual(innerComponent.dirs);
-      expect(innerComponent.dirs.length).toBe(3);
-      const oldDirs = innerComponent.dirs;
-      selectDir(1);
-      expect(oldDirs).not.toEqual(innerComponent.dirs);
-      expect(innerComponent.dirs.length).toBe(0);
+    it('should reload all paths on update', () => {
+      selectDir('/three1');
+      expect(lsDirSpy).toHaveBeenCalledTimes(7);
+      const old_fetched = component.justFetched;
+      expect(old_fetched).toBe(component.justFetched);
+
+      component.updateDirList();
+      expect(lsDirSpy).toHaveBeenCalledTimes(14);
+      expect(old_fetched).not.toBe(component.justFetched);
+      expect(old_fetched).toEqual(component.justFetched);
+    });
+
+    it('should set the right tree status for the current level', () => {
+      expect(findDir('/two1').treeStatus).toBe('disabled');
+      expect(findDir('/one1').treeStatus).toBe('collapsed');
+      expect(findDir('/one1/one1').treeStatus).toBe('disabled');
+      expect(findDir('/one1/two1').treeStatus).toBe('disabled');
+    });
+
+    it('should update the tree status for the subdirectories of the selected directory', () => {
+      selectDir('/one1'); // Updates subdirectories
+      expect(findDir('/one1/one1').treeStatus).toBe('collapsed');
+      expect(findDir('/one1/two1').treeStatus).toBe('disabled');
+    });
+
+    it('should update subdirectories on tree action', () => {
+      expectTriggerTreeStatus('/one1', 'collapsed', 'expanded');
+      expect(lsDirSpy).toHaveBeenCalledTimes(7);
+    });
+
+    it('should tree actions should can be triggered', () => {
+      expectTriggerTreeStatus('/one1', 'collapsed', 'expanded');
+      expectTriggerTreeStatus('/one1', 'expanded', 'collapsed');
+      expectTriggerTreeStatus('/two1', 'disabled', 'disabled');
     });
   });
 

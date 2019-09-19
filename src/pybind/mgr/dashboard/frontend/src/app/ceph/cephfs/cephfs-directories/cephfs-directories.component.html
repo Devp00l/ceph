@@ -4,14 +4,9 @@
           [forceIdentifier]="true"
           selectionType="single"
           [autoReload]="false"
-          (fetchData)="getDirList($event)"
+          [treeView]="treeView"
+          (fetchData)="updateDirList($event)"
           (updateSelection)="updateSelection($event)">
-  <tabset cdTableDetail *ngIf="selection.first()">
-    <tab [heading]="getTabHeading()">
-      <cd-cephfs-directories [id]="id" [path]="selectedPath">
-      </cd-cephfs-directories>
-    </tab>
-  </tabset>
 </cd-table>
 
 <ng-template #quotas

@@ -15,6 +15,7 @@ import {
 import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { TimeDiffService } from '../../../shared/services/time-diff.service';
+import { TableComponent } from '../../../shared/datatable/table/table.component';
 
 @Component({
   selector: 'cd-cephfs-directories',
@@ -22,6 +23,8 @@ import { TimeDiffService } from '../../../shared/services/time-diff.service';
   styleUrls: ['./cephfs-directories.component.scss']
 })
 export class CephfsDirectoriesComponent implements OnInit, OnChanges {
+  @ViewChild(TableComponent, { static: true })
+  table: TableComponent;
   @ViewChild('quotas', { static: true })
   quotas: TemplateRef<any>;
   @ViewChild('snapshots', { static: true })
@@ -32,10 +35,18 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   @Input()
   path?: string;
 
-  dirs: CephfsDir[];
-  columns: CdTableColumn[];
-  selection = new CdTableSelection();
   selectedPath: string;
+  context: CdTableFetchDataContext;
+
+  dirs: CephfsDir[] = [];
+  columns: CdTableColumn[] = [];
+  justFetched: string[] = [];
+  pathList: string[] = ['/'];
+  selection = new CdTableSelection();
+  treeView = {
+    relation: 'parent',
+    action: (e) => this.onTreeAction(e)
+  };
 
   constructor(
     private cephfsService: CephfsService,
@@ -48,13 +59,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.columns = [
       {
-        name: this.i18n('Name'),
-        prop: 'name',
-        flexGrow: 2
-      },
-      {
         name: this.i18n('Path'),
         prop: 'path',
+        isTreeColumn: true,
         flexGrow: 4
       },
       {
@@ -75,16 +82,16 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
-    this.getDirList();
+    this.pathList = ['/'];
   }
 
-  getDirList(context?: CdTableFetchDataContext) {
+  updateDirList(context?: CdTableFetchDataContext) {
     if (!_.isNumber(this.id)) {
       return;
     }
-    this.cephfsService
-      .lsDir(this.id, this.path)
-      .subscribe((data) => (this.dirs = data), () => context && context.error());
+    this.dirs = [];
+    this.justFetched = [];
+    this.pathList.forEach((path) => this.getDirectory(path, this.pathList.length === 1, context));
   }
 
   displayQuotas(quotas: CephfsQuotas): string {
@@ -114,10 +121,70 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     const selected = selection.first();
     if (selected) {
       this.selectedPath = selected.path;
+      this.getDirectory(selected.path);
     }
   }
 
-  getTabHeading(): string {
-    return `${this.i18n('Directories in')} ${this.selectedPath}`;
+  getDirectory(path: string, deep = true, context?: CdTableFetchDataContext) {
+    if (context) {
+      this.context = context;
+    }
+    if (!this.pathList.includes(path)) {
+      this.pathList.push(path);
+    }
+    if (this.justFetched.includes(path)) {
+      if (deep) {
+        this.dirs
+          .filter((dir) => dir.parent === path)
+          .forEach((dir) => this.getDirectory(dir.path, false));
+      }
+      return;
+    }
+    this.justFetched.push(path);
+    this.cephfsService
+      .lsDir(this.id, path)
+      .subscribe((data) => this.updateDirs(deep, data), () => this.context && this.context.error());
+  }
+
+  private updateDirs(deep: boolean, data: CephfsDir[]) {
+    //export type TreeStatus = 'collapsed' | 'expanded' | 'loading' | 'disabled';
+    data.forEach((dir) => (dir.treeStatus = 'loading'));
+    if (deep) {
+      data.forEach((dir) => this.getDirectory(dir.path, false));
+    }
+    const dirs = _.uniqBy(this.dirs.concat(data), 'path');
+    //const dirs = this.dirs.concat(data);
+    this.updateDirTreeStatus(dirs);
+    this.dirs = dirs;
+  }
+
+  private updateDirTreeStatus(dirs: CephfsDir[]) {
+    dirs.forEach((dir) => {
+      const status = dir.treeStatus;
+      if (dirs.some((d) => d.parent === dir.path)) {
+        if (['loading', 'disabled'].includes(status)) {
+          dir.treeStatus = 'collapsed';
+        }
+      } else {
+        if (status !== 'disabled') {
+          dir.treeStatus = 'disabled';
+        }
+      }
+    });
+  }
+
+  onTreeAction(event: any) {
+    const dir: CephfsDir = event.row;
+    this.triggerTreeStatus(dir);
+    this.table.selection.selected = [dir];
+    this.table.onSelect();
+  }
+
+  private triggerTreeStatus(dir: CephfsDir) {
+    if (dir.treeStatus === 'collapsed') {
+      dir.treeStatus = 'expanded';
+    } else if (dir.treeStatus === 'expanded') {
+      dir.treeStatus = 'collapsed';
+    }
   }
 }
