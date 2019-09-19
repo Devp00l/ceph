@@ -94,6 +94,37 @@
   margin-bottom: 0;
   max-width: none !important;
 
+  .datatable-tree-button {
+    font-family: 'forkawesome';
+    border: 0;
+    background: none;
+    padding: 0 0.5em;
+
+    &:focus {
+      outline: 0;
+    }
+
+    &:disabled {
+      display: none;
+    }
+
+    .icon::before {
+      display: inline-block;
+      font-style: normal;
+      font-variant: normal;
+      text-rendering: auto;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .datatable-icon-up:before {
+      content: '\f067'; // fa-plus
+    }
+
+    .datatable-icon-down:before {
+      content: '\f068'; // fa-minus
+    }
+  }
+
   .progress-linear {
     display: block;
     position: relative;
