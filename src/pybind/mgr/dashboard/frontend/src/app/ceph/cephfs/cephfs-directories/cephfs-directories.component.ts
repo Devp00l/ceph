@@ -147,13 +147,11 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   private updateDirs(deep: boolean, data: CephfsDir[]) {
-    //export type TreeStatus = 'collapsed' | 'expanded' | 'loading' | 'disabled';
     data.forEach((dir) => (dir.treeStatus = 'loading'));
     if (deep) {
       data.forEach((dir) => this.getDirectory(dir.path, false));
     }
     const dirs = _.uniqBy(this.dirs.concat(data), 'path');
-    //const dirs = this.dirs.concat(data);
     this.updateDirTreeStatus(dirs);
     this.dirs = dirs;
   }
