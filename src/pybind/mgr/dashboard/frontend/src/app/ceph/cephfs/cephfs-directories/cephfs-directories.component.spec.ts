@@ -9,7 +9,11 @@ import { of } from 'rxjs';
 import { configureTestBed, i18nProviders } from '../../../../testing/unit-test-helper';
 import { CephfsService } from '../../../shared/api/cephfs.service';
 import { CdTableSelection } from '../../../shared/models/cd-table-selection';
-import { CephfsQuotas, CephfsSnapshot } from '../../../shared/models/cephfs-directory-models';
+import {
+  CephfsDir,
+  CephfsQuotas,
+  CephfsSnapshot
+} from '../../../shared/models/cephfs-directory-models';
 import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsDirectoriesComponent } from './cephfs-directories.component';
@@ -36,13 +40,13 @@ describe('CephfsDirectoriesComponent', () => {
       }
       return snapshots;
     },
-    dir: (path, name, modifier) => {
+    dir: (path, name, modifier): CephfsDir => {
       const dirPath = `${path === '/' ? '' : path}/${name}`;
       return {
         name,
         path: dirPath,
         parent: path,
-        quota: mock.quotas(1024 * modifier, 10 * modifier),
+        quotas: mock.quotas(1024 * modifier, 10 * modifier),
         snapshots: mock.snapshots(path, modifier)
       };
     },
