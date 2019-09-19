@@ -50,16 +50,23 @@ describe('CephfsDirectoriesComponent', () => {
         snapshots: mock.snapshots(path, modifier)
       };
     },
-    lsDir: (id, path = '') => {
+    levelDirs: (id, path = ''): CephfsDir[] => {
       if (path.includes('two')) {
         // 'two' has no sub directories
-        return of([]);
+        return [];
       }
-      const mockData = [
+      return [
         mock.dir(path, 'one' + id, 1),
         mock.dir(path, 'two' + id, 2),
         mock.dir(path, 'three' + id, 3)
       ];
+    },
+    lsDir: (id, path = '') => { // will return 2 levels deep
+      let mockData = mock.levelDirs(id, path);
+      const paths = mockData.map((dir) => dir.path)
+      paths.forEach(pathL2 => {
+        mockData = mockData.concat(mock.levelDirs(id, pathL2))
+      })
       return of(mockData);
     },
     date: (arg) => (arg ? new originalDate(arg) : new Date('2022-02-22T00:00:00'))

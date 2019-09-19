@@ -91,7 +91,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
     this.dirs = [];
     this.justFetched = [];
-    this.pathList.forEach((path) => this.getDirectory(path, this.pathList.length === 1, context));
+    this.pathList.forEach((path) => this.getDirectory(path, context));
   }
 
   displayQuotas(quotas: CephfsQuotas): string {
@@ -126,7 +126,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
   }
 
-  getDirectory(path: string, deep = true, context?: CdTableFetchDataContext) {
+  getDirectory(path: string, context?: CdTableFetchDataContext) {
     if (context) {
       this.context = context;
     }
@@ -134,24 +134,17 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       this.pathList.push(path);
     }
     if (this.justFetched.includes(path)) {
-      if (deep) {
-        this.dirs
-          .filter((dir) => dir.parent === path)
-          .forEach((dir) => this.getDirectory(dir.path, false));
-      }
+      this.dirs = [...this.dirs];
       return;
     }
     this.justFetched.push(path);
     this.cephfsService
       .lsDir(this.id, path)
-      .subscribe((data) => this.updateDirs(deep, data), () => this.context && this.context.error());
+      .subscribe((data) => this.updateDirs(data), () => this.context && this.context.error());
   }
 
-  private updateDirs(deep: boolean, data: CephfsDir[]) {
+  private updateDirs(data: CephfsDir[]) {
     data.forEach((dir) => (dir.treeStatus = 'loading'));
-    if (deep) {
-      data.forEach((dir) => this.getDirectory(dir.path, false));
-    }
     const dirs = _.uniqBy(this.dirs.concat(data), 'path');
     this.updateDirTreeStatus(dirs);
     this.dirs = dirs;

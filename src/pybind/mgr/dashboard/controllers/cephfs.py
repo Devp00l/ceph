@@ -344,7 +344,7 @@ class CephFS(RESTController):
             path = os.path.normpath(path)
         try:
             cfs = self._cephfs_instance(fs_id)
-            paths = cfs.ls_dir(path, 1)
+            paths = cfs.ls_dir(path, 2)
             # Convert (bytes => string), prettify paths (strip slashes)
             # and append additional information.
             paths = [{
