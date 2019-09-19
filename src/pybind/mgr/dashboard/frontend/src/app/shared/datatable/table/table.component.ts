@@ -106,6 +106,9 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   @Input()
   autoSave = true;
 
+  @Input()
+  searchableObjects = false;
+
   // To use tree a view in the table
   @Input()
   treeView?: {
@@ -549,6 +552,15 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
           } else if (_.isNumber(cellValue) || _.isBoolean(cellValue)) {
             cellValue = cellValue.toString();
           }
+
+          if (_.isObjectLike(cellValue)) {
+            if (this.searchableObjects) {
+              cellValue = JSON.stringify(cellValue)
+            } else {
+              return false;
+            }
+          }
+
           return cellValue.toLowerCase().indexOf(searchTerm) !== -1;
         }).length > 0
       );
