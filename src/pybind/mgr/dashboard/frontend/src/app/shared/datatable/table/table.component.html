@@ -107,6 +107,9 @@
                  [footerHeight]="footer ? 'auto' : 0"
                  [limit]="userConfig.limit > 0 ? userConfig.limit : undefined"
                  [loadingIndicator]="loadingIndicator"
+                 [treeFromRelation]="treeView && treeView.relation"
+                 [treeToRelation]="treeView && tableColumns && tableColumns[0].prop"
+                 (treeAction)="treeView && treeView.action($event)"
                  [rowIdentity]="rowIdentity()"
                  [rowHeight]="'auto'">
     <ngx-datatable-footer>

@@ -106,6 +106,13 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   @Input()
   autoSave = true;
 
+  // To use tree a view in the table
+  @Input()
+  treeView?: {
+    relation: string; // The attribute that shows the relation
+    action: (event: any) => undefined;
+  };
+
   // Only needed to set if the classAddingTpl is used
   @Input()
   customCss?: { [css: string]: number | string | ((any) => boolean) };
