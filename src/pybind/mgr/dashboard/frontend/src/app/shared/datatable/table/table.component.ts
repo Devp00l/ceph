@@ -109,6 +109,10 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
   @Input()
   searchableObjects = false;
 
+  // In oder to show an some information regarding the search form.
+  @Input()
+  searchInfo?: string;
+
   // To use tree a view in the table
   @Input()
   treeView?: {
@@ -555,7 +559,7 @@ export class TableComponent implements AfterContentChecked, OnInit, OnChanges, O
 
           if (_.isObjectLike(cellValue)) {
             if (this.searchableObjects) {
-              cellValue = JSON.stringify(cellValue)
+              cellValue = JSON.stringify(cellValue);
             } else {
               return false;
             }

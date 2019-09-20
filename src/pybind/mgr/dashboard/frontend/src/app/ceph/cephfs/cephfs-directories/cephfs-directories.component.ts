@@ -47,6 +47,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     relation: 'parent',
     action: (e) => this.onTreeAction(e)
   };
+  searchInfo = this.i18n(
+    'This will not search all directories, only directories that were received.'
+  );
 
   constructor(
     private cephfsService: CephfsService,

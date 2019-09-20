@@ -18,7 +18,12 @@
     <div class="input-group search">
       <span class="input-group-prepend">
         <span class="input-group-text">
-        <i [ngClass]="[icons.search]"></i>
+          <i [ngClass]="[icons.search]"></i>
+        </span>
+      </span>
+      <span class="input-group-prepend" *ngIf="searchInfo">
+        <span class="input-group-text">
+          <cd-helper>{{searchInfo}}</cd-helper>
         </span>
       </span>
       <input class="form-control"
