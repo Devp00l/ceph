@@ -19,9 +19,9 @@ export class CephfsService {
   }
 
   lsDir(id, path?): Observable<CephfsDir[]> {
-    let apiPath = `${this.baseURL}/${id}/ls_dir`;
+    let apiPath = `${this.baseURL}/${id}/ls_dir?depth=2`;
     if (path) {
-      apiPath += `?path=${encodeURIComponent(path)}`;
+      apiPath += `&path=${encodeURIComponent(path)}`;
     }
     return this.http.get<CephfsDir[]>(apiPath);
   }

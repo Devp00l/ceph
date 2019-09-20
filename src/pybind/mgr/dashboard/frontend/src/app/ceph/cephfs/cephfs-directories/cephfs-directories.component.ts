@@ -140,17 +140,22 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     this.justFetched.push(path);
     this.cephfsService
       .lsDir(this.id, path)
-      .subscribe((data) => this.updateDirs(data), () => this.context && this.context.error());
+      .subscribe((data) => this.updateDirs(data, path), () => this.context && this.context.error());
   }
 
-  private updateDirs(data: CephfsDir[]) {
+  private updateDirs(data: CephfsDir[], path: string) {
+    if (path !== '/') {
+      // Removes duplicate directories
+      data = data.filter((dir) => dir.parent !== path);
+    }
     data.forEach((dir) => (dir.treeStatus = 'loading'));
-    const dirs = _.uniqBy(this.dirs.concat(data), 'path');
-    this.updateDirTreeStatus(dirs);
+    const dirs = this.dirs.concat(data);
+    this.updateDirTreeStatus(dirs, path);
     this.dirs = dirs;
   }
 
-  private updateDirTreeStatus(dirs: CephfsDir[]) {
+  private updateDirTreeStatus(dirs: CephfsDir[], path: string) {
+    dirs = dirs.filter((dir) => dir.parent.startsWith(path));
     dirs.forEach((dir) => {
       const status = dir.treeStatus;
       if (dirs.some((d) => d.parent === dir.path)) {

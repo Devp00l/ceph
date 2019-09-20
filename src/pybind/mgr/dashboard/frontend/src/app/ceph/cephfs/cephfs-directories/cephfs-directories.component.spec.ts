@@ -61,12 +61,13 @@ describe('CephfsDirectoriesComponent', () => {
         mock.dir(path, 'three' + id, 3)
       ];
     },
-    lsDir: (id, path = '') => { // will return 2 levels deep
+    lsDir: (id, path = '') => {
+      // will return 2 levels deep
       let mockData = mock.levelDirs(id, path);
-      const paths = mockData.map((dir) => dir.path)
-      paths.forEach(pathL2 => {
-        mockData = mockData.concat(mock.levelDirs(id, pathL2))
-      })
+      const paths = mockData.map((dir) => dir.path);
+      paths.forEach((pathL2) => {
+        mockData = mockData.concat(mock.levelDirs(id, pathL2));
+      });
       return of(mockData);
     },
     date: (arg) => (arg ? new originalDate(arg) : new Date('2022-02-22T00:00:00'))
@@ -102,20 +103,20 @@ describe('CephfsDirectoriesComponent', () => {
   it('calls lsDir only if an id exits', () => {
     component.ngOnChanges();
     expect(lsDirSpy).not.toHaveBeenCalled();
+
     updateId(1);
-    expect(component.pathList).toEqual([
-      '/',
-      '/one1', // new -> 3 directories
-      '/two1', // new -> 0 directories
-      '/three1' // new -> 3 directories
-    ]);
+    expect(component.pathList).toEqual(['/']);
+    expect(component.dirs.every((dir) => dir.path.endsWith("1"))).toBe(true);
+    expect(component.dirs.length).toBe(9);
+    expect(lsDirSpy).toHaveBeenCalledTimes(1);
+    expect(lsDirSpy).toHaveBeenCalledWith(1, '/');
+
     updateId(2);
-    expect(component.pathList).toEqual([
-      '/',
-      '/one2', // new -> 3 directories
-      '/two2', // new -> 0 directories
-      '/three2' // new -> 3 directories
-    ]);
+    expect(component.pathList).toEqual(['/']);
+    expect(component.dirs.every((dir) => dir.path.endsWith("2"))).toBe(true);
+    expect(component.dirs.length).toBe(9);
+    expect(lsDirSpy).toHaveBeenCalledTimes(2);
+    expect(lsDirSpy).toHaveBeenCalledWith(2, '/');
   });
 
   describe('listing sub directories', () => {
@@ -133,7 +134,7 @@ describe('CephfsDirectoriesComponent', () => {
 
     const expectTriggerTreeStatus = (path, beforeTriggerStatus, afterTriggerStatus) => {
       expectTreeStatus(path, beforeTriggerStatus);
-      component.onTreeAction({ row: findDir(path) });
+      selectDir(path)
       expectTreeStatus(path, afterTriggerStatus);
     };
 
@@ -143,41 +144,26 @@ describe('CephfsDirectoriesComponent', () => {
       selection = table.selection;
     });
 
-    it('should extend the list by subdirectories on first call', () => {
-      expect(lsDirSpy).toHaveBeenCalledTimes(4);
-      expect(component.pathList).toEqual([
-        '/',
-        '/one1', // new -> 3 directories
-        '/two1', // new -> 0 directories
-        '/three1' // new -> 3 directories
-      ]);
-      component.pathList.forEach((path) => expect(lsDirSpy).toHaveBeenCalledWith(1, path));
-      expect(component.dirs.length).toBe(9);
-    });
-
     it('should extend the list by subdirectories on selection and omit already called path', () => {
       selectDir('/one1');
-      expect(lsDirSpy).toHaveBeenCalledTimes(7);
+      expect(lsDirSpy).toHaveBeenCalledTimes(2);
       expect(component.pathList).toEqual([
         '/',
-        '/one1', // Call got omitted
-        '/two1',
-        '/three1',
-        '/one1/one1', // new -> 3 directories
-        '/one1/two1', // new -> 0 directories
-        '/one1/three1' // new -> 3 directories
+        '/one1'
       ]);
       expect(component.dirs.length).toBe(15);
     });
 
     it('should reload all paths on update', () => {
+      selectDir('/one1');
       selectDir('/three1');
-      expect(lsDirSpy).toHaveBeenCalledTimes(7);
+      expect(lsDirSpy).toHaveBeenCalledTimes(3);
       const old_fetched = component.justFetched;
       expect(old_fetched).toBe(component.justFetched);
+      expect(component.dirs.length).toBe(21);
 
       component.updateDirList();
-      expect(lsDirSpy).toHaveBeenCalledTimes(14);
+      expect(lsDirSpy).toHaveBeenCalledTimes(6);
       expect(old_fetched).not.toBe(component.justFetched);
       expect(old_fetched).toEqual(component.justFetched);
     });
@@ -197,12 +183,12 @@ describe('CephfsDirectoriesComponent', () => {
 
     it('should update subdirectories on tree action', () => {
       expectTriggerTreeStatus('/one1', 'collapsed', 'expanded');
-      expect(lsDirSpy).toHaveBeenCalledTimes(7);
     });
 
     it('should tree actions should can be triggered', () => {
       expectTriggerTreeStatus('/one1', 'collapsed', 'expanded');
       expectTriggerTreeStatus('/one1', 'expanded', 'collapsed');
+
       expectTriggerTreeStatus('/two1', 'disabled', 'disabled');
     });
   });
