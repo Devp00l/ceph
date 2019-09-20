@@ -16,9 +16,34 @@ class CephfsTest(DashboardTestCase):
         self.assertIn(key, data)
         self.assertIsNotNone(data[key])
 
+    def get_fs_id(self):
+        return self.fs.get_namespace_id()
+
+    def mk_dirs(self, path, expectedStatus=200):
+        self._post("/api/cephfs/{}/mk_dirs".format(self.get_fs_id()),
+                   params={'path': path})
+        self.assertStatus(expectedStatus)
+
+    def rm_dir(self, path, expectedStatus=200):
+        self._post("/api/cephfs/{}/rm_dir".format(self.get_fs_id()),
+                   params={'path': path})
+        self.assertStatus(expectedStatus)
+
+    def ls_dir(self, path, expectedLength, depth = None):
+        params = {'path': path}
+        if depth is not None:
+            params['depth'] = depth
+        data = self._get("/api/cephfs/{}/ls_dir".format(self.get_fs_id()),
+                         params=params)
+        self.assertStatus(200)
+        self.assertIsInstance(data, list)
+        self.assertEqual(len(data), expectedLength)
+        return data
+
+
     @DashboardTestCase.RunAs('test', 'test', ['block-manager'])
     def test_access_permissions(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         self._get("/api/cephfs/{}/clients".format(fs_id))
         self.assertStatus(403)
         self._get("/api/cephfs/{}".format(fs_id))
@@ -29,7 +54,7 @@ class CephfsTest(DashboardTestCase):
         self.assertStatus(403)
 
     def test_cephfs_clients(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         data = self._get("/api/cephfs/{}/clients".format(fs_id))
         self.assertStatus(200)
 
@@ -37,12 +62,12 @@ class CephfsTest(DashboardTestCase):
         self.assertIn('data', data)
 
     def test_cephfs_evict_client_does_not_exist(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         data = self._delete("/api/cephfs/{}/client/1234".format(fs_id))
         self.assertStatus(404)
 
     def test_cephfs_get(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         data = self._get("/api/cephfs/{}/".format(fs_id))
         self.assertStatus(200)
 
@@ -51,7 +76,7 @@ class CephfsTest(DashboardTestCase):
         self.assertToHave(data, 'versions')
 
     def test_cephfs_mds_counters(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         data = self._get("/api/cephfs/{}/mds_counters".format(fs_id))
         self.assertStatus(200)
 
@@ -77,7 +102,7 @@ class CephfsTest(DashboardTestCase):
         self.assertToHave(cephfs, 'mdsmap')
 
     def test_cephfs_tabs(self):
-        fs_id = self.fs.get_namespace_id()
+        fs_id = self.get_fs_id()
         data = self._get("/ui-api/cephfs/{}/tabs".format(fs_id))
         self.assertStatus(200)
         self.assertIsInstance(data, dict)
@@ -117,54 +142,27 @@ class CephfsTest(DashboardTestCase):
         self.assertIsInstance(clients['status'], int)
 
     def test_ls_mk_rm_dir(self):
-        fs_id = self.fs.get_namespace_id()
-        data = self._get("/api/cephfs/{}/ls_dir".format(fs_id),
-                         params={'path': '/'})
-        self.assertStatus(200)
-        self.assertIsInstance(data, list)
-        self.assertEqual(len(data), 0)
+        self.ls_dir('/', 0)
 
-        self._post("/api/cephfs/{}/mk_dirs".format(fs_id),
-                   params={'path': '/pictures/birds'})
-        self.assertStatus(200)
+        self.mk_dirs('/pictures/birds')
+        self.ls_dir('/', 2, 3)
+        self.ls_dir('/pictures', 1)
 
-        data = self._get("/api/cephfs/{}/ls_dir".format(fs_id),
-                         params={'path': '/pictures'})
-        self.assertStatus(200)
-        self.assertIsInstance(data, list)
-        self.assertEqual(len(data), 1)
+        self.rm_dir('/pictures', 500)
+        self.rm_dir('/pictures/birds')
+        self.rm_dir('/pictures')
 
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/pictures'})
-        self.assertStatus(500)
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/pictures/birds'})
-        self.assertStatus(200)
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/pictures'})
-        self.assertStatus(200)
-
-        data = self._get("/api/cephfs/{}/ls_dir".format(fs_id),
-                         params={'path': '/'})
-        self.assertStatus(200)
-        self.assertIsInstance(data, list)
-        self.assertEqual(len(data), 0)
+        self.ls_dir('/', 0)
 
     def test_snapshots(self):
-        fs_id = self.fs.get_namespace_id()
-        self._post("/api/cephfs/{}/mk_dirs".format(fs_id),
-                   params={'path': '/movies/dune'})
-        self.assertStatus(200)
+        fs_id = self.get_fs_id()
+        self.mk_dirs('/movies/dune')
 
         self._post("/api/cephfs/{}/mk_snapshot".format(fs_id),
                    params={'path': '/movies/dune', 'name': 'test'})
         self.assertStatus(200)
 
-        data = self._get("/api/cephfs/{}/ls_dir".format(fs_id),
-                         params={'path': '/movies'})
-        self.assertStatus(200)
-        self.assertIsInstance(data, list)
-        self.assertEqual(len(data), 1)
+        data = self.ls_dir('/movies', 1)
         self.assertSchema(data[0], JObj(sub_elems={
             'name': JLeaf(str),
             'path': JLeaf(str),
@@ -189,19 +187,11 @@ class CephfsTest(DashboardTestCase):
                    params={'path': '/movies/dune', 'name': 'test'})
         self.assertStatus(200)
 
-        data = self._get("/api/cephfs/{}/ls_dir".format(fs_id),
-                         params={'path': '/movies'})
-        self.assertStatus(200)
+        data = self.ls_dir('/movies', 1)
         self.assertEqual(len(data[0]['snapshots']), 0)
 
         # Cleanup. Note, the CephFS Python extension (and therefor the Dashoard
         # REST API) does not support recursive deletion of a directory.
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/movies/dune'})
-        self.assertStatus(200)
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/movies/.snap'})
-        self.assertStatus(200)
-        self._post("/api/cephfs/{}/rm_dir".format(fs_id),
-                   params={'path': '/movies'})
-        self.assertStatus(200)
+        self.rm_dir('/movies/dune')
+        self.rm_dir('/movies/.snap')
+        self.rm_dir('/movies')
