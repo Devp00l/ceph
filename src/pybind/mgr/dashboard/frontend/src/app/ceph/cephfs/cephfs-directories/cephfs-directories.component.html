@@ -1,5 +1,16 @@
 <div class="row">
   <div class="col-sm-4">
+    <div class="dataTables_header">
+      <!-- refresh button -->
+      <div class="widget-toolbar">
+        <button type="button"
+                class="btn btn-light"
+                (click)="refreshAllDirectories()">
+          <i [ngClass]="[icons.large, icons.refresh]"
+             [class.fa-spin]="loadingIndicator"></i>
+        </button>
+      </div>
+    </div>
     <tree [tree]="tree"
           (nodeSelected)="onNodeSelected($event)">
       <ng-template let-node>

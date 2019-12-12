@@ -157,7 +157,10 @@ describe('CephfsDirectoriesComponent', () => {
     // Only used inside other mocks to mock "tree.expand" of every node
     expand: (path: string) => {
       component.updateDirectory(path, (nodes) => {
-        mockData.nodes = mockData.nodes.concat(nodes);
+        mockData.nodes = mockData.nodes.concat(nodes).map((node) => {
+          node.reloadChildren = () => mockLib.expand(node.id as string);
+          return node;
+        });
       });
     },
     getNodeEvent: (path: string): NodeEvent => {
@@ -185,6 +188,7 @@ describe('CephfsDirectoriesComponent', () => {
       dir.quotas.max_files = maxFiles;
       get.nodeIds()[dir.path] = dir;
       mockData.nodes.push({
+        reloadChildren: () => mockLib.expand(dir.path),
         id: dir.path,
         value: name
       });
@@ -242,6 +246,10 @@ describe('CephfsDirectoriesComponent', () => {
     dirLength: (n: number) => expect(get.dirs().length).toBe(n),
     nodeLength: (n: number) => expect(mockData.nodes.length).toBe(n),
     lsDirCalledTimes: (n: number) => expect(lsDirSpy).toHaveBeenCalledTimes(n),
+    lsDirHasBeenCalledWith: (id: number, paths: string[]) => {
+      paths.forEach((path) => expect(lsDirSpy).toHaveBeenCalledWith(id, path));
+      expect(lsDirSpy).toHaveBeenCalledTimes(paths.length);
+    },
     requestedPaths: (expected: string[]) => expect(get.requestedPaths()).toEqual(expected),
     snapshotsByName: (snaps: string[]) =>
       expect(component.selectedDir.snapshots.map((s) => s.name)).toEqual(snaps),
@@ -915,6 +923,49 @@ describe('CephfsDirectoriesComponent', () => {
           primary: { multiple: '', executing: '', single: '', no: '' }
         }
       });
+    });
+  });
+
+  describe('reload all', () => {
+    const calledPaths = ['/', '/a', '/a/c', '/a/c/a'];
+
+    beforeEach(() => {
+      mockLib.changeId(1);
+      mockLib.selectNode('/a');
+      mockLib.selectNode('/a/c');
+      mockLib.selectNode('/a/c/a');
+      mockLib.selectNode('/a/c/a/b');
+      // Calls rest api with: '/', '/a', '/a/c', '/a/c/a'
+      // Should not call '/a/c/a/b' as it contains no directory.
+    });
+
+    it('should store all requested paths', () => {
+      expect(get.requestedPaths()).toEqual(calledPaths);
+      assert.lsDirHasBeenCalledWith(1, calledPaths);
+    });
+
+    it('should reload all requested paths', () => {
+      assert.lsDirHasBeenCalledWith(1, calledPaths);
+      lsDirSpy.calls.reset();
+      component.refreshAllDirectories();
+      assert.lsDirHasBeenCalledWith(1, calledPaths);
+    });
+
+    it('should reload all requested paths if not selected anything', () => {
+      lsDirSpy.calls.reset();
+      mockLib.changeId(2);
+      assert.lsDirHasBeenCalledWith(2, ['/']);
+      lsDirSpy.calls.reset();
+      component.refreshAllDirectories();
+      assert.lsDirHasBeenCalledWith(2, ['/']);
+    });
+
+    it('should reload all requested paths + the current selection if it now has directories', () => {
+      lsDirSpy.calls.reset();
+      mockLib.mkDir('/a/c/a/b', 'has_dir_now', 0, 0);
+      mockLib.selectNode('/a/c/a/b/has_dir_now');
+      component.refreshAllDirectories();
+      assert.lsDirHasBeenCalledWith(1, ['/', '/a', '/a/c', '/a/c/a', '/a/c/a/b']);
     });
   });
 });

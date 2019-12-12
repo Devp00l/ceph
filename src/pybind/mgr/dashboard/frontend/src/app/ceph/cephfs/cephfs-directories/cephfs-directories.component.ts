@@ -65,6 +65,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private requestedPaths: string[];
   private selectedNode: Tree;
 
+  icons = Icons;
+  loadingIndicator = false;
+
   permission: Permission;
   selectedDir: CephfsDir;
   settings: QuotaSetting[];
@@ -192,6 +195,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.selectedDir = undefined;
+    this.selectedNode = undefined;
     this.dirs = [];
     this.requestedPaths = [];
     this.nodeIds = {};
@@ -520,14 +524,28 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
    * As all nodes point by their path on an directory object, the easiest way is to update
    * the objects by merge with their latest change.
    */
-  private forceDirRefresh() {
-    const path = this.selectedNode.parent.id as string;
+  private forceDirRefresh(path?: string) {
+    if (!path) {
+      if (!this.selectedDir) {
+        throw 'This function can only be called without path if an selection was made';
+      }
+      path = this.selectedDir.path;
+    }
     this.cephfsService.lsDir(this.id, path).subscribe((data) => {
+      console.log('forceRefresh', path, data);
       data.forEach((d) => {
-        Object.assign(this.dirs.find((sub) => sub.path === d.path), d);
+        const currentDirObject = this.dirs.find((sub) => sub.path === d.path);
+        if (currentDirObject) {
+          Object.assign(currentDirObject, d);
+        } else {
+          // It's a new directory! Which has to be included in the tree.
+          // Find parent in tree and call reload function
+        }
       });
-      // Now update quotas
-      this.setSettings(this.selectedNode);
+      // Update quotas for selected path
+      if (this.selectedNode && path === this.selectedNode.parent.id) {
+        this.setSettings(this.selectedNode);
+      }
     });
   }
 
@@ -559,5 +577,15 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     });
     this.modalRef.hide();
     this.forceDirRefresh();
+  }
+
+  refreshAllDirectories() {
+    if (this.selectedDir && !this.requestedPaths.includes(this.selectedDir.path)) {
+      this.requestedPaths.push(this.selectedDir.path)
+    }
+    this.requestedPaths.forEach((path) => this.forceDirRefresh(path));
+    if (this.selectedDir) {
+      this.selectedNode.reloadChildren();
+    }
   }
 }
