@@ -11,7 +11,7 @@
         </button>
       </div>
     </div>
-    <tree-root [nodes]="tree"></tree-root>
+    <tree-root *ngIf="tree" [nodes]="[tree]" [options]="treeOptions"></tree-root>
     <!--
     <tree [tree]="tree"
           (nodeSelected)="onNodeSelected($event)">
