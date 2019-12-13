@@ -4,7 +4,7 @@ import { Validators } from '@angular/forms';
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import { NodeEvent, Tree, TreeComponent, TreeModel } from 'ng2-tree';
+import { NodeEvent, Tree, TreeComponent, TreeModel} from 'angular-tree-component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 import { CephfsService } from '../../../shared/api/cephfs.service';
@@ -581,11 +581,12 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   refreshAllDirectories() {
     if (this.selectedDir && !this.requestedPaths.includes(this.selectedDir.path)) {
-      this.requestedPaths.push(this.selectedDir.path)
+      this.requestedPaths.push(this.selectedDir.path);
     }
     this.requestedPaths.forEach((path) => this.forceDirRefresh(path));
     if (this.selectedDir) {
-      this.selectedNode.reloadChildren();
+      const node = this.treeComponent.getControllerByNodeId(this.selectedDir.path);
+      node.expand();
     }
   }
 }

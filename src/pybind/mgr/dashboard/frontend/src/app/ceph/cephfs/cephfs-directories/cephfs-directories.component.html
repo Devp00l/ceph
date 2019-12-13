@@ -11,6 +11,8 @@
         </button>
       </div>
     </div>
+    <tree-root [nodes]="tree"></tree-root>
+    <!--
     <tree [tree]="tree"
           (nodeSelected)="onNodeSelected($event)">
       <ng-template let-node>
@@ -18,6 +20,7 @@
               [innerHTML]="node.value"></span>
       </ng-template>
     </tree>
+    -->
   </div>
   <!-- Selection details -->
   <div class="col-sm-8 metadata"
