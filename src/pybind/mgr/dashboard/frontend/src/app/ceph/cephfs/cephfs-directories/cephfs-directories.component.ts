@@ -4,13 +4,7 @@ import { Validators } from '@angular/forms';
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import {
-  TreeNode,
-  TreeComponent,
-  TreeModel,
-  ITreeOptions,
-  TREE_ACTIONS
-} from 'angular-tree-component';
+import { TreeNode, TreeComponent, ITreeOptions, TREE_ACTIONS } from 'angular-tree-component';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 import { CephfsService } from '../../../shared/api/cephfs.service';
@@ -69,16 +63,12 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private dirs: CephfsDir[];
   private nodeIds: { [path: string]: CephfsDir };
   private requestedPaths: string[];
-  private selectedNode: TreeNode;
 
   icons = Icons;
   loadingIndicator = false;
   treeOptions: ITreeOptions = {
     getChildren: (node: TreeNode) => {
-      console.log('tree called the option');
-      const sth = this.updateDirectory(node.id);
-      console.log(sth);
-      return sth;
+      return this.updateDirectory(node.id);
     },
     actionMapping: {
       mouse: {
@@ -88,9 +78,15 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
   };
 
+  getSelectedNode(): TreeNode {
+    return this.selectedDir
+      ? this.treeComponent.treeModel.getNodeById(this.selectedDir.path)
+      : undefined;
+  }
+
   private selectAndShowNode(tree, node, $event) {
     TREE_ACTIONS.TOGGLE_EXPANDED(tree, node, $event);
-    this.selectNode(node)
+    this.selectNode(node);
   }
 
   permission: Permission;
@@ -108,7 +104,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     tableActions: CdTableAction[];
     updateSelection: Function;
   };
-  tree: any;
+  tree: any[];
 
   constructor(
     private authStorageService: AuthStorageService,
@@ -220,7 +216,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   ngOnChanges() {
     this.selectedDir = undefined;
-    this.selectedNode = undefined;
     this.dirs = [];
     this.requestedPaths = [];
     this.nodeIds = {};
@@ -239,12 +234,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     if (nodes.length > 0) {
       tree.children = nodes;
     }
-    this.tree = tree;
-    console.log('root node', tree, nodes);
+    this.tree = [tree];
   }
 
   private firstCall() {
-    console.log('called first call');
     const path = '/';
     this.requestedPaths.push(path);
     this.cephfsService.lsDir(this.id, path).subscribe((data) => {
@@ -254,8 +247,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   updateDirectory(path: string): any {
-    console.log('update dir with', path);
-    // how to update?
     if (
       !this.requestedPaths.includes(path) &&
       (path === '/' || this.getSubDirectories(path).length > 0)
@@ -276,7 +267,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   private loadDirectory(data: CephfsDir[], path: string): any {
-    console.log('loadchildren for', path);
     if (path !== '/') {
       // As always to levels are loaded all sub-directories of the current called path are
       // already loaded, that's why they are filtered out.
@@ -286,26 +276,31 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     return this.getChildren(path);
   }
 
-  private getChildren(path: string): any {
-    const subTree = this.getSubTree(path);
-    const nodes = _.sortBy(this.getSubDirectories(path), 'path').map((d) => {
-      this.nodeIds[d.path] = d;
-      return {
-        name: d.name,
-        id: d.path,
-        hasChildren: this.getSubDirectories(d.path, subTree).length > 0
-      };
-    });
-    console.log('get children', nodes);
-    return nodes;
+  private getChildren(parentPath: string): any[] {
+    const subTree = this.getSubTree(parentPath);
+    return _.sortBy(this.getSubDirectories(parentPath), 'path').map((dir) =>
+      this.createNode(dir, subTree)
+    );
+  }
+
+  private createNode(dir: CephfsDir, subTree?: CephfsDir[]) {
+    this.nodeIds[dir.path] = dir;
+    if (!subTree) {
+      this.getSubTree(dir.parent);
+    }
+    return {
+      name: dir.name,
+      id: dir.path,
+      hasChildren: this.getSubDirectories(dir.path, subTree).length > 0
+    };
   }
 
   private getSubTree(path: string): CephfsDir[] {
     return this.dirs.filter((d) => d.parent.startsWith(path));
   }
 
-  private selectNodeByPath (path) {
-    this.selectNode(this.treeComponent.treeModel.getNodeById(path))
+  private selectNodeByPath(path) {
+    this.selectNode(this.treeComponent.treeModel.getNodeById(path));
   }
 
   private selectNode(node) {
@@ -315,11 +310,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
     this.setSettings(node);
     this.selectedDir = this.getDirectory(node);
-    this.selectedNode = node;
   }
 
   selectOrigin(path) {
-    this.selectNodeByPath(path)
+    this.selectNodeByPath(path);
   }
 
   private setSettings(node: TreeNode) {
@@ -332,6 +326,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         readable(value, (v) => this.dimlessBinaryPipe.transform(v))
       )
     ];
+    console.log('updated settings', this.settings);
   }
 
   private getQuota(
@@ -373,12 +368,28 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     };
   }
 
+  /**
+   * Get the node where the quota limit originates from in the current node
+   *
+   * Example as it's a recursive method:
+   *
+   * |  Path + Value | Call depth |       useOrigin?      | Output |
+   * |:-------------:|:----------:|:---------------------:|:------:|
+   * | /a/b/c/d (15) |     1st    | 2nd (5) < 15 => false |  /a/b  |
+   * | /a/b/c (20)   |     2nd    | 3rd (5) < 20 => false |  /a/b  |
+   * | /a/b (5)      |     3rd    |  4th (10) < 5 => true |  /a/b  |
+   * | /a (10)       |     4th    |       10 => true      |   /a   |
+   *
+   */
   private getOrigin(tree: TreeNode, quotaSetting: string): TreeNode {
-    if (tree.parent.id !== '/') {
+    if (tree.parent && tree.parent.id !== '/') {
       const current = this.getQuotaFromTree(tree, quotaSetting);
+
+      // Get the next used quota and node above the current one (until it hits the root directory)
       const originTree = this.getOrigin(tree.parent, quotaSetting);
       const inherited = this.getQuotaFromTree(originTree, quotaSetting);
 
+      // Select if the current quota is in use or the above
       const useOrigin = current === 0 || (inherited !== 0 && inherited < current);
       return useOrigin ? originTree : tree;
     }
@@ -564,7 +575,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       if (!this.selectedDir) {
         throw 'This function can only be called without path if an selection was made';
       }
-      path = this.selectedDir.path;
+      // Parent has to be called in order to update the object referring
+      // to the current selected directory
+      path = this.selectedDir.parent;
     }
     this.cephfsService.lsDir(this.id, path).subscribe((data) => {
       console.log('forceRefresh', path, data);
@@ -575,13 +588,27 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         } else {
           // It's a new directory! Which has to be included in the tree.
           // Find parent in tree and call reload function
+          console.log('Its a new directory', d);
+          // add to dirs
+          this.dirs.push(d);
+          // adds to nodes
+          const children = this.getChildren(d.parent);
+          // adds to parent node children
+          const parent = this.treeComponent.treeModel.getNodeById(d.parent);
+          parent.data.children = children;
+          parent.data.hasChildren = children.length > 0;
+          // updates tree if not recognized
+          this.treeComponent.treeModel.update();
         }
       });
       // Update quotas for selected path
-      if (this.selectedNode && path === this.selectedNode.parent.id) {
-        this.setSettings(this.selectedNode);
+      const selectedNode = this.getSelectedNode();
+      if (selectedNode) {
+        //this.selectNode(selectedNode);
+        this.setSettings(selectedNode);
       }
-      this.treeComponent.updateData();
+      this.tree = [...this.tree];
+      this.treeComponent.treeModel.update();
     });
   }
 
@@ -624,5 +651,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       //const node = this.treeComponent.getControllerByNodeId(this.selectedDir.path);
       //node.expand();
     }
+    this.tree = [...this.tree];
+    this.treeComponent.treeModel.update();
   }
 }
