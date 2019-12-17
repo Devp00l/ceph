@@ -229,7 +229,8 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private setRootNode(nodes: any[]) {
     const tree: any = {
       name: '/',
-      id: '/'
+      id: '/',
+      isExpanded: true
     };
     if (nodes.length > 0) {
       tree.children = nodes;
@@ -326,7 +327,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         readable(value, (v) => this.dimlessBinaryPipe.transform(v))
       )
     ];
-    console.log('updated settings', this.settings);
   }
 
   private getQuota(
@@ -580,7 +580,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       path = this.selectedDir.parent;
     }
     this.cephfsService.lsDir(this.id, path).subscribe((data) => {
-      console.log('forceRefresh', path, data);
       data.forEach((d) => {
         const currentDirObject = this.dirs.find((sub) => sub.path === d.path);
         if (currentDirObject) {
@@ -588,7 +587,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         } else {
           // It's a new directory! Which has to be included in the tree.
           // Find parent in tree and call reload function
-          console.log('Its a new directory', d);
           // add to dirs
           this.dirs.push(d);
           // adds to nodes
@@ -598,7 +596,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
           parent.data.children = children;
           parent.data.hasChildren = children.length > 0;
           // updates tree if not recognized
-          this.treeComponent.treeModel.update();
         }
       });
       // Update quotas for selected path
@@ -608,7 +605,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         this.setSettings(selectedNode);
       }
       this.tree = [...this.tree];
-      this.treeComponent.treeModel.update();
     });
   }
 
@@ -647,11 +643,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       this.requestedPaths.push(this.selectedDir.path);
     }
     this.requestedPaths.forEach((path) => this.forceDirRefresh(path));
-    if (this.selectedDir) {
-      //const node = this.treeComponent.getControllerByNodeId(this.selectedDir.path);
-      //node.expand();
-    }
     this.tree = [...this.tree];
-    this.treeComponent.treeModel.update();
   }
 }

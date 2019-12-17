@@ -1,13 +1,21 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Validators } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
-import { NodeEvent, Tree, TreeModel, TreeModule } from 'ng2-tree';
+import {
+  TreeNode,
+  TreeComponent,
+  ITreeOptions,
+  TREE_ACTIONS,
+  TreeModule,
+  TreeModel
+} from 'angular-tree-component';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
 import { of } from 'rxjs';
+import * as _ from 'lodash';
 
 import {
   configureTestBed,
@@ -30,6 +38,8 @@ import {
 import { NotificationService } from '../../../shared/services/notification.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsDirectoriesComponent } from './cephfs-directories.component';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import {path} from "@angular-devkit/core";
 
 describe('CephfsDirectoriesComponent', () => {
   let component: CephfsDirectoriesComponent;
@@ -54,11 +64,12 @@ describe('CephfsDirectoriesComponent', () => {
 
   // Object contains mock data that will be reset before each test.
   let mockData: {
-    nodes: TreeModel[];
-    parent: Tree;
+    nodes: any;
+    parent: any;
     createdSnaps: CephfsSnapshot[] | any[];
     deletedSnaps: CephfsSnapshot[] | any[];
     updatedQuotas: { [path: string]: CephfsQuotas };
+    createdDirs: CephfsDir[];
   };
 
   // Object contains mock functions
@@ -103,16 +114,17 @@ describe('CephfsDirectoriesComponent', () => {
     },
     // Only used inside other mocks
     lsSingleDir: (path = ''): CephfsDir[] => {
+      const customDirs = mockData.createdDirs.filter((d) => d.parent === path);
       if (path.includes('b')) {
         // 'b' has no sub directories
-        return [];
+        return customDirs;
       }
-      return [
+      return customDirs.concat([
         // Directories are not sorted!
         mockLib.dir(path, 'c', 3),
         mockLib.dir(path, 'a', 1),
         mockLib.dir(path, 'b', 2)
-      ];
+      ]);
     },
     lsDir: (_id: number, path = '') => {
       // will return 2 levels deep
@@ -148,50 +160,62 @@ describe('CephfsDirectoriesComponent', () => {
       return modal.ref;
     },
     date: (arg) => (arg ? new originalDate(arg) : new Date('2022-02-22T00:00:00')),
-    getControllerByPath: (path: string) => {
-      return {
-        expand: () => mockLib.expand(path),
-        select: () => component.onNodeSelected(mockLib.getNodeEvent(path))
-      };
+    getNodeById: (path: string) => {
+      return mockLib.useNode(path);
     },
     // Only used inside other mocks to mock "tree.expand" of every node
     expand: (path: string) => {
-      component.updateDirectory(path, (nodes) => {
-        mockData.nodes = mockData.nodes.concat(nodes).map((node) => {
-          node.reloadChildren = () => mockLib.expand(node.id as string);
-          return node;
-        });
-      });
+      mockLib.updateNodes(component.updateDirectory(path));
     },
-    getNodeEvent: (path: string): NodeEvent => {
-      const tree = mockData.nodes.find((n) => n.id === path) as Tree;
+    updateNodes: fakeAsync((n: any[] | Promise<any[]>) => {
+      const saveMocks = (nodes) => {
+        mockData.nodes = mockData.nodes.concat(nodes);
+      };
+      if (_.isArray(n)) {
+        saveMocks(n);
+      } else {
+        // It's a promise
+        n.then((nodes) => saveMocks(nodes));
+      }
+      tick();
+    }),
+    getNodeEvent: (path: string) => {
+      const tree = mockData.nodes.find((n) => n.id === path);
       if (mockData.parent) {
         tree.parent = mockData.parent;
       } else {
         const dir = get.nodeIds()[path];
         const parentNode = mockData.nodes.find((n) => n.id === dir.parent);
-        tree.parent = parentNode as Tree;
+        tree.parent = parentNode;
       }
-      return { node: tree } as NodeEvent;
+      return { node: tree };
     },
     changeId: (id: number) => {
       component.id = id;
       component.ngOnChanges();
-      mockData.nodes = [component.tree].concat(component.tree.children);
+      mockData.nodes = component.tree.concat(component.tree[0].children);
     },
     selectNode: (path: string) => {
-      mockLib.getControllerByPath(path).select();
+      component['selectAndShowNode'](undefined, mockLib.useNode(path), undefined);
+    },
+    // Creates TreeNode with parents until root
+    useNode: (path: string) => {
+      const isRootDir = path.split('/').length === 2;
+      return {
+        id: path,
+        parent: isRootDir ? { id: '/' } : mockLib.useNode(get.nodeIds()[path].parent)
+      };
+    },
+    treeActions: {
+      toggleActive: (_a, node, _b) => mockLib.updateNodes(component.treeOptions.getChildren(node))
     },
     mkDir: (path: string, name: string, maxFiles: number, maxBytes: number) => {
       const dir = mockLib.dir(path, name, 3);
       dir.quotas.max_bytes = maxBytes * 1024;
       dir.quotas.max_files = maxFiles;
+      mockData.createdDirs.push(dir);
       get.nodeIds()[dir.path] = dir;
-      mockData.nodes.push({
-        reloadChildren: () => mockLib.expand(dir.path),
-        id: dir.path,
-        value: name
-      });
+      mockData.nodes.push({ id: dir.path });
     },
     createSnapshotThroughModal: (name: string) => {
       component.createSnapshot();
@@ -221,7 +245,7 @@ describe('CephfsDirectoriesComponent', () => {
       let path = '';
       quotas.forEach((quota, index) => {
         index += 1;
-        mockLib.mkDir(path, index.toString(), quota[0], quota[1]);
+        mockLib.mkDir(path === '' ? '/' : path, index.toString(), quota[0], quota[1]);
         path += '/' + index;
       });
       mockData.parent = {
@@ -236,7 +260,7 @@ describe('CephfsDirectoriesComponent', () => {
             parent: { value: '/', id: '/' }
           }
         }
-      } as Tree;
+      };
       mockLib.selectNode('/1/2/3/4');
     }
   };
@@ -348,7 +372,7 @@ describe('CephfsDirectoriesComponent', () => {
       HttpClientTestingModule,
       SharedModule,
       RouterTestingModule,
-      TreeModule,
+      TreeModule.forRoot(),
       NgBootstrapFormValidationModule.forRoot(),
       ToastrModule.forRoot(),
       ModalModule.forRoot()
@@ -363,6 +387,7 @@ describe('CephfsDirectoriesComponent', () => {
       parent: undefined,
       createdSnaps: [],
       deletedSnaps: [],
+      createdDirs: [],
       updatedQuotas: {}
     };
     originalDate = Date;
@@ -381,9 +406,9 @@ describe('CephfsDirectoriesComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    spyOn(component.treeComponent, 'getControllerByNodeId').and.callFake((id) =>
-      mockLib.getControllerByPath(id)
-    );
+    spyOn(TREE_ACTIONS, 'TOGGLE_ACTIVE').and.callFake(mockLib.treeActions.toggleActive);
+
+    component.treeComponent = { treeModel: { getNodeById: mockLib.getNodeById } } as TreeComponent;
   });
 
   it('should create', () => {
@@ -514,7 +539,7 @@ describe('CephfsDirectoriesComponent', () => {
     it('expands first level', () => {
       // Tree will only show '*' if nor 'loadChildren' or 'children' are defined
       expect(
-        mockData.nodes.map((node) => ({ [node.id]: Boolean(node.loadChildren || node.children) }))
+        mockData.nodes.map((node) => ({ [node.id]: node.hasChildren || Boolean(node.children) }))
       ).toEqual([{ '/': true }, { '/a': true }, { '/b': false }, { '/c': true }]);
     });
 
@@ -531,8 +556,8 @@ describe('CephfsDirectoriesComponent', () => {
        *   > c
        * */
       assert.requestedPaths(['/', '/a']);
-      assert.nodeLength(7);
       assert.dirLength(15);
+      assert.nodeLength(7);
       expect(component.selectedDir).toBeDefined();
 
       mockLib.changeId(undefined);
@@ -928,6 +953,7 @@ describe('CephfsDirectoriesComponent', () => {
 
   describe('reload all', () => {
     const calledPaths = ['/', '/a', '/a/c', '/a/c/a'];
+    const dirsByPath = () => get.dirs().map((d) => d.path);
 
     beforeEach(() => {
       mockLib.changeId(1);
@@ -944,11 +970,11 @@ describe('CephfsDirectoriesComponent', () => {
       assert.lsDirHasBeenCalledWith(1, calledPaths);
     });
 
-    it('should reload all requested paths', () => {
+    it('should reload all requested paths + the current selected dir', () => {
       assert.lsDirHasBeenCalledWith(1, calledPaths);
       lsDirSpy.calls.reset();
       component.refreshAllDirectories();
-      assert.lsDirHasBeenCalledWith(1, calledPaths);
+      assert.lsDirHasBeenCalledWith(1, ['/', '/a', '/a/c', '/a/c/a', '/a/c/a/b']);
     });
 
     it('should reload all requested paths if not selected anything', () => {
@@ -962,10 +988,11 @@ describe('CephfsDirectoriesComponent', () => {
 
     it('should reload all requested paths + the current selection if it now has directories', () => {
       lsDirSpy.calls.reset();
+      const dirsBeforeRefresh = dirsByPath();
       mockLib.mkDir('/a/c/a/b', 'has_dir_now', 0, 0);
-      mockLib.selectNode('/a/c/a/b/has_dir_now');
       component.refreshAllDirectories();
-      assert.lsDirHasBeenCalledWith(1, ['/', '/a', '/a/c', '/a/c/a', '/a/c/a/b']);
+      const dirsAfterRefresh = dirsByPath();
+      expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(1);
     });
   });
 });
