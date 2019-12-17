@@ -32,7 +32,7 @@ import { NotificationService } from '../../../shared/services/notification.servi
 
 class QuotaSetting {
   row: {
-    // Shows quota that is used for current directory
+    // Used in quota table
     name: string;
     value: number | string;
     originPath: string;
@@ -78,17 +78,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
   };
 
-  getSelectedNode(): TreeNode {
-    return this.selectedDir
-      ? this.treeComponent.treeModel.getNodeById(this.selectedDir.path)
-      : undefined;
-  }
-
-  private selectAndShowNode(tree, node, $event) {
-    TREE_ACTIONS.TOGGLE_EXPANDED(tree, node, $event);
-    this.selectNode(node);
-  }
-
   permission: Permission;
   selectedDir: CephfsDir;
   settings: QuotaSetting[];
@@ -117,8 +106,19 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     private dimlessBinaryPipe: DimlessBinaryPipe
   ) {}
 
+  private selectAndShowNode(tree, node, $event) {
+    TREE_ACTIONS.TOGGLE_EXPANDED(tree, node, $event);
+    this.selectNode(node);
+  }
+
+
   ngOnInit() {
     this.permission = this.authStorageService.getPermissions().cephfs;
+    this.setUpQuotaTable();
+    this.setUpSnapshotTable();
+  }
+
+  private setUpQuotaTable () {
     this.quota = {
       columns: [
         {
@@ -170,6 +170,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
         }
       ]
     };
+  }
+
+  private setUpSnapshotTable () {
     this.snapshot = {
       columns: [
         {
@@ -300,10 +303,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     return this.dirs.filter((d) => d.parent.startsWith(path));
   }
 
-  private selectNodeByPath(path) {
-    this.selectNode(this.treeComponent.treeModel.getNodeById(path));
-  }
-
   private selectNode(node) {
     TREE_ACTIONS.TOGGLE_ACTIVE(undefined, node, undefined);
     if (node.id === '/') {
@@ -311,10 +310,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }
     this.setSettings(node);
     this.selectedDir = this.getDirectory(node);
-  }
-
-  selectOrigin(path) {
-    this.selectNodeByPath(path);
   }
 
   private setSettings(node: TreeNode) {
@@ -403,6 +398,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private getDirectory(node: TreeNode): CephfsDir {
     const path = node.id as string;
     return this.nodeIds[path];
+  }
+
+  selectOrigin(path) {
+    this.selectNode(this.treeComponent.treeModel.getNodeById(path));
   }
 
   updateQuotaModal() {
@@ -606,6 +605,12 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       }
       this.tree = [...this.tree];
     });
+  }
+
+  getSelectedNode(): TreeNode {
+    return this.selectedDir
+      ? this.treeComponent.treeModel.getNodeById(this.selectedDir.path)
+      : undefined;
   }
 
   deleteSnapshotModal() {

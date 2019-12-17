@@ -4,14 +4,7 @@ import { Validators } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
-import {
-  TreeNode,
-  TreeComponent,
-  ITreeOptions,
-  TREE_ACTIONS,
-  TreeModule,
-  TreeModel
-} from 'angular-tree-component';
+import { TreeComponent, TREE_ACTIONS, TreeModule } from 'angular-tree-component';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
 import { of } from 'rxjs';
@@ -38,8 +31,6 @@ import {
 import { NotificationService } from '../../../shared/services/notification.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsDirectoriesComponent } from './cephfs-directories.component';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
-import {path} from "@angular-devkit/core";
 
 describe('CephfsDirectoriesComponent', () => {
   let component: CephfsDirectoriesComponent;
@@ -115,7 +106,8 @@ describe('CephfsDirectoriesComponent', () => {
     // Only used inside other mocks
     lsSingleDir: (path = ''): CephfsDir[] => {
       const customDirs = mockData.createdDirs.filter((d) => d.parent === path);
-      if (path.includes('b')) {
+      const isCustomDir = mockData.createdDirs.some(d => d.path === path)
+      if (isCustomDir || path.includes('b')) {
         // 'b' has no sub directories
         return customDirs;
       }
@@ -214,6 +206,7 @@ describe('CephfsDirectoriesComponent', () => {
       dir.quotas.max_bytes = maxBytes * 1024;
       dir.quotas.max_files = maxFiles;
       mockData.createdDirs.push(dir);
+      // Below is needed for quota tests only where 4 dirs are mocked
       get.nodeIds()[dir.path] = dir;
       mockData.nodes.push({ id: dir.path });
     },
@@ -872,10 +865,7 @@ describe('CephfsDirectoriesComponent', () => {
   describe('table actions', () => {
     let actions: CdTableAction[];
 
-    const empty = (): CdTableSelection => {
-      const selection = new CdTableSelection();
-      return selection;
-    };
+    const empty = (): CdTableSelection => new CdTableSelection();
 
     const select = (value: number): CdTableSelection => {
       const selection = new CdTableSelection();
@@ -961,8 +951,6 @@ describe('CephfsDirectoriesComponent', () => {
       mockLib.selectNode('/a/c');
       mockLib.selectNode('/a/c/a');
       mockLib.selectNode('/a/c/a/b');
-      // Calls rest api with: '/', '/a', '/a/c', '/a/c/a'
-      // Should not call '/a/c/a/b' as it contains no directory.
     });
 
     it('should store all requested paths', () => {
@@ -986,13 +974,24 @@ describe('CephfsDirectoriesComponent', () => {
       assert.lsDirHasBeenCalledWith(2, ['/']);
     });
 
-    it('should reload all requested paths + the current selection if it now has directories', () => {
-      lsDirSpy.calls.reset();
+    it('should add new directories if some exist', () => {
       const dirsBeforeRefresh = dirsByPath();
-      mockLib.mkDir('/a/c/a/b', 'has_dir_now', 0, 0);
+      mockLib.mkDir('/a/c', 'has_dir_now', 0, 0);
+      mockLib.mkDir('/a/c/a/b', 'has_dir_now_too', 0, 0);
       component.refreshAllDirectories();
       const dirsAfterRefresh = dirsByPath();
-      expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(1);
+      console.log(dirsAfterRefresh, dirsBeforeRefresh)
+      expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(2);
+    });
+
+    it('should remove directories that do not exist anymore', () => {
+      mockLib.mkDir('/a/c', 'will_be_removed_shortly', 0, 0);
+      component.refreshAllDirectories();
+      const dirsBeforeRefresh = dirsByPath();
+      mockData.createdDirs = [] // Resets all custom added dirs
+      component.refreshAllDirectories();
+      const dirsAfterRefresh = dirsByPath();
+      expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(-1);
     });
   });
 });
