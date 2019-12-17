@@ -106,7 +106,7 @@ describe('CephfsDirectoriesComponent', () => {
     // Only used inside other mocks
     lsSingleDir: (path = ''): CephfsDir[] => {
       const customDirs = mockData.createdDirs.filter((d) => d.parent === path);
-      const isCustomDir = mockData.createdDirs.some(d => d.path === path)
+      const isCustomDir = mockData.createdDirs.some((d) => d.path === path);
       if (isCustomDir || path.includes('b')) {
         // 'b' has no sub directories
         return customDirs;
@@ -980,7 +980,6 @@ describe('CephfsDirectoriesComponent', () => {
       mockLib.mkDir('/a/c/a/b', 'has_dir_now_too', 0, 0);
       component.refreshAllDirectories();
       const dirsAfterRefresh = dirsByPath();
-      console.log(dirsAfterRefresh, dirsBeforeRefresh)
       expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(2);
     });
 
@@ -988,7 +987,7 @@ describe('CephfsDirectoriesComponent', () => {
       mockLib.mkDir('/a/c', 'will_be_removed_shortly', 0, 0);
       component.refreshAllDirectories();
       const dirsBeforeRefresh = dirsByPath();
-      mockData.createdDirs = [] // Resets all custom added dirs
+      mockData.createdDirs = []; // Resets all custom added dirs
       component.refreshAllDirectories();
       const dirsAfterRefresh = dirsByPath();
       expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(-1);
