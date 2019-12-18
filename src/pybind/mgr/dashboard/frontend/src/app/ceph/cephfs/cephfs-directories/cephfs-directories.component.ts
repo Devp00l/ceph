@@ -111,6 +111,15 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     this.selectNode(node);
   }
 
+  private selectNode(node) {
+    TREE_ACTIONS.TOGGLE_ACTIVE(undefined, node, undefined);
+    if (node.id === '/') {
+      return;
+    }
+    this.setSettings(node);
+    this.selectedDir = this.getDirectory(node);
+  }
+
   ngOnInit() {
     this.permission = this.authStorageService.getPermissions().cephfs;
     this.setUpQuotaTable();
@@ -300,15 +309,6 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   private getSubTree(path: string): CephfsDir[] {
     return this.dirs.filter((d) => d.parent.startsWith(path));
-  }
-
-  private selectNode(node) {
-    TREE_ACTIONS.TOGGLE_ACTIVE(undefined, node, undefined);
-    if (node.id === '/') {
-      return;
-    }
-    this.setSettings(node);
-    this.selectedDir = this.getDirectory(node);
   }
 
   private setSettings(node: TreeNode) {
