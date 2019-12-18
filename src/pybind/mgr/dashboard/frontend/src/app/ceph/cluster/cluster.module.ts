@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
-import { TreeModule } from 'ng2-tree';
+import { TreeModule } from 'angular-tree-component';
 import { AlertModule } from 'ngx-bootstrap/alert';
 import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
@@ -75,7 +75,7 @@ import { ServicesComponent } from './services/services.component';
     ModalModule.forRoot(),
     AlertModule.forRoot(),
     TooltipModule.forRoot(),
-    TreeModule,
+    TreeModule.forRoot(),
     MgrModulesModule,
     TypeaheadModule.forRoot(),
     TimepickerModule.forRoot(),
