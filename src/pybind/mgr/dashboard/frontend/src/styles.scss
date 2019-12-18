@@ -3,6 +3,9 @@
 
 // Angular2-Tree Component
 @import '~angular-tree-component/dist/angular-tree-component.css';
+::ng-deep tree-root .tree-children {
+  overflow: inherit
+}
 
 // Fork-Awesome
 $fa-font-path: '~fork-awesome/fonts';

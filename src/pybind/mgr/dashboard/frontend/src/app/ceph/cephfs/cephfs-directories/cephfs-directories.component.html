@@ -1,16 +1,12 @@
 <div class="row">
   <div class="col-sm-4">
-    <div class="dataTables_header">
-      <!-- refresh button -->
-      <div class="widget-toolbar">
-        <button type="button"
-                class="btn btn-light"
-                (click)="refreshAllDirectories()">
-          <i [ngClass]="[icons.large, icons.refresh]"
-             [class.fa-spin]="loadingIndicator"></i>
-        </button>
-      </div>
-    </div>
+    <button type="button"
+            class="btn btn-light btn-block"
+            (click)="refreshAllDirectories()">
+      <i [ngClass]="[icons.large, icons.refresh]"
+         [class.fa-spin]="loadingIndicator"></i>
+      &nbsp; <span i18n>Reload tree</span>
+    </button>
     <tree-root #treeComp *ngIf="tree" [nodes]="tree" [options]="treeOptions"></tree-root>
     <!--
     <tree [tree]="tree"

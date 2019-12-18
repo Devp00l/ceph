@@ -630,6 +630,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private updateDirectoryRelatedNode(dir: CephfsDir) {
     const parent = dir.parent;
     const node = this.treeComponent.treeModel.getNodeById(parent);
+    if (!node) {
+      console.warn('Could not find node for ', parent, 'Therefore could not update its children');
+      return;
+    }
     const children = this.getChildren(parent);
     node.data.children = children;
     node.data.hasChildren = children.length > 0;
