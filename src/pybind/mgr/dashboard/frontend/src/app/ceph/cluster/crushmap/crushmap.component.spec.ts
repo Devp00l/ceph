@@ -2,9 +2,9 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { DebugElement } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TreeModule } from 'ng2-tree';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import { of } from 'rxjs';
+import { TreeModule } from 'angular-tree-component';
 
 import { configureTestBed } from '../../../../testing/unit-test-helper';
 import { HealthService } from '../../../shared/api/health.service';
@@ -25,6 +25,7 @@ describe('CrushmapComponent', () => {
     fixture = TestBed.createComponent(CrushmapComponent);
     component = fixture.componentInstance;
     debugElement = fixture.debugElement;
+    fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -32,7 +33,6 @@ describe('CrushmapComponent', () => {
   });
 
   it('should display right title', () => {
-    fixture.detectChanges();
     const span = debugElement.nativeElement.querySelector('.card-header');
     expect(span.textContent).toBe('CRUSH map viewer');
   });
@@ -43,7 +43,7 @@ describe('CrushmapComponent', () => {
       spyOn(healthService, 'getFullHealth').and.returnValue(
         of({ osd_map: { tree: { nodes: nodes } } })
       );
-      fixture.detectChanges();
+      component.ngOnInit()
     };
 
     beforeEach(() => {
@@ -53,7 +53,7 @@ describe('CrushmapComponent', () => {
     it('should display "No nodes!" if ceph tree nodes is empty array', () => {
       prepareGetHealth([]);
       expect(healthService.getFullHealth).toHaveBeenCalled();
-      expect(component.tree.value).toEqual('No nodes!');
+      expect(component.nodes[0].name).toEqual('No nodes!');
     });
 
     describe('nodes not empty', () => {
@@ -71,86 +71,66 @@ describe('CrushmapComponent', () => {
       });
 
       it('should have two root nodes', () => {
-        expect(component.tree.children).toEqual([
+        expect(component.nodes).toEqual([
           {
+            isExpanded: true,
             children: [
               {
+                isExpanded: true,
                 children: [
                   {
                     id: 4,
-                    settings: {
-                      static: true
-                    },
                     status: 'up',
                     type: 'osd',
-                    value: 'osd.0-2 (osd)'
+                    name: 'osd.0-2 (osd)'
                   }
                 ],
                 id: -4,
-                settings: {
-                  static: true
-                },
                 status: undefined,
                 type: 'host',
-                value: 'my-host-2 (host)'
+                name: 'my-host-2 (host)'
               }
             ],
             id: -3,
-            settings: {
-              static: true
-            },
             status: undefined,
             type: 'root',
-            value: 'default-2 (root)'
+            name: 'default-2 (root)'
           },
           {
+            isExpanded: true,
             children: [
               {
+                isExpanded: true,
                 children: [
                   {
                     id: 0,
-                    settings: {
-                      static: true
-                    },
                     status: 'up',
                     type: 'osd',
-                    value: 'osd.0 (osd)'
+                    name: 'osd.0 (osd)'
                   },
                   {
                     id: 1,
-                    settings: {
-                      static: true
-                    },
                     status: 'down',
                     type: 'osd',
-                    value: 'osd.1 (osd)'
+                    name: 'osd.1 (osd)'
                   },
                   {
                     id: 2,
-                    settings: {
-                      static: true
-                    },
                     status: 'up',
                     type: 'osd',
-                    value: 'osd.2 (osd)'
+                    name: 'osd.2 (osd)'
                   }
                 ],
                 id: -2,
-                settings: {
-                  static: true
-                },
                 status: undefined,
                 type: 'host',
-                value: 'my-host (host)'
+                name: 'my-host (host)'
               }
             ],
             id: -1,
-            settings: {
-              static: true
-            },
             status: undefined,
             type: 'root',
-            value: 'default (root)'
+            name: 'default (root)'
           }
         ]);
       });

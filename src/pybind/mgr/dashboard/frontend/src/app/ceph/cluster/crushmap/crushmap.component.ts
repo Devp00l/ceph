@@ -1,9 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 
-import { NodeEvent, TreeModel } from 'ng2-tree';
+import { ITreeOptions, TREE_ACTIONS, TreeComponent } from 'angular-tree-component';
 
 import { HealthService } from '../../../shared/api/health.service';
-import { ITreeOptions, TREE_ACTIONS, TreeComponent, TreeNode } from 'angular-tree-component';
 
 @Component({
   selector: 'cd-crushmap',
@@ -14,14 +13,11 @@ export class CrushmapComponent implements OnInit {
   @ViewChild(TreeComponent, { static: false })
   treeComponent: TreeComponent;
 
-  tree: any;
+  nodes: any;
   treeOptions: ITreeOptions = {
     actionMapping: {
       mouse: {
-        click: (tree, node, $event) => {
-          if (node.id === 'root') {
-            return;
-          }
+        click: (tree, node, _event) => {
           TREE_ACTIONS.TOGGLE_ACTIVE(undefined, node, undefined);
           const { name, type, status, ...remain } = this.metadataKeyMap[node.id];
           this.metadata = remain;
@@ -32,14 +28,13 @@ export class CrushmapComponent implements OnInit {
   };
   metadata: any;
   metadataTitle: string;
-  metadataKeyMap: { [key: number]: number } = {};
+  metadataKeyMap: { [key: number]: any } = {};
 
   constructor(private healthService: HealthService) {}
 
   ngOnInit() {
     this.healthService.getFullHealth().subscribe((data: any) => {
-      this.tree = this._abstractTreeData(data);
-      console.log(this.tree);
+      this.nodes = this._abstractTreeData(data);
     });
   }
 
@@ -47,12 +42,8 @@ export class CrushmapComponent implements OnInit {
     const nodes = data.osd_map.tree.nodes || [];
     const treeNodeMap: { [key: number]: any } = {};
 
-    if (0 === nodes.length) {
-      return {
-        name: 'No nodes!',
-        id: 'root',
-        hasChildren: false
-      };
+    if (nodes.length === 0) {
+      return [{ name: 'No nodes!' }];
     }
 
     const roots = [];
@@ -63,16 +54,9 @@ export class CrushmapComponent implements OnInit {
       treeNodeMap[node.id] = this.generateTreeLeaf(node, treeNodeMap);
     });
 
-    const children = roots.map((id) => {
+    return roots.map((id) => {
       return treeNodeMap[id];
     });
-
-    return {
-      name: 'CRUSH map',
-      children: children,
-      id: 'root',
-      isExpanded: true
-    };
   }
 
   private generateTreeLeaf(node: any, treeNodeMap) {

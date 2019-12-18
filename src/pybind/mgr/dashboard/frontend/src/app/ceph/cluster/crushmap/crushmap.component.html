@@ -6,7 +6,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col-sm-6 col-lg-6">
-            <tree-root *ngIf="tree" [nodes]="[tree]" [options]="treeOptions">
+            <tree-root *ngIf="nodes" [nodes]="nodes" [options]="treeOptions">
               <ng-template #treeNodeTemplate let-node>
                 <span *ngIf="node.data.status">
                   <span class="badge"
@@ -20,22 +20,6 @@
                       [innerHTML]="node.data.name"></span>
               </ng-template>
             </tree-root>
-            <!--
-            <tree [tree]="tree"
-                  [settings]="{rootIsVisible: false}"
-                  (nodeSelected)="onNodeSelected($event)">
-              <ng-template let-node>
-                <span class="badge"
-                      [ngClass]="{'badge-success': ['in', 'up'].includes(node.status), 'badge-danger': ['down', 'out'].includes(node.status)}">
-                  {{ node.status }}
-                </span>
-                <span>&nbsp;</span>
-                <span class="node-name"
-                      [ngClass]="{'type-osd': node.type === 'osd'}"
-                      [innerHTML]="node.value"></span>
-              </ng-template>
-            </tree>
-            -->
           </div>
           <div class="col-sm-6 col-lg-6 metadata"
                *ngIf="metadata">
