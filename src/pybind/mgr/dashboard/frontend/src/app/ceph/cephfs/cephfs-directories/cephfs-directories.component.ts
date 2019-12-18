@@ -93,7 +93,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     tableActions: CdTableAction[];
     updateSelection: Function;
   };
-  tree: any[];
+  nodes: any[];
 
   constructor(
     private authStorageService: AuthStorageService,
@@ -229,15 +229,15 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   private setRootNode(nodes: any[]) {
-    const tree: any = {
+    const node: any = {
       name: '/',
       id: '/',
       isExpanded: true
     };
     if (nodes.length > 0) {
-      tree.children = nodes;
+      node.children = nodes;
     }
-    this.tree = [tree];
+    this.nodes = [node];
   }
 
   private firstCall() {
@@ -630,13 +630,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   private updateDirectoryRelatedNode(dir: CephfsDir) {
     const parent = dir.parent;
     const node = this.treeComponent.treeModel.getNodeById(parent);
-    if (!node) {
-      console.warn('Could not find node for ', parent, 'Therefore could not update its children');
-      return;
-    }
     const children = this.getChildren(parent);
     node.data.children = children;
     node.data.hasChildren = children.length > 0;
+    this.treeComponent.treeModel.update();
   }
 
   private updateExistingDirectory(source: CephfsDir[], updatedDir: CephfsDir) {
@@ -652,7 +649,8 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   private updateTree() {
-    this.tree = [...this.tree];
+    this.treeComponent.treeModel.update();
+    this.nodes = [...this.nodes];
   }
 
   getSelectedNode(): TreeNode {

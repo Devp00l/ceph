@@ -7,16 +7,10 @@
          [class.fa-spin]="loadingIndicator"></i>
       &nbsp; <span i18n>Reload tree</span>
     </button>
-    <tree-root #treeComp *ngIf="tree" [nodes]="tree" [options]="treeOptions"></tree-root>
-    <!--
-    <tree [tree]="tree"
-          (nodeSelected)="onNodeSelected($event)">
-      <ng-template let-node>
-        <span class="node-name"
-              [innerHTML]="node.value"></span>
-      </ng-template>
-    </tree>
-    -->
+    <tree-root *ngIf="nodes"
+               [nodes]="nodes"
+               [options]="treeOptions">
+    </tree-root>
   </div>
   <!-- Selection details -->
   <div class="col-sm-8 metadata"

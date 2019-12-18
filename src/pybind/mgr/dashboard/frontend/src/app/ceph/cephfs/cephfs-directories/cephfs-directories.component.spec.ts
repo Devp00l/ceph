@@ -185,7 +185,7 @@ describe('CephfsDirectoriesComponent', () => {
     changeId: (id: number) => {
       component.id = id;
       component.ngOnChanges();
-      mockData.nodes = component.tree.concat(component.tree[0].children);
+      mockData.nodes = component.nodes.concat(component.nodes[0].children);
     },
     selectNode: (path: string) => {
       component['selectAndShowNode'](undefined, mockLib.useNode(path), undefined);
