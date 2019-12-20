@@ -7,10 +7,8 @@
          [class.fa-spin]="loadingIndicator"></i>
       &nbsp; <span i18n>Reload tree</span>
     </button>
-    <tree-root *ngIf="nodes"
-               [nodes]="nodes"
-               [options]="treeOptions">
-    </tree-root>
+    <tree [tree]="tree">
+    </tree>
   </div>
   <!-- Selection details -->
   <div class="col-sm-8 metadata"

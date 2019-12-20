@@ -4,7 +4,7 @@ import { NgModule } from '@angular/core';
 import { ChartsModule } from 'ng2-charts';
 import { ProgressbarModule } from 'ngx-bootstrap/progressbar';
 import { TabsModule } from 'ngx-bootstrap/tabs';
-import { TreeModule } from 'angular-tree-component';
+import {TreeModule} from "ng2-tree";
 
 import { AppRoutingModule } from '../../app-routing.module';
 import { SharedModule } from '../../shared/shared.module';
@@ -21,7 +21,7 @@ import { CephfsTabsComponent } from './cephfs-tabs/cephfs-tabs.component';
     SharedModule,
     AppRoutingModule,
     ChartsModule,
-    TreeModule.forRoot(),
+    TreeModule,
     ProgressbarModule.forRoot(),
     TabsModule.forRoot()
   ],
