@@ -4,10 +4,10 @@ import { Validators } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
-import { TreeComponent, TREE_ACTIONS, TreeModule } from 'angular-tree-component';
+import { TreeComponent, TREE_ACTIONS, TreeModule, TreeNode } from 'angular-tree-component';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 
 import {
@@ -159,16 +159,14 @@ describe('CephfsDirectoriesComponent', () => {
     expand: (path: string) => {
       mockLib.updateNodes(component.updateDirectory(path));
     },
-    updateNodes: fakeAsync((n: any[] | Promise<any[]>) => {
+    updateNodes: fakeAsync((n: Promise<any[]>) => {
+      if (!n) {
+        return;
+      }
       const saveMocks = (nodes) => {
         mockData.nodes = mockData.nodes.concat(nodes);
       };
-      if (_.isArray(n)) {
-        saveMocks(n);
-      } else {
-        // It's a promise
-        n.then((nodes) => saveMocks(nodes));
-      }
+      n.then((nodes) => saveMocks(nodes));
       tick();
     }),
     getNodeEvent: (path: string) => {
@@ -188,14 +186,18 @@ describe('CephfsDirectoriesComponent', () => {
       mockData.nodes = component.nodes.concat(component.nodes[0].children);
     },
     selectNode: (path: string) => {
-      component['selectAndShowNode'](undefined, mockLib.useNode(path), undefined);
+      component.treeOptions.getChildren({ id: path } as TreeNode);
+      component.treeOptions.actionMapping.mouse.click(undefined, mockLib.useNode(path), undefined);
     },
     // Creates TreeNode with parents until root
     useNode: (path: string) => {
-      const isRootDir = path.split('/').length === 2;
+      const parentPath = path.split('/');
+      parentPath.pop();
+      const isRootDir = parentPath.length === 1;
+      const parent = isRootDir ? { id: '/' } : mockLib.useNode(parentPath.join('/'));
       return {
         id: path,
-        parent: isRootDir ? { id: '/' } : mockLib.useNode(get.nodeIds()[path].parent)
+        parent
       };
     },
     treeActions: {
@@ -263,10 +265,8 @@ describe('CephfsDirectoriesComponent', () => {
     dirLength: (n: number) => expect(get.dirs().length).toBe(n),
     nodeLength: (n: number) => expect(mockData.nodes.length).toBe(n),
     lsDirCalledTimes: (n: number) => expect(lsDirSpy).toHaveBeenCalledTimes(n),
-    lsDirHasBeenCalledWith: (id: number, paths: string[]) => {
-      paths.forEach((path) => expect(lsDirSpy).toHaveBeenCalledWith(id, path));
-      expect(lsDirSpy).toHaveBeenCalledTimes(paths.length);
-    },
+    lsDirHasBeenCalledWith: (id: number, paths: string[]) =>
+      paths.forEach((path) => expect(lsDirSpy).toHaveBeenCalledWith(id, path)),
     requestedPaths: (expected: string[]) => expect(get.requestedPaths()).toEqual(expected),
     snapshotsByName: (snaps: string[]) =>
       expect(component.selectedDir.snapshots.map((s) => s.name)).toEqual(snaps),
@@ -401,7 +401,9 @@ describe('CephfsDirectoriesComponent', () => {
 
     spyOn(TREE_ACTIONS, 'TOGGLE_ACTIVE').and.callFake(mockLib.treeActions.toggleActive);
 
-    component.treeComponent = { treeModel: { getNodeById: mockLib.getNodeById } } as TreeComponent;
+    component.treeComponent = {
+      treeModel: { getNodeById: mockLib.getNodeById, update: () => null }
+    } as TreeComponent;
   });
 
   it('should create', () => {
@@ -567,7 +569,7 @@ describe('CephfsDirectoriesComponent', () => {
       assert.quotaIsNotInherited('bytes', '1 KiB', 0);
     });
 
-    it('should extend the list by subdirectories when expanding and omit already called path', () => {
+    it('should extend the list by subdirectories when expanding', () => {
       mockLib.selectNode('/a');
       mockLib.selectNode('/a/c');
       /**
@@ -583,7 +585,6 @@ describe('CephfsDirectoriesComponent', () => {
        *   * b
        *   > c
        * */
-      assert.lsDirCalledTimes(3);
       assert.requestedPaths(['/', '/a', '/a/c']);
       assert.dirLength(21);
       assert.nodeLength(10);
@@ -597,7 +598,7 @@ describe('CephfsDirectoriesComponent', () => {
       expect(component.selectedDir.path).toBe('/a');
     });
 
-    it('should omit call for directories that have no sub directories', () => {
+    it('should refresh directories with no sub directories as they could have some now', () => {
       mockLib.selectNode('/b');
       /**
        * Tree looks like this:
@@ -606,8 +607,7 @@ describe('CephfsDirectoriesComponent', () => {
        *   * b <- Selected
        *   > c
        * */
-      assert.lsDirCalledTimes(1);
-      assert.requestedPaths(['/']);
+      assert.requestedPaths(['/', '/b']);
       assert.nodeLength(4);
     });
 
@@ -942,7 +942,7 @@ describe('CephfsDirectoriesComponent', () => {
   });
 
   describe('reload all', () => {
-    const calledPaths = ['/', '/a', '/a/c', '/a/c/a'];
+    const calledPaths = ['/', '/a', '/a/c', '/a/c/a', '/a/c/a/b'];
     const dirsByPath = () => get.dirs().map((d) => d.path);
 
     beforeEach(() => {
@@ -991,6 +991,16 @@ describe('CephfsDirectoriesComponent', () => {
       component.refreshAllDirectories();
       const dirsAfterRefresh = dirsByPath();
       expect(dirsAfterRefresh.length - dirsBeforeRefresh.length).toBe(-1);
+    });
+
+    it('should rotate the loading indicator on load', () => {
+      const path = '/a/c/a/b';
+      expect(component.loadingIndicators[path]).toEqual(false);
+      expect(component.loadingIndicator).toBe(false);
+      lsDirSpy.and.callFake(() => Observable.create(() => null));
+      component.updateDirectory(path);
+      expect(component.loadingIndicators[path]).toEqual(true);
+      expect(component.loadingIndicator).toBe(true);
     });
   });
 });

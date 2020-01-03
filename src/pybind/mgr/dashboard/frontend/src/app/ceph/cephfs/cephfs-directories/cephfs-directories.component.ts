@@ -66,6 +66,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   icons = Icons;
   loadingIndicator = false;
+  loadingIndicators = {};
   treeOptions: ITreeOptions = {
     getChildren: (node: TreeNode) => {
       return this.updateDirectory(node.id);
@@ -259,33 +260,30 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   updateDirectory(path: string): any {
-    if (
-      !this.requestedPaths.includes(path) &&
-      (path === '/' || this.getSubDirectories(path).length > 0)
-    ) {
+    if (!this.requestedPaths.includes(path)) {
       this.requestedPaths.push(path);
-      return new Promise((resolve) =>
-        this.cephfsService
-          .lsDir(this.id, path)
-          .subscribe((data) => resolve(this.loadDirectory(data, path)))
-      );
-    } else {
-      return this.getChildren(path);
+    } else if (this.loadingIndicators[path] === true) {
+      return; // Path is currently fetched.
     }
+    return new Promise((resolve) => {
+      this.setLoadingIndicator(path, true);
+      this.cephfsService.lsDir(this.id, path).subscribe((dirs) => {
+        this.updateTreeStructure(dirs);
+        this.updateQuotaTable();
+        this.updateTree();
+        resolve(this.getChildren(path));
+        this.setLoadingIndicator(path, false);
+      });
+    });
+  }
+
+  private setLoadingIndicator(path: string, loading: boolean) {
+    this.loadingIndicators[path] = loading;
+    this.loadingIndicator = _.some(this.loadingIndicators);
   }
 
   private getSubDirectories(path: string, tree: CephfsDir[] = this.dirs): CephfsDir[] {
     return tree.filter((d) => d.parent === path);
-  }
-
-  private loadDirectory(data: CephfsDir[], path: string): any {
-    if (path !== '/') {
-      // As always to levels are loaded all sub-directories of the current called path are
-      // already loaded, that's why they are filtered out.
-      data = data.filter((dir) => dir.parent !== path);
-    }
-    this.dirs = this.dirs.concat(data);
-    return this.getChildren(path);
   }
 
   private getChildren(parentPath: string): any[] {
@@ -577,11 +575,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
       // to the current selected directory
       path = this.selectedDir.parent;
     }
-    this.cephfsService.lsDir(this.id, path).subscribe((dirs) => {
-      this.updateTreeStructure(dirs);
-      this.updateQuotaTable();
-      this.updateTree();
-    });
+    this.updateDirectory(path);
   }
 
   private updateTreeStructure(dirs: CephfsDir[]) {
@@ -623,17 +617,19 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   private addNewDirectory(newDir: CephfsDir) {
     this.dirs.push(newDir);
-    this.nodeIds[newDir.path] = newDir;
-    this.updateDirectoryRelatedNode(newDir);
   }
 
   private updateDirectoryRelatedNode(dir: CephfsDir) {
     const parent = dir.parent;
-    const node = this.treeComponent.treeModel.getNodeById(parent);
     const children = this.getChildren(parent);
-    node.data.children = children;
-    node.data.hasChildren = children.length > 0;
-    this.treeComponent.treeModel.update();
+    const node = this.treeComponent.treeModel.getNodeById(parent);
+    if (node) {
+      node.data.children = children;
+      node.data.hasChildren = children.length > 0;
+      this.treeComponent.treeModel.update();
+    } else {
+      console.warn('Cloud not finde node to remove');
+    }
   }
 
   private updateExistingDirectory(source: CephfsDir[], updatedDir: CephfsDir) {
@@ -654,9 +650,10 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
   }
 
   getSelectedNode(): TreeNode {
-    return this.selectedDir
+    const node = this.selectedDir
       ? this.treeComponent.treeModel.getNodeById(this.selectedDir.path)
       : undefined;
+    return node;
   }
 
   deleteSnapshotModal() {
