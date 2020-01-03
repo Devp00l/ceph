@@ -28,7 +28,8 @@ import { CdDatePipe } from '../../../shared/pipes/cd-date.pipe';
 import { DimlessBinaryPipe } from '../../../shared/pipes/dimless-binary.pipe';
 import { AuthStorageService } from '../../../shared/services/auth-storage.service';
 import { NotificationService } from '../../../shared/services/notification.service';
-import { TreeComponent, TreeModel, TreeModelSettings } from 'ng2-tree';
+import { TreeComponent, TreeModel, TreeModelSettings, NodeEvent } from 'ng2-tree';
+import { Observable, of } from 'rxjs';
 
 class QuotaSetting {
   row: {
@@ -105,6 +106,11 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     private notificationService: NotificationService,
     private dimlessBinaryPipe: DimlessBinaryPipe
   ) {}
+
+  onNodeSelected(e: NodeEvent) {
+    const node = e.node;
+    this.selectNode(node);
+  }
 
   private selectAndShowNode(tree, node, $event) {
     //TREE_ACTIONS.TOGGLE_EXPANDED(tree, node, $event);
@@ -248,17 +254,19 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     }, 200);
   }
 
-  updateDirectory(path: string): any {
+  updateDirectory(path: string): Observable<any[]> {
     if (
       !this.requestedPaths.includes(path) &&
       (path === '/' || this.getSubDirectories(path).length > 0)
     ) {
       this.requestedPaths.push(path);
-      return new Promise((resolve) =>
+      return Observable.create((observer) => {
         this.cephfsService
           .lsDir(this.id, path)
-          .subscribe((data) => resolve(this.loadDirectory(data, path)))
-      );
+          .subscribe((data) =>
+            this.loadDirectory(data, path).subscribe((nodes) => observer.next(nodes))
+          );
+      });
     } else {
       return this.getChildren(path);
     }
@@ -268,7 +276,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     return tree.filter((d) => d.parent === path);
   }
 
-  private loadDirectory(data: CephfsDir[], path: string): any {
+  private loadDirectory(data: CephfsDir[], path: string): Observable<any[]> {
     if (path !== '/') {
       // As always to levels are loaded all sub-directories of the current called path are
       // already loaded, that's why they are filtered out.
@@ -278,13 +286,15 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     return this.getChildren(path);
   }
 
-  private getChildren(parentPath: string): any[] | Promise<any[]> {
+  private getChildren(parentPath: string): Observable<any[]> {
     const subTree = this.getSubTree(parentPath);
     const ls = _.sortBy(this.getSubDirectories(parentPath), 'path');
-    return ls.map((dir) => {
-      const node = this.createNode(dir, subTree);
-      return node;
-    });
+    return of(
+      ls.map((dir) => {
+        const node = this.createNode(dir, subTree);
+        return node;
+      })
+    );
   }
 
   private createNode(dir: CephfsDir, subTree?: CephfsDir[]): TreeModel {
@@ -591,26 +601,23 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   private setLoadingIndicator(path: string, loading: boolean) {
     this.loadingIndicators[path] = loading;
-    console.log(this.loadingIndicators)
     this.loadingIndicator = _.some(this.loadingIndicators) || this.expanding;
     if (this.loadingIndicator === false && this.toBeExpanded.length > 0) {
       this.autoExpand();
     }
   }
 
-  expanding = false
+  expanding = false;
   private autoExpand() {
     if (this.toBeExpanded.length === 0) {
-      this.expanding = false
+      this.expanding = false;
       return;
     }
-    this.expanding = true
+    this.expanding = true;
     const waitTime = 500;
     this.toBeExpanded = this.toBeExpanded.sort().reverse();
-    console.log(this.toBeExpanded)
     const nextPath = this.toBeExpanded.pop();
     setTimeout(() => {
-      console.log(nextPath);
       const node = this.getNodeController(nextPath);
       if (node) {
         node.expand();
@@ -697,15 +704,7 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
 
   private oldSetLoadChildren(node) {
     node.loadChildren = (treeCallback) => {
-      const res = this.updateDirectory(node.id);
-      if (_.isArray(res)) {
-        treeCallback(res);
-      } else {
-        // It's a promise
-        res.then((nodes) => {
-          treeCallback(nodes);
-        });
-      }
+      this.updateDirectory(node.id).subscribe((nodes) => treeCallback(nodes));
     };
   }
 
@@ -767,9 +766,9 @@ export class CephfsDirectoriesComponent implements OnInit, OnChanges {
     this.requestedPaths.forEach((path) => this.forceDirRefresh(path));
      */
     Object.keys(this.nodeIds).forEach((p) => {
-      this.expandedNode(p)
+      this.expandedNode(p);
     });
-    this.forceNodeReload('/')
+    this.forceNodeReload('/');
   }
 
   forceNodeReload(p) {

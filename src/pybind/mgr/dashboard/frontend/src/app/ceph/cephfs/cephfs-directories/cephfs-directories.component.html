@@ -7,7 +7,8 @@
          [class.fa-spin]="loadingIndicator"></i>
       &nbsp; <span i18n>Reload tree</span>
     </button>
-    <tree [tree]="tree">
+    <tree [tree]="tree"
+          (nodeSelected)="onNodeSelected($event)">
     </tree>
   </div>
   <!-- Selection details -->

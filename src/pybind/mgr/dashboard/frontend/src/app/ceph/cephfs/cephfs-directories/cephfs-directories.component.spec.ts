@@ -4,10 +4,9 @@ import { Validators } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgBootstrapFormValidationModule } from 'ng-bootstrap-form-validation';
-import { TreeComponent, TREE_ACTIONS, TreeModule } from 'angular-tree-component';
 import { BsModalRef, BsModalService, ModalModule } from 'ngx-bootstrap/modal';
 import { ToastrModule } from 'ngx-toastr';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import * as _ from 'lodash';
 
 import {
@@ -31,6 +30,7 @@ import {
 import { NotificationService } from '../../../shared/services/notification.service';
 import { SharedModule } from '../../../shared/shared.module';
 import { CephfsDirectoriesComponent } from './cephfs-directories.component';
+import { TreeComponent, TreeModule } from 'ng2-tree';
 
 describe('CephfsDirectoriesComponent', () => {
   let component: CephfsDirectoriesComponent;
@@ -159,18 +159,11 @@ describe('CephfsDirectoriesComponent', () => {
     expand: (path: string) => {
       mockLib.updateNodes(component.updateDirectory(path));
     },
-    updateNodes: fakeAsync((n: any[] | Promise<any[]>) => {
-      const saveMocks = (nodes) => {
-        mockData.nodes = mockData.nodes.concat(nodes);
-      };
-      if (_.isArray(n)) {
-        saveMocks(n);
-      } else {
-        // It's a promise
-        n.then((nodes) => saveMocks(nodes));
-      }
-      tick();
-    }),
+    updateNodes: (n: Observable<any[]>) => {
+      n.subscribe((nodes) => {
+        mockData.nodes = mockData.nodes.concat(nodes)
+      });
+    },
     getNodeEvent: (path: string) => {
       const tree = mockData.nodes.find((n) => n.id === path);
       if (mockData.parent) {
@@ -182,11 +175,12 @@ describe('CephfsDirectoriesComponent', () => {
       }
       return { node: tree };
     },
-    changeId: (id: number) => {
+    changeId: fakeAsync((id: number) => {
       component.id = id;
       component.ngOnChanges();
-      mockData.nodes = component.nodes.concat(component.nodes[0].children);
-    },
+      mockData.nodes = [component.tree];
+      tick(800);
+    }),
     selectNode: (path: string) => {
       component['selectAndShowNode'](undefined, mockLib.useNode(path), undefined);
     },
@@ -195,6 +189,8 @@ describe('CephfsDirectoriesComponent', () => {
       const isRootDir = path.split('/').length === 2;
       return {
         id: path,
+        reloadChildren: () => mockLib.expand(path),
+        expand: () => mockLib.expand(path),
         parent: isRootDir ? { id: '/' } : mockLib.useNode(get.nodeIds()[path].parent)
       };
     },
@@ -365,7 +361,7 @@ describe('CephfsDirectoriesComponent', () => {
       HttpClientTestingModule,
       SharedModule,
       RouterTestingModule,
-      TreeModule.forRoot(),
+      TreeModule,
       NgBootstrapFormValidationModule.forRoot(),
       ToastrModule.forRoot(),
       ModalModule.forRoot()
@@ -376,7 +372,7 @@ describe('CephfsDirectoriesComponent', () => {
 
   beforeEach(() => {
     mockData = {
-      nodes: undefined,
+      nodes: [],
       parent: undefined,
       createdSnaps: [],
       deletedSnaps: [],
@@ -399,9 +395,9 @@ describe('CephfsDirectoriesComponent', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
 
-    spyOn(TREE_ACTIONS, 'TOGGLE_ACTIVE').and.callFake(mockLib.treeActions.toggleActive);
+    //spyOn(TREE_ACTIONS, 'TOGGLE_ACTIVE').and.callFake(mockLib.treeActions.toggleActive);
 
-    component.treeComponent = { treeModel: { getNodeById: mockLib.getNodeById } } as TreeComponent;
+    component.treeComponent = { getControllerByNodeId: mockLib.getNodeById } as TreeComponent;
   });
 
   it('should create', () => {
