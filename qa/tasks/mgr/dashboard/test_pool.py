@@ -400,7 +400,7 @@ class PoolTest(DashboardTestCase):
         })
 
     def test_pool_info(self):
-        self._get("/api/pool/_info")
+        self._get("/ui-api/pool/info")
         self.assertSchemaBody(JObj({
             'pool_names': JList(six.string_types),
             'compression_algorithms': JList(six.string_types),
@@ -410,4 +410,7 @@ class PoolTest(DashboardTestCase):
             'osd_count': int,
             'crush_rules_replicated': JList(JObj({}, allow_unknown=True)),
             'crush_rules_erasure': JList(JObj({}, allow_unknown=True)),
+            'pg_autoscale_config': JObj({}, allow_unknown=True),
+            'erasure_code_profiles': JList(JObj({}, allow_unknown=True)),
+            'used_rules': JObj({}, allow_unknown=True),
         }))

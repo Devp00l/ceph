@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import time
 import cherrypy
 
-from . import ApiController, RESTController, Endpoint, ReadPermission, Task
+from . import ApiController, RESTController, Endpoint, ReadPermission, Task, UiApiController
 from .. import mgr
 from ..security import Scope
 from ..services.ceph_service import CephService
@@ -205,15 +205,26 @@ class Pool(RESTController):
     def configuration(self, pool_name):
         return RbdConfiguration(pool_name).list()
 
+
+@UiApiController('/pool', Scope.POOL)
+class PoolUi(Pool):
     @Endpoint()
     @ReadPermission
-    def _info(self, pool_name=''):
+    def info(self):
         # type: (str) -> dict
         """Used by the create-pool dialog"""
+        osd_map_crush = mgr.get('osd_map_crush')
+        options = mgr.get('config_options')['options']
+
+        def get_config_option(name):
+            for option in options:
+                if option['name'] == name:
+                    return option
+            return None
 
         def rules(pool_type):
             return [r
-                    for r in mgr.get('osd_map_crush')['rules']
+                    for r in osd_map_crush['rules']
                     if r['type'] == pool_type]
 
         def all_bluestore():
@@ -222,11 +233,22 @@ class Pool(RESTController):
 
         def compression_enum(conf_name):
             return [[v for v in o['enum_values'] if len(v) > 0]
-                    for o in mgr.get('config_options')['options']
+                    for o in options
                     if o['name'] == conf_name][0]
 
-        result = {
-            "pool_names": [p['pool_name'] for p in self._pool_list()],
+        used_rules = {}
+        pool_names = []
+        for p in self._pool_list():
+            name = p['pool_name']
+            rule = p['crush_rule']
+            pool_names.append(name)
+            if rule in used_rules:
+                used_rules[rule].append(name)
+            else:
+                used_rules[rule] = [name]
+
+        return {
+            "pool_names": pool_names,
             "crush_rules_replicated": rules(1),
             "crush_rules_erasure": rules(3),
             "is_all_bluestore": all_bluestore(),
@@ -234,9 +256,7 @@ class Pool(RESTController):
             "bluestore_compression_algorithm": mgr.get('config')['bluestore_compression_algorithm'],
             "compression_algorithms": compression_enum('bluestore_compression_algorithm'),
             "compression_modes": compression_enum('bluestore_compression_mode'),
+            "pg_autoscale_config": get_config_option("osd_pool_default_pg_autoscale_mode"),
+            "erasure_code_profiles": CephService.get_erasure_code_profiles(),
+            "used_rules": used_rules
         }
-
-        if pool_name:
-            result['pool_options'] = RbdConfiguration(pool_name).list()
-
-        return result
