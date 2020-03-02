@@ -1,11 +1,11 @@
 import { Component, EventEmitter, OnInit } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 import { BsModalService } from 'ngx-bootstrap/modal';
-import { forkJoin, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { ConfigurationService } from '../../../shared/api/configuration.service';
 import { ErasureCodeProfileService } from '../../../shared/api/erasure-code-profile.service';
@@ -59,7 +59,6 @@ export class PoolFormComponent implements OnInit {
   isErasure = false;
   data = new PoolFormData(this.i18n);
   externalPgChange = false;
-  private modalSubscription: Subscription;
   current: Record<string, any> = {
     rules: []
   };
@@ -72,6 +71,9 @@ export class PoolFormComponent implements OnInit {
   resource: string;
   icons = Icons;
   pgAutoscaleModes: string[];
+
+  private crushRuleValidators: ValidatorFn[];
+  private modalSubscription: Subscription;
 
   constructor(
     private dimlessBinaryPipe: DimlessBinaryPipe,
@@ -106,6 +108,12 @@ export class PoolFormComponent implements OnInit {
   }
 
   private createForm() {
+    this.crushRuleValidators = [
+      CdValidators.custom(
+        'tooFewOsds',
+        (rule: any) => this.info && rule && this.info.osd_count < rule.min_size
+      )
+    ];
     const compressionForm = new CdFormGroup({
       mode: new FormControl('none'),
       algorithm: new FormControl(''),
@@ -140,12 +148,7 @@ export class PoolFormComponent implements OnInit {
           validators: [Validators.required]
         }),
         crushRule: new FormControl(null, {
-          validators: [
-            CdValidators.custom(
-              'tooFewOsds',
-              (rule: any) => this.info && rule && this.info.osd_count < rule.min_size
-            )
-          ]
+          validators: this.crushRuleValidators
         }),
         size: new FormControl('', {
           updateOn: 'blur'
@@ -167,17 +170,8 @@ export class PoolFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    forkJoin(
-      this.configurationService.get('osd_pool_default_pg_autoscale_mode'),
-      this.poolService.getInfo(),
-      this.ecpService.list()
-    ).subscribe((data: [any, PoolFormInfo, ErasureCodeProfile[]]) => {
-      const pgAutoscaleConfig = data[0];
-      this.pgAutoscaleModes = pgAutoscaleConfig.enum_values;
-      const defaultPgAutoscaleMode = this.configurationService.getValue(pgAutoscaleConfig, 'mon');
-      this.form.silentSet('pgAutoscaleMode', defaultPgAutoscaleMode);
-      this.initInfo(data[1]);
-      this.initEcp(data[2]);
+    this.poolService.getInfo().subscribe((info: PoolFormInfo) => {
+      this.initInfo(info);
       if (this.editing) {
         this.initEditMode();
       } else {
@@ -189,21 +183,36 @@ export class PoolFormComponent implements OnInit {
   }
 
   private initInfo(info: PoolFormInfo) {
+    const pgAutoscaleConfig = info.pg_autoscale_config;
+    this.pgAutoscaleModes = pgAutoscaleConfig.enum_values;
+    this.form.silentSet(
+      'pgAutoscaleMode',
+      this.configurationService.getValue(pgAutoscaleConfig, 'mon')
+    );
     this.form.silentSet('algorithm', info.bluestore_compression_algorithm);
+    if (info.crush_rules_replicated.length > 1) {
+      this.crushRuleValidators.push(Validators.required);
+      this.form.get('crushRule').setValidators(this.crushRuleValidators);
+    }
     this.info = info;
+    this.initEcp(info.erasure_code_profiles);
   }
 
   private initEcp(ecProfiles: ErasureCodeProfile[]) {
-    const control = this.form.get('erasureProfile');
-    if (ecProfiles.length <= 1) {
-      control.disable();
+    this.setListControlStatus('erasureProfile', ecProfiles);
+    this.ecProfiles = ecProfiles;
+  }
+
+  private setListControlStatus(controlName: string, arr: any[]) {
+    const control = this.form.get(controlName);
+    if (arr.length === 1) {
+      control.setValue(arr[0]);
     }
-    if (ecProfiles.length === 1) {
-      control.setValue(ecProfiles[0]);
-    } else if (ecProfiles.length > 1 && control.disabled) {
+    if (arr.length <= 1) {
+      control.disable();
+    } else if (control.disabled) {
       control.enable();
     }
-    this.ecProfiles = ecProfiles;
   }
 
   private initEditMode() {
@@ -228,12 +237,11 @@ export class PoolFormComponent implements OnInit {
       sourceType: RbdConfigurationSourceField.pool
     });
     this.rulesChange(pool.type);
+    const rules = this.info.crush_rules_replicated.concat(this.info.crush_rules_erasure);
     const dataMap = {
       name: pool.pool_name,
       poolType: pool.type,
-      crushRule: this.info['crush_rules_' + pool.type].find(
-        (rule: CrushRule) => rule.rule_name === pool.crush_rule
-      ),
+      crushRule: rules.find((rule: CrushRule) => rule.rule_name === pool.crush_rule),
       size: pool.size,
       erasureProfile: this.ecProfiles.find((ecp) => ecp.name === pool.erasure_code_profile),
       pgAutoscaleMode: pool.pg_autoscale_mode,
@@ -352,7 +360,8 @@ export class PoolFormComponent implements OnInit {
       control.setValue(null);
       control.enable();
     }
-    this.current.rules = rules;
+    this.replicatedRuleChange();
+    this.pgCalc();
   }
 
   private setTypeBooleans(replicated: boolean, erasure: boolean) {
