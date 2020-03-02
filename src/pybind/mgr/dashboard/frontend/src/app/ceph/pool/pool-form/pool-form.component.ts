@@ -255,7 +255,6 @@ export class PoolFormComponent implements OnInit {
       max_bytes: this.dimlessBinaryPipe.transform(pool.quota_max_bytes),
       max_objects: pool.quota_max_objects
     };
-
     Object.keys(dataMap).forEach((controlName: string) => {
       const value = dataMap[controlName];
       if (!_.isUndefined(value) && value !== '') {
@@ -311,15 +310,16 @@ export class PoolFormComponent implements OnInit {
       this.rulesChange(poolType);
     });
     this.form.get('crushRule').valueChanges.subscribe(() => {
-      if (this.isReplicated) {
-        this.replicatedRuleChange();
-      }
+      // The crush rule can only be changed if type 'replicated' is set.
+      this.replicatedRuleChange();
       this.pgCalc();
     });
     this.form.get('size').valueChanges.subscribe(() => {
+      // The size can only be changed if type 'replicated' is set.
       this.pgCalc();
     });
     this.form.get('erasureProfile').valueChanges.subscribe(() => {
+      // The ec profile can only be changed if type 'erasure' is set.
       this.pgCalc();
     });
     this.form.get('mode').valueChanges.subscribe(() => {

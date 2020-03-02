@@ -173,6 +173,8 @@ describe('PoolFormComponent', () => {
     ]
   });
 
+  let navigationSpy: jasmine.Spy;
+
   beforeEach(() => {
     poolService = TestBed.get(PoolService);
     setInfo();
@@ -181,6 +183,7 @@ describe('PoolFormComponent', () => {
     ecpService = TestBed.get(ErasureCodeProfileService);
 
     router = TestBed.get(Router);
+    navigationSpy = spyOn(router, 'navigate').and.stub();
 
     setUpPoolComponent();
   });
@@ -193,9 +196,10 @@ describe('PoolFormComponent', () => {
     let poolPermissions: Permission;
     let authStorageService: AuthStorageService;
 
-    const testForRedirect = (times: number) => {
+    const expectRedirect = (redirected = true) => {
+      navigationSpy.calls.reset();
       component.authenticate();
-      expect(router.navigate).toHaveBeenCalledTimes(times);
+      expect(navigationSpy).toHaveBeenCalledTimes(redirected ? 1 : 0);
     };
 
     beforeEach(() => {
@@ -217,28 +221,28 @@ describe('PoolFormComponent', () => {
     });
 
     it('navigates if user is not allowed', () => {
-      testForRedirect(1);
+      expectRedirect();
       poolPermissions.read = true;
-      testForRedirect(2);
+      expectRedirect();
       poolPermissions.delete = true;
-      testForRedirect(3);
+      expectRedirect();
       poolPermissions.update = true;
-      testForRedirect(4);
+      expectRedirect();
       component.editing = true;
       poolPermissions.update = false;
       poolPermissions.create = true;
-      testForRedirect(5);
+      expectRedirect();
     });
 
     it('does not navigate users with right permissions', () => {
       poolPermissions.read = true;
       poolPermissions.create = true;
-      testForRedirect(0);
+      expectRedirect(false);
       component.editing = true;
       poolPermissions.update = true;
-      testForRedirect(0);
+      expectRedirect(false);
       poolPermissions.create = false;
-      testForRedirect(0);
+      expectRedirect(false);
     });
   });
 
