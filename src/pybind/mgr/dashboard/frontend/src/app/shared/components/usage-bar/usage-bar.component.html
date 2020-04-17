@@ -2,11 +2,19 @@
   <table>
     <tr>
       <td class="text-left">Used:&nbsp;</td>
-      <td class="text-right"><strong> {{ usedBytes | dimlessBinary }}</strong></td>
+      <td class="text-right"><strong *ngIf="(totalAmount > 0); else usedBytesTpl"> {{ usedAmount | dimless }}</strong>
+        <ng-template #usedBytesTpl>
+          {{ usedBytes | dimlessBinary }}
+        </ng-template>
+      </td>
     </tr>
     <tr>
       <td class="text-left">Free:&nbsp;</td>
-      <td class="'text-right"><strong>{{ freeBytes | dimlessBinary }}</strong></td>
+      <td class="text-right"><strong *ngIf="(totalAmount > 0); else freeBytesTpl"> {{ freeAmount | dimless }}</strong>
+        <ng-template #freeBytesTpl>
+          {{ freeBytes | dimlessBinary }}
+        </ng-template>
+      </td>
     </tr>
   </table>
 </ng-template>
