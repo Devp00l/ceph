@@ -25,9 +25,9 @@
 
 <ng-template #bucketSizeTpl
              let-row="row">
-  <cd-usage-bar *ngIf="(row.bucket_quota.max_size > 0); else noSizeQuota"
-             [totalBytes]="row.bucket_quota.max_size"
-             [usedBytes]="row.bucket_size">
+  <cd-usage-bar *ngIf="row.size_usage; else noSizeQuota"
+                [total]="row.bucket_quota.max_size"
+                [used]="row.bucket_size">
   </cd-usage-bar>
 
   <ng-template #noSizeQuota>No Limit</ng-template>
@@ -35,9 +35,10 @@
 
 <ng-template #bucketObjectTpl
              let-row="row">
-  <cd-usage-bar *ngIf="(row.bucket_quota.max_objects > 0); else noObjectQuota"
-             [totalAmount]="row.bucket_quota.max_objects"
-             [usedAmount]="row.num_objects">
+  <cd-usage-bar *ngIf="row.object_usage; else noObjectQuota"
+                [isBinary]="false"
+                [total]="row.bucket_quota.max_objects"
+                [used]="row.num_objects">
   </cd-usage-bar>
 
   <ng-template #noObjectQuota>No Limit</ng-template>
