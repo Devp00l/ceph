@@ -16,6 +16,10 @@ export class CdTableSelection {
    * of selected rows.
    */
   private update() {
+    // Happens if you set the row count to zero
+    if (!this._selected) {
+      this._selected = []
+    }
     this.hasSelection = this._selected.length > 0;
     this.hasSingleSelection = this._selected.length === 1;
     this.hasMultiSelection = this._selected.length > 1;

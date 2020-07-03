@@ -1,6 +1,5 @@
 import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
-import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { I18n } from '@ngx-translate/i18n-polyfill';
 import * as _ from 'lodash';
 
@@ -16,7 +15,6 @@ import { ViewCacheStatus } from '../../../shared/enum/view-cache-status.enum';
 import { CdTableAction } from '../../../shared/models/cd-table-action';
 import { CdTableColumn } from '../../../shared/models/cd-table-column';
 import { CdTableSelection } from '../../../shared/models/cd-table-selection';
-import { ExecutingTask } from '../../../shared/models/executing-task';
 import { FinishedTask } from '../../../shared/models/finished-task';
 import { Permissions } from '../../../shared/models/permissions';
 import { DimlessPipe } from '../../../shared/pipes/dimless.pipe';
@@ -52,8 +50,6 @@ export class PoolListComponent extends ListWithDetails implements OnInit {
   pools: Pool[];
   columns: CdTableColumn[];
   selection = new CdTableSelection();
-  modalRef: NgbModalRef;
-  executingTasks: ExecutingTask[] = [];
   permissions: Permissions;
   tableActions: CdTableAction[];
   viewCacheStatusList: any[];
@@ -221,7 +217,7 @@ export class PoolListComponent extends ListWithDetails implements OnInit {
 
   deletePoolModal() {
     const name = this.selection.first().pool_name;
-    this.modalRef = this.modalService.show(CriticalConfirmationModalComponent, {
+    this.modalService.show(CriticalConfirmationModalComponent, {
       itemDescription: 'Pool',
       itemNames: [name],
       submitActionObservable: () =>
@@ -281,7 +277,12 @@ export class PoolListComponent extends ListWithDetails implements OnInit {
   getSelectionTiers() {
     if (typeof this.expandedRow !== 'undefined') {
       const cacheTierIds = this.expandedRow['tiers'];
-      this.cacheTiers = this.pools.filter((pool) => cacheTierIds.includes(pool.pool));
+      const cacheTiers = this.pools.filter((pool) => cacheTierIds.includes(pool.pool));
+      console.log('equals cacheTiers?')
+      if (!_.isEqual(this.cacheTiers, cacheTiers)) {
+        this.cacheTiers = cacheTiers;
+        console.log('no new cacheTiers!')
+      }
     }
   }
 

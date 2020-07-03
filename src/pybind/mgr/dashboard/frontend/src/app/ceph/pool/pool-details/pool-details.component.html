@@ -8,7 +8,7 @@
          i18n>Details</a>
       <ng-template ngbNavContent>
         <cd-table-key-value [renderObjects]="true"
-                            [data]="filterNonPoolData(selection)"
+                            [data]="filteredNonPoolData"
                             [autoReload]="false">
         </cd-table-key-value>
       </ng-template>
@@ -18,14 +18,14 @@
       <a ngbNavLink
          i18n>Performance Details</a>
       <ng-template ngbNavContent>
-        <cd-grafana [grafanaPath]="'ceph-pool-detail?var-pool_name='+ selection['pool_name']"
+        <cd-grafana [grafanaPath]="grafanaPath"
                     uid="-xyV8KCiz"
                     grafanaStyle="one">
         </cd-grafana>
       </ng-template>
     </li>
     <li ngbNavItem
-        *ngIf="selection.type === 'replicated'">
+        *ngIf="isReplicated">
       <a ngbNavLink
          i18n>Configuration</a>
       <ng-template ngbNavContent>
@@ -33,7 +33,7 @@
       </ng-template>
     </li>
     <li ngbNavItem
-        *ngIf="selection['tiers']?.length > 0">
+        *ngIf="hasTiers">
       <a ngbNavLink
          i18n>Cache Tiers Details</a>
       <ng-template ngbNavContent>

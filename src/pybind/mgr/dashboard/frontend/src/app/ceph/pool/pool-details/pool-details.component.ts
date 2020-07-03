@@ -23,6 +23,7 @@ export class PoolDetailsComponent implements OnChanges {
   @Input()
   cacheTiers: any[];
   selectedPoolConfiguration: RbdConfigurationEntry[];
+  filteredNonPoolData: object;
 
   constructor(private i18n: I18n, private poolService: PoolService) {
     this.cacheTierColumns = [
@@ -59,15 +60,30 @@ export class PoolDetailsComponent implements OnChanges {
     ];
   }
 
-  ngOnChanges() {
-    if (this.selection) {
-      this.poolService.getConfiguration(this.selection.pool_name).subscribe((poolConf) => {
-        this.selectedPoolConfiguration = poolConf;
-      });
+  hasTiers: boolean;
+  isReplicated: boolean;
+  grafanaPath: string;
+
+  private hasChanged(publicVarName: string, data: any) {
+    if (!_.isEqual(data, this[publicVarName])) {
+      console.log(publicVarName, 'has changed');
+      this[publicVarName] = data;
     }
   }
 
-  filterNonPoolData(pool: object): object {
-    return _.omit(pool, ['cdExecuting', 'cdIsBinary']);
+  ngOnChanges() {
+    if (this.selection) {
+      console.log('selection has changed - at least I think so');
+      this.poolService.getConfiguration(this.selection.pool_name).subscribe((poolConf) => {
+        this.hasChanged('selectedPoolConfiguration', poolConf);
+      });
+      this.hasChanged('filteredNonPoolData', _.omit(this.selection, ['cdExecuting', 'cdIsBinary']));
+      this.hasChanged('hasTiers', this.selection['tiers'].length > 0);
+      this.hasChanged('isReplicated', this.selection['type'] === 'replicated');
+      this.hasChanged(
+        'grafanaPath',
+        'ceph-pool-detail?var-pool_name=' + this.selection['pool_name']
+      );
+    }
   }
 }
